@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy, terms &amp; data licences — CarDNA</title>
+<meta name="description" content="How CarDNA handles data, what the service promises, and the licences behind the vehicle catalogue.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a class="btn btn--ghost btn--sm" href="index.html">Home</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">Legal</div>
+      <h1>Privacy, terms &amp; licences.</h1>
+      <p>Short, because the service is short: nothing is stored on a server, and the data has named owners.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid-2">
+        <div class="card">
+          <h3 id="privacy">Privacy</h3>
+          <p>
+            CarDNA has no accounts and no backend. A VIN you decode is sent to NHTSA's public vPIC API
+            from your browser; we never receive or store it. Recent lookups and saved vehicles live in
+            your browser's local storage (<code>cardna.recent</code>, <code>cardna.garage</code>) and
+            disappear when you clear site data. There are no analytics, advertising or tracking cookies
+            on this site.
+          </p>
+          <p>
+            If a paid European decoder is added later, it will run through a proxy that keeps the API key
+            server-side and stores only the decoded result, keyed by VIN — never your identity.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 id="terms">Terms of use</h3>
+          <p>
+            The decoder and catalogue are provided as-is, for information. Vehicle records are filed by
+            manufacturers and can be incomplete or wrong; a decode is not a substitute for checking the
+            physical vehicle, its documents or a workshop diagnosis. Do not rely on a single field to
+            order a part.
+          </p>
+          <p>
+            You may use the site for personal and commercial research. Do not scrape, mirror or resell
+            the catalogue, and do not present another service's data as ours.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 id="sources">Data licences</h3>
+          <p>
+            <strong>Makes and models</strong> — VehiclesDB, <a href="https://vehiclesdb.com">vehiclesdb.com</a>,
+            licensed <strong>CC BY 4.0</strong>. Credit is required and appears in every footer.
+          </p>
+          <p>
+            <strong>Generations and engines</strong> — gor3a/vehicle-makes-models, licensed
+            <strong>ODbL</strong>. Share-alike: a modified version of that database must be published
+            under ODbL. CarDNA ships the file unmodified.
+          </p>
+          <p>
+            <strong>VIN decoding</strong> — NHTSA vPIC, a US Government work in the public domain. The
+            structural layer (WMI table, year codes, check digit) is CarDNA's own code.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 id="disclaimer">Independence</h3>
+          <p>
+            CarDNA is independent and not affiliated with, endorsed by or sponsored by any vehicle
+            manufacturer. Marque names, model names and trademarks belong to their owners and are used
+            for identification only.
+          </p>
+          <p>
+            The exploded-diagram illustration on the home page is a drawing, not an OEM schematic, and is
+            labelled as such.
+          </p>
+        </div>
+      </div>
+
+      <p style="margin-top:26px;color:var(--dim-2);font-size:.82rem">
+        Questions or a correction? <a href="mailto:hello@gmottomotive.com">hello@gmottomotive.com</a> —
+        GMOttomotive, publisher of CarDNA.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:0;margin-top:0">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA</span>
+      <span><a href="index.html">Home</a> · <a href="garage.html">Garage</a> · <a href="about.html">Company</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

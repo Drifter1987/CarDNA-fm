@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parse public-apis — CarDNA tools</title>
+<meta name="description" content="Turn the public-apis README into JSON or CSV, in the browser.">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="../index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">tools</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a class="btn btn--ghost btn--sm" href="../index.html">Home</a>
+      <a class="btn btn--ghost btn--sm" href="../makes.html">Brands</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">Tool</div>
+      <h1>public-apis → JSON / CSV</h1>
+      <p>
+        Reads <code>data/public-apis-README.md</code> in this repo, parses every table row, and gives you
+        the dataset back. Runs entirely in the browser — no Python, no npm, no build.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <p id="status" class="results-meta">Reading the catalogue…</p>
+
+      <div class="stats" id="summary" hidden>
+        <div class="stat"><b id="count-apis">0</b><span>APIs</span></div>
+        <div class="stat"><b id="count-cats">0</b><span>categories</span></div>
+        <div class="stat"><b id="count-nokey">0</b><span>no API key</span></div>
+        <div class="stat"><b id="count-cors">0</b><span>CORS enabled</span></div>
+      </div>
+
+      <p style="margin:26px 0 12px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" type="button" id="dl-json" disabled>Download JSON</button>
+        <button class="btn btn--ghost" type="button" id="dl-csv" disabled>Download CSV</button>
+        <label class="sr-only" for="filter">Filter by category</label>
+        <select class="search-input" id="filter" style="max-width:280px" disabled>
+          <option value="">All categories</option>
+        </select>
+      </p>
+
+      <div class="table-wrap">
+        <div class="table-tools">
+          <input class="input" id="search" type="search" placeholder="Filter by name, description or category…" disabled>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Category</th><th>API</th><th>Description</th><th>Auth</th><th>CORS</th></tr>
+            </thead>
+            <tbody id="rows">
+              <tr class="empty-row"><td colspan="5">Parsing…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p style="margin-top:14px;color:var(--dim-2);font-size:.82rem">
+        Showing the first 100 matching rows. The download includes everything. The upstream list carries
+        no quota data — only name, description, auth, HTTPS and CORS.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:0;margin-top:0">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA</span>
+      <span>Source: <a href="https://github.com/public-apis/public-apis">public-apis/public-apis</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/app.js"></script>
+<script>
+  (function () {
+    "use strict";
+
+    var SKIP = { "APIs Covered Under APILayer Suite!": true };
+    var LINK = /^\[([^\]]+)\]\(([^)]+)\)/;
+    var LIMIT = 100;
+
+    var all = [];
+    var view = [];
+
+    var statusEl = document.getElementById("status");
+    var rowsEl = document.getElementById("rows");
+    var searchEl = document.getElementById("search");
+    var filterEl = document.getElementById("filter");
+    var dlJson = document.getElementById("dl-json");
+    var dlCsv = document.getElementById("dl-csv");
+
+    function parse(text) {
+      var out = [];
+      var category = "";
+      var started = false;
+      var seen = {};
+
+      text.split(/\r?\n/).forEach(function (line) {
+        if (/^##\s+Index/.test(line)) { started = true; return; }
+        if (!started) { return; }
+
+        var heading = line.match(/^###\s+(.+)$/);
+        if (heading) {
+          var name = heading[1].trim();
+          category = SKIP[name] ? "" : name;
+          return;
+        }
+
+        if (line.indexOf("| [") !== 0 || !category) { return; }
+
+        var cells = line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(function (cell) {
+          return cell.trim().replace(/^`|`$/g, "");
+        });
+        if (cells.length < 4) { return; }
+
+        var link = cells[0].match(LINK);
+        if (!link) { return; }
+
+        var key = (link[1] + "|" + link[2]).toLowerCase();
+        if (seen[key]) { return; }
+        seen[key] = true;
+
+        out.push({
+          category: category,
+          name: link[1].trim(),
+          url: link[2].trim(),
+          description: (cells[1] || "").trim(),
+          auth: (cells[2] || "No").trim(),
+          https: (cells[3] || "Unknown").trim(),
+          cors: (cells[4] || "Unknown").trim()
+        });
+      });
+
+      return out;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, function (ch) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+      });
+    }
+
+    function render() {
+      var query = (searchEl.value || "").trim().toLowerCase();
+      var category = filterEl.value;
+
+      view = all.filter(function (item) {
+        if (category && item.category !== category) { return false; }
+        if (!query) { return true; }
+        return (item.name + " " + item.description + " " + item.category).toLowerCase().indexOf(query) !== -1;
+      });
+
+      rowsEl.innerHTML = "";
+
+      if (!view.length) {
+        rowsEl.innerHTML = '<tr class="empty-row"><td colspan="5">Nothing matches that filter.</td></tr>';
+        return;
+      }
+
+      var fragment = document.createDocumentFragment();
+      view.slice(0, LIMIT).forEach(function (item) {
+        var tr = document.createElement("tr");
+        tr.innerHTML =
+          "<td>" + escapeHtml(item.category) + "</td>" +
+          '<td><a href="' + escapeHtml(item.url) + '" rel="noopener">' + escapeHtml(item.name) + "</a></td>" +
+          "<td>" + escapeHtml(item.description) + "</td>" +
+          "<td>" + escapeHtml(item.auth) + "</td>" +
+          "<td>" + escapeHtml(item.cors) + "</td>";
+        fragment.appendChild(tr);
+      });
+      rowsEl.appendChild(fragment);
+
+      statusEl.textContent = view.length + " of " + all.length + " APIs" +
+        (view.length > LIMIT ? " — first " + LIMIT + " shown" : "");
+    }
+
+    function download(name, text, type) {
+      var blob = new Blob([text], { type: type });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    }
+
+    function csvCell(value) {
+      var text = String(value == null ? "" : value);
+      return /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+    }
+
+    function toCsv(list) {
+      var head = ["category", "name", "url", "description", "auth", "https", "cors"];
+      var lines = [head.join(",")];
+      list.forEach(function (item) {
+        lines.push(head.map(function (key) { return csvCell(item[key]); }).join(","));
+      });
+      return lines.join("\n");
+    }
+
+    fetch("../data/public-apis-README.md")
+      .then(function (response) {
+        if (!response.ok) { throw new Error("HTTP " + response.status); }
+        return response.text();
+      })
+      .then(function (text) {
+        all = parse(text);
+
+        if (!all.length) {
+          statusEl.textContent = "Parsed nothing — the upstream README layout probably changed.";
+          rowsEl.innerHTML = '<tr class="empty-row"><td colspan="5">No entries found.</td></tr>';
+          return;
+        }
+
+        var categories = [];
+        var noKey = 0;
+        var cors = 0;
+        var seenCat = {};
+
+        all.forEach(function (item) {
+          if (!seenCat[item.category]) { seenCat[item.category] = true; categories.push(item.category); }
+          if (/^no$/i.test(item.auth)) { noKey += 1; }
+          if (/^yes$/i.test(item.cors)) { cors += 1; }
+        });
+
+        document.getElementById("count-apis").textContent = all.length.toLocaleString();
+        document.getElementById("count-cats").textContent = categories.length;
+        document.getElementById("count-nokey").textContent = noKey.toLocaleString();
+        document.getElementById("count-cors").textContent = cors.toLocaleString();
+        document.getElementById("summary").hidden = false;
+
+        categories.sort().forEach(function (name) {
+          var option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          filterEl.appendChild(option);
+        });
+
+        searchEl.disabled = false;
+        filterEl.disabled = false;
+        dlJson.disabled = false;
+        dlCsv.disabled = false;
+
+        render();
+
+        dlJson.addEventListener("click", function () {
+          download("public-apis.json", JSON.stringify({
+            source: "https://github.com/public-apis/public-apis",
+            count: all.length,
+            categoryCount: categories.length,
+            categories: categories,
+            entries: all
+          }, null, 2), "application/json");
+        });
+
+        dlCsv.addEventListener("click", function () {
+          download("public-apis.csv", toCsv(all), "text/csv");
+        });
+      })
+      .catch(function (err) {
+        statusEl.textContent = "";
+        rowsEl.innerHTML = '<tr class="empty-row"><td colspan="5">Could not read the catalogue: ' +
+          escapeHtml(err.message) + ". Serve the folder over http (python-less options: any static server, " +
+          "or open the published site) rather than double-clicking the file.</td></tr>";
+      });
+
+    searchEl.addEventListener("input", render);
+    filterEl.addEventListener("change", render);
+  })();
+</script>
+</body>
+</html>

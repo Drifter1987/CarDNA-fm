@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CarDNA — read any vehicle in 17 characters | GMOttomotive</title>
+<meta name="description" content="CarDNA decodes a VIN into the exact vehicle, and browses 319 car brands with 5,600+ models, generations and engines. A GMOttomotive product.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="is-app">
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+
+    <div class="header-actions">
+      <a class="btn btn--ghost btn--sm" href="garage.html">Garage</a>
+      <a class="btn btn--ghost btn--sm" href="about.html">Company</a>
+    </div>
+  </div>
+</header>
+
+<div class="tabbar">
+  <div class="container tabbar-inner" role="tablist" aria-label="Sections">
+    <button class="tab" type="button" role="tab" id="tab-overview" data-tab="overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+    <button class="tab" type="button" role="tab" id="tab-decode" data-tab="decode" aria-controls="panel-decode" aria-selected="false" tabindex="-1">Decode VIN</button>
+    <button class="tab" type="button" role="tab" id="tab-brands" data-tab="brands" aria-controls="panel-brands" aria-selected="false" tabindex="-1">Brands</button>
+    <button class="tab" type="button" role="tab" id="tab-catalogue" data-tab="catalogue" aria-controls="panel-catalogue" aria-selected="false" tabindex="-1">Catalogue</button>
+    <button class="tab" type="button" role="tab" id="tab-pricing" data-tab="pricing" aria-controls="panel-pricing" aria-selected="false" tabindex="-1">Pricing</button>
+  </div>
+</div>
+
+<main class="app-scroll" id="app-scroll">
+
+  <!-- ============================================================ overview -->
+  <section class="panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="container">
+      <div class="kicker">GMOttomotive · vehicle intelligence</div>
+      <h1>Every car has a genome. <em>Read it.</em></h1>
+      <p class="hero-lede">
+        CarDNA turns a 17-character VIN into the exact vehicle — make, model, year, engine, factory and
+        trim — then opens the catalogue behind it: 319 brands, 5,600+ models, 7,000 generations and
+        30,535 engine variants. Free, no account, and the catalogue is static.
+      </p>
+
+      <div class="hero-meta">
+        <span><span class="dot"></span> 319 car brands</span>
+        <span><span class="dot"></span> 30,535 engine variants</span>
+        <span><span class="dot"></span> No API to browse</span>
+      </div>
+
+      <p style="margin-top:26px;display:flex;flex-wrap:wrap;gap:10px">
+        <button class="btn" type="button" data-jump="decode">Decode a VIN</button>
+        <button class="btn btn--ghost" type="button" data-jump="brands">Browse brands</button>
+      </p>
+
+      <div class="stats" style="margin-top:34px">
+        <div class="stat"><b>319</b><span>brands</span></div>
+        <div class="stat"><b>5,600+</b><span>models</span></div>
+        <div class="stat"><b>30,535</b><span>engine variants</span></div>
+        <div class="stat"><b>0</b><span>accounts required</span></div>
+      </div>
+
+      <div class="grid-4" style="margin-top:34px">
+        <div class="card">
+          <span class="card-num">01 / identity</span>
+          <h3>VIN → configuration</h3>
+          <p>Year, engine, body, drive, plant and trim — the configuration that decides which parts fit.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">02 / brands</span>
+          <h3>Every marque</h3>
+          <p>319 marques grouped by country, with every model, generation and engine variant underneath.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">03 / fitment</span>
+          <h3>Part ↔ vehicle</h3>
+          <p>Supersessions, interchange and applicability — the licensed layer that comes next.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">04 / workshop</span>
+          <h3>Repair context</h3>
+          <p>Procedures, torque figures and the parts you need together, attached to the assembly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== decode -->
+  <section class="panel" id="panel-decode" role="tabpanel" aria-labelledby="tab-decode" hidden>
+    <div class="container">
+      <div class="grid-2" style="grid-template-columns:1fr">
+        <div class="decoder">
+          <h2>Read a VIN</h2>
+          <p class="decoder-sub">US manufacturer record from vPIC, plus a European structural decode
+            (WMI, model year, plant) — every field shown, blanks as “—”.</p>
+
+          <form class="vin-form" id="vin-form" novalidate>
+            <label class="vin-label" for="vin">Vehicle identification number</label>
+            <div class="vin-row">
+              <input class="vin-input" id="vin" name="vin" maxlength="17" placeholder="1HGCM82633A004352"
+                     autocomplete="off" autocapitalize="characters" spellcheck="false">
+              <button class="btn" type="submit">Read DNA</button>
+            </div>
+            <p class="vin-hint" id="vin-hint">17 characters · never contains I, O or Q · free</p>
+          </form>
+
+          <div id="vin-result" hidden></div>
+          <div class="recent" id="recent"></div>
+
+          <p style="margin-top:18px;font-size:.86rem;color:var(--dim-2)">
+            Need shareable links and examples? <a href="decode.html">Open the full decoder →</a>
+          </p>
+        </div>
+
+        <div>
+          <h2 style="font-size:1.35rem">What a VIN actually tells you</h2>
+          <p style="color:var(--dim);margin-top:14px">
+            Position 1–3 is the manufacturer and market, 4–8 the model line, engine and body, position 9
+            a check digit, the tenth the model year and the eleventh the plant. We read the
+            manufacturer-filed record, not a pattern guess.
+          </p>
+
+          <ul class="feature-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Exact configuration</strong>Engine, body, drive and trim as filed.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Origin</strong>Plant country and city where it was built.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Free and unlimited</strong>NHTSA vPIC, no key and no account.</span>
+            </li>
+          </ul>
+
+          <p style="margin-top:22px;font-size:.86rem;color:var(--dim-2)">
+            vPIC is the US federal record — non-US and pre-1981 vehicles can return “no record”.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== brands -->
+  <section class="panel" id="panel-brands" role="tabpanel" aria-labelledby="tab-brands" hidden>
+    <div class="container">
+      <div class="panel-head">
+        <div class="kicker">Coverage</div>
+        <h2>Start with what you own</h2>
+        <p>Every marque we can account for, grouped by country, with every model, generation and engine
+          underneath. Open the full list to search across all 319.</p>
+      </div>
+
+      <div class="make-grid">
+        <button class="make-pill" type="button" data-open-brand="Toyota">Toyota</button>
+        <button class="make-pill" type="button" data-open-brand="Volkswagen">Volkswagen</button>
+        <button class="make-pill" type="button" data-open-brand="Ford">Ford</button>
+        <button class="make-pill" type="button" data-open-brand="BMW">BMW</button>
+        <button class="make-pill" type="button" data-open-brand="Mercedes-Benz">Mercedes-Benz</button>
+        <button class="make-pill" type="button" data-open-brand="Honda">Honda</button>
+        <button class="make-pill" type="button" data-open-brand="Nissan">Nissan</button>
+        <button class="make-pill" type="button" data-open-brand="Audi">Audi</button>
+        <button class="make-pill" type="button" data-open-brand="Hyundai">Hyundai</button>
+        <button class="make-pill" type="button" data-open-brand="Kia">Kia</button>
+        <button class="make-pill" type="button" data-open-brand="Chevrolet">Chevrolet</button>
+        <button class="make-pill" type="button" data-open-brand="Renault">Renault</button>
+        <button class="make-pill" type="button" data-open-brand="Peugeot">Peugeot</button>
+        <button class="make-pill" type="button" data-open-brand="Volvo">Volvo</button>
+        <button class="make-pill" type="button" data-open-brand="Subaru">Subaru</button>
+        <button class="make-pill" type="button" data-open-brand="Mazda">Mazda</button>
+        <button class="make-pill" type="button" data-open-brand="Tesla">Tesla</button>
+        <a class="make-pill" href="makes.html">All 319 brands →</a>
+      </div>
+
+      <div class="notice" style="margin-top:28px">
+        <strong>Brands → models → generations.</strong> One file each: 15,068 model rows from VehiclesDB
+        and 30,535 engine variants from gor3a. Open a brand on the full list, then click a model to see
+        its generations and engines.
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================== catalogue -->
+  <section class="panel" id="panel-catalogue" role="tabpanel" aria-labelledby="tab-catalogue" hidden>
+    <div class="container">
+      <div class="catalogue-grid">
+        <div class="diagram-frame">
+          <svg viewBox="0 0 560 380" role="img" aria-label="Illustrative exploded parts diagram with numbered callouts">
+            <defs>
+              <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                <path d="M28 0H0V28" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="560" height="380" fill="url(#grid)"/>
+            <path d="M96 116h196a26 26 0 0 1 26 26v128a26 26 0 0 1-26 26H96a26 26 0 0 1-26-26V142a26 26 0 0 1 26-26z"
+                  fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.6"/>
+            <rect x="112" y="150" width="120" height="72" rx="8" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1.4"/>
+            <rect x="250" y="150" width="52" height="72" rx="8" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1.4"/>
+            <path d="M112 244h190" stroke="rgba(255,255,255,.2)" stroke-width="1.4"/>
+            <path d="M250 244v50M148 244v50" stroke="rgba(255,255,255,.2)" stroke-width="1.4"/>
+            <g stroke="rgba(198,242,78,.55)" stroke-width="1">
+              <path d="M172 186h64"/><path d="M276 186h84"/><path d="M236 160h124"/>
+              <path d="M172 226h60"/><path d="M296 226h64"/><path d="M186 268h174"/>
+            </g>
+            <g font-family="ui-monospace, monospace" font-size="11" text-anchor="middle">
+              <circle cx="172" cy="186" r="11" fill="#0a0d13" stroke="#c6f24e" stroke-width="1.2"/>
+              <text x="172" y="190" fill="#c6f24e">1</text>
+              <circle cx="276" cy="186" r="11" fill="#0a0d13" stroke="#c6f24e" stroke-width="1.2"/>
+              <text x="276" y="190" fill="#c6f24e">2</text>
+              <circle cx="236" cy="160" r="11" fill="#0a0d13" stroke="rgba(198,242,78,.5)" stroke-width="1"/>
+              <text x="236" y="164" fill="rgba(198,242,78,.8)">3</text>
+              <circle cx="172" cy="226" r="11" fill="#0a0d13" stroke="rgba(198,242,78,.5)" stroke-width="1"/>
+              <text x="172" y="230" fill="rgba(198,242,78,.8)">4</text>
+              <circle cx="296" cy="226" r="11" fill="#0a0d13" stroke="rgba(198,242,78,.5)" stroke-width="1"/>
+              <text x="296" y="230" fill="rgba(198,242,78,.8)">5</text>
+              <circle cx="186" cy="268" r="11" fill="#0a0d13" stroke="rgba(198,242,78,.8)" stroke-width="1"/>
+              <text x="186" y="272" fill="#c6f24e">6</text>
+            </g>
+            <g font-family="ui-monospace, monospace" font-size="10" fill="#8d96a8">
+              <text x="368" y="182">01 · assembly</text>
+              <path d="M352 190h168" stroke="rgba(255,255,255,.1)"/>
+              <text x="368" y="222">02 · callout</text>
+              <path d="M352 230h168" stroke="rgba(255,255,255,.1)"/>
+              <text x="368" y="262">03 · part number</text>
+            </g>
+          </svg>
+          <span class="diagram-caption">Illustrative — not a real OEM drawing</span>
+        </div>
+
+        <div>
+          <div class="kicker">The catalogue</div>
+          <h2>Numbers with a place to live</h2>
+          <p style="color:var(--dim);margin-top:16px">
+            A part number on its own is trivia. What makes it useful is its assembly, its position on the
+            drawing, and every vehicle it was built for. That structure is licensed, not scraped.
+          </p>
+
+          <ul class="feature-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Assembly-first navigation</strong>Engine → cylinder head → gasket, the way a workshop thinks.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Callout ↔ row sync</strong>Click a number on the drawing, the part row highlights.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Supersessions</strong>Old number, new number, and which one to order.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Licensed provenance</strong>Every row carries its source. No scraped mirrors.</span>
+            </li>
+          </ul>
+
+          <p style="margin-top:24px">
+            <a class="btn btn--ghost" href="about.html#sources">How we source data</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= pricing -->
+  <section class="panel" id="panel-pricing" role="tabpanel" aria-labelledby="tab-pricing" hidden>
+    <div class="container">
+      <div class="panel-head">
+        <div class="kicker">Pricing</div>
+        <h2>Identity is free. Forever.</h2>
+        <p>You should never pay to find out what car you own. The catalogue and workshop tools are what
+          we charge for — and nothing is gated yet.</p>
+      </div>
+
+      <div class="tiers">
+        <div class="tier">
+          <h3>Free</h3>
+          <p class="price">€0</p>
+          <p class="tier-note">for every driver</p>
+          <ul>
+            <li>Unlimited VIN decodes</li>
+            <li>All 319 car brands and 5,600+ models</li>
+            <li>Generations and engine variants</li>
+            <li>Shareable decode links</li>
+          </ul>
+          <button class="btn btn--ghost" type="button" data-jump="decode">Start decoding</button>
+        </div>
+
+        <div class="tier tier--featured">
+          <span class="tier-tag">Preview</span>
+          <h3>Pro</h3>
+          <p class="price">€9<small>/mo</small></p>
+          <p class="tier-note">for the home workshop</p>
+          <ul>
+            <li>Full catalogue access</li>
+            <li>Exploded diagrams and OEM numbers</li>
+            <li>Fitment for saved vehicles</li>
+            <li>Supersession chains</li>
+          </ul>
+          <a class="btn" href="pricing.html">See what's included</a>
+        </div>
+
+        <div class="tier">
+          <h3>Workshop</h3>
+          <p class="price">€29<small>/mo</small></p>
+          <p class="tier-note">for teams and shops</p>
+          <ul>
+            <li>Everything in Pro</li>
+            <li>Multiple users and vehicles</li>
+            <li>Repair procedures and torque data</li>
+            <li>Export and API access</li>
+          </ul>
+          <a class="btn btn--ghost" href="pricing.html">Compare plans</a>
+        </div>
+      </div>
+
+      <p style="margin-top:18px;color:var(--dim-2);font-size:.82rem">
+        Pilot pricing. The catalogue tiers go on sale when the first OEM licences are signed — until
+        then, everything on this site is free to use.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <div class="container" style="display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between">
+    <span>© <span id="year">2026</span> GMOttomotive · CarDNA · <a href="legal.html">Legal</a></span>
+    <span>
+      Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and
+      <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC
+    </span>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/garage.js"></script>
+<script src="assets/vin-schema.js"></script>
+<script src="assets/vin.js"></script>
+<script>
+  (function () {
+    "use strict";
+
+    document.querySelectorAll("[data-jump]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        window.location.hash = "#" + button.getAttribute("data-jump");
+      });
+    });
+
+    document.querySelectorAll("[data-open-brand]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        window.location.href = "makes.html?q=" +
+          encodeURIComponent(button.getAttribute("data-open-brand"));
+      });
+    });
+  })();
+</script>
+</body>
+</html>

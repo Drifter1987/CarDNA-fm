@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIN decoder comparison — CarDNA tools</title>
+<meta name="description" content="Compare free, keyless VIN decoders on the same four vehicles, full field by field.">
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+  .vin-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-top: 12px; }
+  .vin-card > summary {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    cursor: pointer; padding: 14px 16px; list-style: none;
+  }
+  .vin-card > summary::-webkit-details-marker { display: none; }
+  .vin-card > summary strong { font-size: .98rem; }
+  .vin-card > summary .vin-mono { font: 500 10px/1 var(--mono); letter-spacing: .1em; color: var(--dim-2); }
+  .vin-card .vin-body { padding: 4px 16px 18px; }
+  .extra-block { margin-top: 16px; }
+  .extra-block h5 {
+    font: 600 9px/1 var(--mono); letter-spacing: .15em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 10px;
+  }
+  .panel table { font-size: 12px; }
+  .panel th, .panel td { padding: 7px 9px; white-space: normal; vertical-align: top; }
+  .panel th { white-space: nowrap; }
+  td.diff { color: var(--part-fg); background: rgba(180, 83, 9, .16); font-weight: 600; }
+  .recall { border-top: 1px solid var(--line); padding: 12px 0; font-size: .88rem; }
+  .recall:first-child { border-top: 0; }
+  .recall b { display: block; }
+  .recall span { color: var(--dim); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="../index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">tools</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a class="btn btn--ghost btn--sm" href="../index.html">Home</a>
+      <a class="btn btn--ghost btn--sm" href="parse-public-apis.html">API list</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">Tool · VIN decoders</div>
+      <h1>Same four cars, full record, every free decoder.</h1>
+      <p>
+        Keyless throughout. Each tab shows the complete 104-field schema for every VIN — the same one the
+        main decoder uses — plus whatever extra fields that provider returns. The comparison section at
+        the bottom lines the providers up field by field.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="make-grid" style="margin-bottom:20px">
+        <span class="make-pill">Audi A5 · WAUZZZF55JA120115</span>
+        <span class="make-pill">4Runner · JTEBU14R960103255</span>
+        <span class="make-pill">Camry · 4T1BE46K77U529065</span>
+        <span class="make-pill">Civic · 2HGFC1F90HH103487</span>
+      </div>
+
+      <p style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" type="button" id="run-all">Run all four sources</button>
+        <button class="btn btn--ghost" type="button" id="expand-all">Expand all records</button>
+        <button class="btn btn--ghost" type="button" id="clear-all">Clear</button>
+      </p>
+
+      <div class="tabbar" style="position:static;border:1px solid var(--line);border-radius:12px;margin-bottom:20px">
+        <div class="container tabbar-inner" role="tablist" id="tabs"></div>
+      </div>
+
+      <div id="panels"></div>
+
+      <div class="sec-head" style="margin-top:46px">
+        <div class="kicker">Comparison</div>
+        <h2 style="font-size:1.5rem">Full matrix</h2>
+        <p>One row per provider, one column per VIN. Dashes mean no result yet, not “no vehicle”.</p>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr id="matrix-head"><th>Provider</th></tr></thead>
+            <tbody id="matrix-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sec-head" style="margin-top:38px">
+        <div class="kicker">Field by field</div>
+        <h2 style="font-size:1.35rem">Where they disagree</h2>
+        <label class="sr-only" for="field-vin">Vehicle</label>
+        <select class="search-input" id="field-vin" style="max-width:340px;margin-top:14px"></select>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr id="field-head"><th>Field</th></tr></thead>
+            <tbody id="field-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <p style="margin-top:12px;font-size:.8rem;color:var(--dim-2)">
+        Only fields at least one provider filled are listed. Differing values are highlighted.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:0;margin-top:0">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA</span>
+      <span>vPIC (public domain) · AI Kit Data (no key) · NHTSA recalls (public domain)</span>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/app.js"></script>
+<script src="../assets/vin-schema.js"></script>
+<script>
+  (function () {
+    "use strict";
+
+    var VINS = [
+      { label: "Audi A5", vin: "WAUZZZF55JA120115" },
+      { label: "Toyota 4Runner", vin: "JTEBU14R960103255" },
+      { label: "Toyota Camry", vin: "4T1BE46K77U529065" },
+      { label: "Honda Civic", vin: "2HGFC1F90HH103487" }
+    ];
+
+    var PROVIDERS = [
+      {
+        id: "vpic",
+        name: "NHTSA vPIC",
+        note: "US Government public record. No key, no quota — the decoder CarDNA already runs.",
+        kind: "vpic"
+      },
+      {
+        id: "edge",
+        name: "AI Kit Edge",
+        note: "The vPIC dataset decoded inside a Cloudflare Worker: no round trip to NHTSA, CORS open, no key.",
+        kind: "edge",
+        url: "https://data.ai-kit.net/api/v1/vin/{vin}"
+      },
+      {
+        id: "unified",
+        name: "AI Kit Unified",
+        note: "Same decoder plus EPA fuel-economy and EU RDW reference data merged into one profile.",
+        kind: "edge",
+        url: "https://data.ai-kit.net/api/v1/vin/{vin}/unified"
+      },
+      {
+        id: "recalls",
+        name: "NHTSA Recalls",
+        note: "Recalls by year/make/model, queried from the vPIC result. Free, no key.",
+        kind: "recalls"
+      }
+    ];
+
+    var SCHEMA = (window.CarDNASchema && window.CarDNASchema.sections) || [];
+    var SCHEMA_KEYS = (window.CarDNASchema && window.CarDNASchema.keys()) || {};
+    var TOTAL_FIELDS = SCHEMA.reduce(function (n, s) { return n + s.fields.length; }, 0);
+
+    var state = {};        // providerId -> vin -> result
+    var active = PROVIDERS[0].id;
+
+    var tabsEl = document.getElementById("tabs");
+    var panelsEl = document.getElementById("panels");
+    var fieldVinEl = document.getElementById("field-vin");
+
+    function esc(value) {
+      return String(value).replace(/[&<>"']/g, function (ch) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+      });
+    }
+
+    function badge(status) {
+      if (status === "ok") { return '<span class="badge ok">ok</span>'; }
+      if (status === "error") { return '<span class="badge broken">error</span>'; }
+      if (status === "running") { return '<span class="badge partial">running</span>'; }
+      return '<span class="badge gated">not run</span>';
+    }
+
+    /* ------------------------------------------------------------- providers */
+    function vpicFields(payload) {
+      var map = {};
+      (payload.Results || []).forEach(function (row) {
+        var value = String(row.Value == null ? "" : row.Value).trim();
+        if (!value || /^not applicable$/i.test(value) || /^0(\.0+)?$/.test(value)) { return; }
+        if (!map[row.Variable]) { map[row.Variable] = value; }
+      });
+      return map;
+    }
+
+    function flatten(node, out) {
+      out = out || {};
+      Object.keys(node || {}).forEach(function (key) {
+        var value = node[key];
+        if (value && typeof value === "object") { flatten(value, out); return; }
+        if (value == null) { return; }
+        var text = String(value).trim();
+        if (!text) { return; }
+        if (!out[key]) { out[key] = text; }
+      });
+      return out;
+    }
+
+    function extrasOf(fields) {
+      return Object.keys(fields)
+        .filter(function (key) { return !SCHEMA_KEYS[key]; })
+        .sort()
+        .map(function (key) { return [key, fields[key]]; });
+    }
+
+    /* AI Kit (and most modern APIs) use compact keys like ModelYear / BodyClass.
+       Normalise both sides and aliases a few that differ in wording. */
+    var SCHEMA_BY_NORM = {};
+    SCHEMA.forEach(function (section) {
+      section.fields.forEach(function (pair) {
+        SCHEMA_BY_NORM[pair[1].replace(/[^a-z0-9]/gi, "").toLowerCase()] = pair[1];
+      });
+    });
+
+    var ALIAS = {
+      "manufacturer": "Manufacturer Name",
+      "year": "Model Year",
+      "cylinders": "Engine Number of Cylinders",
+      "horsepower": "Engine Brake (hp) From",
+      "enginecylinders": "Engine Number of Cylinders",
+      "fueltype": "Fuel Type - Primary",
+      "fueltypeprimary": "Fuel Type - Primary",
+      "fueltypesecondary": "Fuel Type - Secondary",
+      "enginehp": "Engine Brake (hp) From",
+      "enginehpto": "Engine Brake (hp) To",
+      "seatbeltsall": "Seat Belt Type",
+      "bodycabtype": "Cab Type",
+      "tpms": "Tire Pressure Monitoring System (TPMS) Type",
+      "gvwr": "Gross Vehicle Weight Rating From",
+      "gvwrto": "Gross Vehicle Weight Rating To",
+      "airbaglocfront": "Front Air Bag Locations",
+      "airbaglocknee": "Knee Air Bag Locations",
+      "airbaglocside": "Side Air Bag Locations",
+      "airbagloccurtain": "Curtain Air Bag Locations",
+      "airbaglocother": "Seat Cushion Air Bag Locations"
+    };
+
+    function canonicalise(raw) {
+      var fields = {};
+      var extras = [];
+
+      Object.keys(raw).forEach(function (key) {
+        var norm = key.replace(/[^a-z0-9]/gi, "").toLowerCase();
+        var target = SCHEMA_BY_NORM[norm] || ALIAS[norm];
+
+        if (target) {
+          if (!fields[target]) { fields[target] = raw[key]; }
+        } else {
+          extras.push([key, raw[key]]);
+        }
+      });
+
+      return { fields: fields, extras: extras };
+    }
+
+    async function decodeVpic(vin) {
+      var res = await fetch("https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/" +
+        encodeURIComponent(vin) + "?format=json");
+      if (!res.ok) { return { status: "error", message: "HTTP " + res.status, fields: {} }; }
+      var json = await res.json();
+      return { status: "ok", fields: vpicFields(json) };
+    }
+
+    async function decodeEdge(provider, vin) {
+      var res = await fetch(provider.url.replace("{vin}", encodeURIComponent(vin)));
+      if (!res.ok) { return { status: "error", message: "HTTP " + res.status, fields: {} }; }
+      var json = await res.json();
+      var payload = json.data || json;
+      var canonical = canonicalise(flatten(payload));
+      return { status: "ok", fields: canonical.fields, extras: canonical.extras };
+    }
+
+    async function decodeRecalls(vin) {
+      var base = (state.vpic && state.vpic[vin] && state.vpic[vin].fields) || {};
+      var make = base["Make"];
+      var model = base["Model"];
+      var year = base["Model Year"];
+
+      if (!make || !model || !year) {
+        return { status: "error", message: "needs a vPIC make/model/year first", fields: {} };
+      }
+
+      var url = "https://api.nhtsa.gov/recalls/recallsByVehicle?make=" +
+        encodeURIComponent(make) + "&model=" + encodeURIComponent(model) +
+        "&modelYear=" + encodeURIComponent(year);
+
+      var res = await fetch(url);
+      if (!res.ok) { return { status: "error", message: "HTTP " + res.status, fields: {} }; }
+
+      var json = await res.json();
+      return {
+        status: "ok",
+        fields: {},
+        recalls: (json.results || []).map(function (r) {
+          return {
+            campaign: r.NHTSACampaignNumber || "",
+            component: r.Component || "",
+            summary: r.Summary || "",
+            consequence: r.Consequence || "",
+            remedy: r.Remedy || ""
+          };
+        })
+      };
+    }
+
+    /* ------------------------------------------------------------ rendering */
+    function sectionsHtml(fields) {
+      return SCHEMA.map(function (section) {
+        var filled = 0;
+        var rows = section.fields.map(function (pair) {
+          var value = fields[pair[1]] || "";
+          if (value) { filled += 1; }
+          return '<div class="dna-row' + (value ? "" : " is-empty") + '">' +
+            '<div class="dna-key">' + esc(pair[0]) + "</div>" +
+            '<div class="dna-val">' + (value ? esc(value) : "—") + "</div>" +
+          "</div>";
+        }).join("");
+
+        return '<section class="dna-section">' +
+          "<header><h4>" + esc(section.title) + "</h4><span>" + filled + "/" +
+          section.fields.length + "</span></header>" +
+          '<div class="dna-rows">' + rows + "</div>" +
+        "</section>";
+      }).join("");
+    }
+
+    function cardHtml(provider, item) {
+      var result = (state[provider.id] || {})[item.vin];
+
+      if (!result) {
+        return '<details class="vin-card"><summary><strong>' + esc(item.label) +
+          '</strong><span class="vin-mono">' + esc(item.vin) + "</span>" +
+          badge("idle") + "</summary></details>";
+      }
+
+      var fields = result.fields || {};
+      var title = [fields["Model Year"], fields["Make"], fields["Model"]]
+        .filter(Boolean).join(" ") || item.label;
+
+      var body = "";
+
+      if (result.status === "error") {
+        body = '<p class="dna-empty">' + esc(result.message || "failed") + "</p>";
+      } else if (provider.kind === "recalls") {
+        var list = result.recalls || [];
+        body = list.length
+          ? list.slice(0, 40).map(function (recall) {
+              return '<div class="recall"><b>' + esc(recall.campaign || "Recall") + " · " +
+                esc(recall.component) + "</b><span>" + esc(recall.summary) + "</span></div>";
+            }).join("")
+          : '<p class="dna-empty">No recalls returned for this vehicle.</p>';
+      } else {
+        var filled = 0;
+        SCHEMA.forEach(function (section) {
+          section.fields.forEach(function (pair) { if (fields[pair[1]]) { filled += 1; } });
+        });
+
+        var extras = result.extras || extrasOf(fields);
+        var extrasHtml = extras.length
+          ? '<div class="extra-block"><h5>Extra fields (' + extras.length + ")</h5>" +
+              '<div class="dna-rows">' + extras.slice(0, 120).map(function (pair) {
+                return '<div class="dna-row"><div class="dna-key">' + esc(pair[0]) +
+                  '</div><div class="dna-val">' + esc(pair[1]) + "</div></div>";
+              }).join("") + "</div></div>"
+          : "";
+
+        body = '<p class="dna-status" style="margin-bottom:12px">' + filled + " of " + TOTAL_FIELDS +
+          " schema fields filed</p>" + sectionsHtml(fields) + extrasHtml;
+      }
+
+      return '<details class="vin-card">' +
+        "<summary><strong>" + esc(title) + '</strong><span class="vin-mono">' + esc(item.vin) +
+        "</span>" + badge(result.status) + "</summary>" +
+        '<div class="vin-body">' + body + "</div>" +
+      "</details>";
+    }
+
+    function renderProvider(id) {
+      var provider = PROVIDERS.filter(function (p) { return p.id === id; })[0];
+      var out = document.getElementById("out-" + id);
+      if (!out) { return; }
+
+      var results = state[id] || {};
+      var done = Object.keys(results).filter(function (vin) {
+        return results[vin] && results[vin].status !== "running";
+      }).length;
+
+      out.innerHTML =
+        '<p style="margin-bottom:6px;font-size:.84rem;color:var(--dim-2)">' +
+          esc(provider.note) + "</p>" +
+        '<p style="margin-bottom:14px;font-size:.8rem;color:var(--dim-2)">' +
+          done + " of " + VINS.length + " VINs finished · schema: " + TOTAL_FIELDS + " fields</p>" +
+        VINS.map(function (item) { return cardHtml(provider, item); }).join("");
+    }
+
+    function build() {
+      tabsEl.innerHTML = "";
+      panelsEl.innerHTML = "";
+
+      PROVIDERS.forEach(function (provider, index) {
+        var tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "tab";
+        tab.textContent = provider.name;
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("data-provider", provider.id);
+        if (index === 0) { tab.setAttribute("aria-selected", "true"); }
+        tab.addEventListener("click", function () { show(provider.id); });
+        tabsEl.appendChild(tab);
+
+        var panel = document.createElement("div");
+        panel.className = "panel";
+        panel.id = "panel-" + provider.id;
+        panel.hidden = provider.id !== active;
+        panel.innerHTML = '<div id="out-' + provider.id + '"></div>' +
+          '<p style="margin-top:16px"><button class="btn btn--ghost btn--sm" type="button" ' +
+          'id="run-' + provider.id + '">Run ' + esc(provider.name) + "</button></p>";
+        panelsEl.appendChild(panel);
+
+        panel.querySelector("#run-" + provider.id).addEventListener("click", function () {
+          runProvider(provider.id);
+        });
+      });
+    }
+
+    function show(id) {
+      active = id;
+      Array.prototype.forEach.call(tabsEl.children, function (tab) {
+        tab.setAttribute("aria-selected", tab.getAttribute("data-provider") === id ? "true" : "false");
+      });
+      PROVIDERS.forEach(function (provider) {
+        document.getElementById("panel-" + provider.id).hidden = provider.id !== id;
+      });
+    }
+
+    /* --------------------------------------------------------------- run */
+    async function runProvider(id) {
+      var provider = PROVIDERS.filter(function (p) { return p.id === id; })[0];
+      state[id] = state[id] || {};
+
+      VINS.forEach(function (item) {
+        if (!state[id][item.vin] || state[id][item.vin].status !== "ok") {
+          state[id][item.vin] = { status: "running", fields: {} };
+        }
+      });
+      renderProvider(id);
+      renderMatrix();
+
+      for (var i = 0; i < VINS.length; i += 1) {
+        var vin = VINS[i].vin;
+        var result;
+
+        try {
+          if (provider.kind === "vpic") { result = await decodeVpic(vin); }
+          else if (provider.kind === "recalls") { result = await decodeRecalls(vin); }
+          else { result = await decodeEdge(provider, vin); }
+        } catch (err) {
+          result = { status: "error", message: err.message, fields: {} };
+        }
+
+        state[id][vin] = result;
+        renderProvider(id);
+        renderMatrix();
+        renderFieldMatrix();
+      }
+    }
+
+    /* ------------------------------------------------------------ matrices */
+    function cellText(result) {
+      if (!result) { return "—"; }
+      if (result.status === "error") { return result.message || "error"; }
+      if (result.status === "running") { return "…"; }
+      if (result.recalls) { return result.recalls.length + " recalls"; }
+      var parts = [result.fields["Model Year"], result.fields["Make"], result.fields["Model"]]
+        .filter(Boolean);
+      return parts.length ? parts.join(" ") : "ok";
+    }
+
+    function renderMatrix() {
+      document.getElementById("matrix-head").innerHTML = "<th>Provider</th>" +
+        VINS.map(function (item) {
+          return "<th>" + esc(item.label) + "<br><span style=\"font:500 9px var(--mono);color:var(--dim-2)\">" +
+            esc(item.vin) + "</span></th>";
+        }).join("");
+
+      document.getElementById("matrix-body").innerHTML = PROVIDERS.map(function (provider) {
+        var results = state[provider.id] || {};
+        return "<tr><td><strong>" + esc(provider.name) + "</strong></td>" +
+          VINS.map(function (item) {
+            return "<td>" + esc(cellText(results[item.vin])) + "</td>";
+          }).join("") + "</tr>";
+      }).join("");
+    }
+
+    function renderFieldMatrix() {
+      var vin = fieldVinEl.value || VINS[0].vin;
+      var columns = PROVIDERS.filter(function (provider) {
+        var result = (state[provider.id] || {})[vin];
+        return result && result.status === "ok" && provider.kind !== "recalls";
+      });
+
+      document.getElementById("field-head").innerHTML = "<th>Field</th>" +
+        columns.map(function (provider) { return "<th>" + esc(provider.name) + "</th>"; }).join("");
+
+      if (!columns.length) {
+        document.getElementById("field-body").innerHTML =
+          '<tr class="empty-row"><td colspan="' + (columns.length + 1) +
+          '">Run the decoders first.</td></tr>';
+        return;
+      }
+
+      var rows = "";
+      SCHEMA.forEach(function (section) {
+        section.fields.forEach(function (pair) {
+          var values = columns.map(function (provider) {
+            var fields = (state[provider.id][vin] || {}).fields || {};
+            return fields[pair[1]] || "";
+          });
+
+          if (!values.some(Boolean)) { return; }
+
+          var unique = values.filter(Boolean).filter(function (value, index, all) {
+            return all.indexOf(value) === index;
+          });
+
+          rows += "<tr><td>" + esc(pair[0]) + "</td>" + values.map(function (value) {
+            /* highlight a value that disagrees, and a gap where another provider has data */
+            var differs = value
+              ? (unique.length > 1 && value !== unique[0])
+              : unique.length > 0;
+            return '<td class="' + (differs ? "diff" : "") + '">' + (value ? esc(value) : "—") + "</td>";
+          }).join("") + "</tr>";
+        });
+      });
+
+      document.getElementById("field-body").innerHTML = rows ||
+        '<tr class="empty-row"><td colspan="' + (columns.length + 1) +
+        '">No schema fields returned.</td></tr>';
+    }
+
+    /* ----------------------------------------------------------------- boot */
+    VINS.forEach(function (item) {
+      var option = document.createElement("option");
+      option.value = item.vin;
+      option.textContent = item.label + " · " + item.vin;
+      fieldVinEl.appendChild(option);
+    });
+
+    build();
+    PROVIDERS.forEach(function (provider) { renderProvider(provider.id); });
+    renderMatrix();
+    renderFieldMatrix();
+
+    document.getElementById("run-all").addEventListener("click", async function () {
+      await runProvider("vpic");
+      await runProvider("edge");
+      await runProvider("unified");
+      await runProvider("recalls");
+    });
+
+    document.getElementById("expand-all").addEventListener("click", function () {
+      var panel = document.getElementById("panel-" + active);
+      if (!panel) { return; }
+      Array.prototype.forEach.call(panel.querySelectorAll("details"), function (details) {
+        details.open = true;
+      });
+    });
+
+    document.getElementById("clear-all").addEventListener("click", function () {
+      state = {};
+      PROVIDERS.forEach(function (provider) { renderProvider(provider.id); });
+      renderMatrix();
+      renderFieldMatrix();
+    });
+
+    fieldVinEl.addEventListener("change", renderFieldMatrix);
+  })();
+</script>
+</body>
+</html>

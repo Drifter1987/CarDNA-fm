@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garage — CarDNA</title>
+<meta name="description" content="Vehicles you saved in CarDNA, stored only in this browser.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a class="btn btn--ghost btn--sm" href="decode.html">Decode</a>
+      <a class="btn btn--ghost btn--sm" href="makes.html">Brands</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">Garage</div>
+      <h1>Your saved vehicles.</h1>
+      <p>
+        Kept in this browser only — no account, no server. Save a car from any decode result, then open
+        it again with its full 104-field record.
+        <span class="mono-dim" id="garage-count">empty</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div id="garage-list"></div>
+
+      <p style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn" href="decode.html">Decode a VIN</a>
+        <button class="btn btn--ghost" type="button" id="garage-clear">Clear garage</button>
+      </p>
+
+      <div class="notice" style="margin-top:28px">
+        <strong>Where this lives.</strong> Saved vehicles sit in this browser's local storage under
+        <code>cardna.garage</code>. Clearing site data, using private mode, or switching device will lose
+        them. An account-backed garage is on the roadmap.
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:0;margin-top:0">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA</span>
+      <span>Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and
+        <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/garage.js"></script>
+</body>
+</html>

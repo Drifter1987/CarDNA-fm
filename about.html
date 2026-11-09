@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company — GMOttomotive &amp; CarDNA</title>
+<meta name="description" content="GMOttomotive builds vehicle data tools. CarDNA is its VIN and parts-intelligence product.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </svg>
+    </button>
+
+    <nav class="nav" id="site-nav">
+      <a href="decode.html">Decode VIN</a>
+      <a href="makes.html">Brands</a>
+      <a href="index.html#catalogue">Catalogue</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="garage.html">Garage</a>
+      <a href="about.html" aria-current="page">Company</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">GMOttomotive</div>
+      <h1>We build the layer under the bonnet.</h1>
+      <p>
+        GMOttomotive makes tools and web apps for the automotive trade. CarDNA is the first of them:
+        a vehicle-identity engine that starts with a VIN and ends with the part that actually fits.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid-2">
+        <div>
+          <div class="kicker">Why</div>
+          <h2 style="font-size:1.6rem">Parts data is broken in a boring way</h2>
+          <p style="color:var(--dim);margin-top:16px">
+            Every parts site asks the same question — what car is this? — and then answers it badly.
+            You pick a year, a model, a trim from a dropdown that was never quite right, and you hope.
+            The part arrives. It does not fit.
+          </p>
+          <p style="color:var(--dim);margin-top:14px">
+            A VIN already contains the answer. Every modern vehicle carries its own configuration in
+            seventeen characters. CarDNA reads it first, then shows only what applies to that exact
+            car — which is a different product from a catalogue with a search box on top.
+          </p>
+        </div>
+
+        <div>
+          <div class="kicker">How</div>
+          <h2 style="font-size:1.6rem">Licensed, sourced, traceable</h2>
+          <p style="color:var(--dim);margin-top:16px">
+            Vehicle identity comes from public registries — NHTSA in the US, DVSA and DVLA in the UK,
+            EEA in Europe. Catalogues and diagrams come from licences: TecAlliance for the aftermarket,
+            per-manufacturer EPC programmes for OEM drawings.
+          </p>
+          <p style="color:var(--dim);margin-top:14px">
+            We do not mirror other people's sites. Every row in the database carries its source, so
+            when a part is wrong we can trace why — and when a licence expires, we know exactly what
+            to remove.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="principles">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Principles</div>
+        <h2>Five rules we do not bend</h2>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <span class="card-num">01</span>
+          <h3>Identity is free</h3>
+          <p>Decoding a VIN is not a premium feature. It is the price of admission to owning a car.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">02</span>
+          <h3>No scraped mirrors</h3>
+          <p>If we do not have a licence for it, we do not have it. That includes diagrams and prices.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">03</span>
+          <h3>Every row has a source</h3>
+          <p>Provenance is stored next to the data, not in someone's memory of where it came from.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">04</span>
+          <h3>Say what you don't know</h3>
+          <p>If a VIN is not in the registry, we say so instead of guessing from a pattern.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">05</span>
+          <h3>No dark patterns</h3>
+          <p>No fake countdowns, no hidden renewals, no masking data you already paid for.</p>
+        </div>
+        <div class="card">
+          <h3>Built to be read</h3>
+          <p>Plain language, real numbers, and a design that does not need a tutorial.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="kicker">The family</div>
+      <h2 style="margin-bottom:28px">CarDNA is one part of GMOttomotive</h2>
+
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">What it does</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CarDNA</strong></td>
+              <td>Vehicle identity, catalogue lookup and parts intelligence — this site.</td>
+              <td class="yes">live (pilot)</td>
+            </tr>
+            <tr>
+              <td>Shopfloor</td>
+              <td>Job cards, labour times and parts ordering for independent workshops.</td>
+              <td class="no">planned</td>
+            </tr>
+            <tr>
+              <td>GMO Data API</td>
+              <td>Vehicle and fitment data for developers, resellers and marketplaces.</td>
+              <td class="no">planned</td>
+            </tr>
+            <tr>
+              <td>Parts Index</td>
+              <td>Interchange and supersession search across OEM and aftermarket numbers.</td>
+              <td class="no">planned</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:16px;color:var(--dim-2);font-size:.82rem">
+        Names of planned products are working titles and may change.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="sources">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Data</div>
+        <h2>Where the numbers come from</h2>
+        <p>Full transparency, because the alternative is another site you cannot trust.</p>
+      </div>
+
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th scope="col">Source</th>
+              <th scope="col">What it gives us</th>
+              <th scope="col">Licence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>NHTSA vPIC (US)</td><td>VIN decode, makes, models, VIN patterns</td><td class="yes">public domain</td></tr>
+            <tr><td>VehiclesDB</td><td>Car makes and models, reconciled from 14 national registries</td><td class="yes">CC BY 4.0</td></tr>
+            <tr><td>gor3a / vehicle-makes-models</td><td>Generations and 30,535 engine variants with dimensions and performance</td><td class="yes">ODbL</td></tr>
+            <tr><td>CarDNA catalogue additions</td><td>Four marques folded into the main catalogue — Koenigsegg, Tatra, Rimac, Maruti Suzuki</td><td class="yes">our own data</td></tr>
+            <tr><td>EPA FuelEconomy.gov</td><td>Specs, engine, drive and MPG by model year</td><td class="yes">public domain</td></tr>
+            <tr><td>Wikidata</td><td>Model taxonomy and production dates</td><td class="yes">CC0</td></tr>
+            <tr><td>DVSA / DVLA (UK)</td><td>MOT history and registration lookup</td><td class="yes">OGL, free key</td></tr>
+            <tr><td>TecAlliance / TecDoc</td><td>Aftermarket catalogue and fitment</td><td class="no">commercial licence</td></tr>
+            <tr><td>OEM EPC programmes</td><td>Exploded diagrams and OEM part numbers</td><td class="no">per-manufacturer licence</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="roadmap">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Roadmap</div>
+        <h2>What ships next</h2>
+      </div>
+
+      <ol class="timeline">
+        <li>
+          <time>Now</time>
+          <div>
+            <strong>Vehicle identity, free</strong>
+            <p>VIN decoding, the full make and model index, shareable links. This is what you are looking at.</p>
+          </div>
+        </li>
+        <li>
+          <time>Next</time>
+          <div>
+            <strong>Garage and saved vehicles</strong>
+            <p>Save a car once, then every search is scoped to it. No re-entering a year and trim.</p>
+          </div>
+        </li>
+        <li>
+          <time>Then</time>
+          <div>
+            <strong>First catalogue licences</strong>
+            <p>Aftermarket breadth through TecDoc, plus the first OEM diagram sets for the brands with the deepest demand.</p>
+          </div>
+        </li>
+        <li>
+          <time>Later</time>
+          <div>
+            <strong>Fitment, supersessions and prices</strong>
+            <p>The graph that answers "does this fit my car", with retailer feeds behind the price.</p>
+          </div>
+        </li>
+        <li>
+          <time>After that</time>
+          <div>
+            <strong>Workshop tools</strong>
+            <p>Procedures, torque data, job cards — and an assistant grounded in licensed data rather than guesses.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2>Talk to GMOttomotive.</h2>
+          <p>Pilot access, data partnerships, or a bug you found in ten seconds. All welcome.</p>
+        </div>
+        <a class="btn" href="mailto:hello@gmottomotive.com">hello@gmottomotive.com</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+            <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+          </svg>
+          <span>
+            <span class="logo-word">CarDNA</span>
+            <span class="logo-sub">by GMOttomotive</span>
+          </span>
+        </a>
+        <p>Vehicle identity and parts intelligence for the people who actually turn the spanner.</p>
+      </div>
+
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="decode.html">VIN decoder</a></li>
+          <li><a href="makes.html">Brands &amp; models</a></li>
+          <li><a href="index.html#catalogue">Catalogue</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About GMOttomotive</a></li>
+          <li><a href="about.html#roadmap">Roadmap</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Data</h4>
+        <ul>
+          <li><a href="about.html#sources">Data sources</a></li>
+          <li><a href="makes.html">NHTSA vPIC index</a></li>
+          <li><a href="about.html#principles">Our principles</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA · <a href="legal.html">Legal</a></span>
+      <span>Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

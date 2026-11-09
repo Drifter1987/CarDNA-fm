@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Car brands &amp; models — CarDNA</title>
+<meta name="description" content="Every car marque, grouped by country, with all of its models on record. Live from the NHTSA registry.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </svg>
+    </button>
+
+    <nav class="nav" id="site-nav">
+      <a href="decode.html">Decode VIN</a>
+      <a href="makes.html" aria-current="page">Brands</a>
+      <a href="index.html#catalogue">Catalogue</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="garage.html">Garage</a>
+      <a href="about.html">Company</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">The marques</div>
+      <h1>Car brands, and every model under them.</h1>
+      <p>
+        Every car marque we can account for — the open VehiclesDB catalogue, plus four marques folded
+        into it — grouped by country with every model underneath. The whole list ships with the site:
+        opening a brand fetches nothing.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="search-bar">
+        <label class="sr-only" for="brand-search">Search brands</label>
+        <input class="search-input" id="brand-search" type="search"
+               placeholder="Search a brand, a model or a country — Ferrari, Corolla, Japan…"
+               autocomplete="off" spellcheck="false">
+      </div>
+
+      <p class="results-meta" id="results-meta">Loading brands…</p>
+
+      <div id="brand-groups"></div>
+
+      <div class="notice" style="margin-top:34px">
+        <strong>Where this comes from.</strong> Makes and models are the open VehiclesDB catalogue
+        (CC BY 4.0), reconciled from the official registries of 14 countries, plus four marques added
+        directly to the catalogue — Koenigsegg, Tatra, Rimac and Maruti Suzuki. Generations and engine
+        variants come from gor3a/vehicle-makes-models (ODbL): 30,535 variants with years, body, power,
+        torque and dimensions. Open a brand, then a model, to see them. Everything ships as files with
+        this site — no API is called to browse.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+            <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+          </svg>
+          <span>
+            <span class="logo-word">CarDNA</span>
+            <span class="logo-sub">by GMOttomotive</span>
+          </span>
+        </a>
+        <p>Vehicle identity and parts intelligence for the people who actually turn the spanner.</p>
+      </div>
+
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="decode.html">VIN decoder</a></li>
+          <li><a href="makes.html">Brands &amp; models</a></li>
+          <li><a href="index.html#catalogue">Catalogue</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About GMOttomotive</a></li>
+          <li><a href="about.html#roadmap">Roadmap</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Data</h4>
+        <ul>
+          <li><a href="about.html#sources">Data sources</a></li>
+          <li><a href="makes.html">NHTSA vPIC index</a></li>
+          <li><a href="about.html#principles">Our principles</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA · <a href="legal.html">Legal</a></span>
+      <span>Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/makes.js"></script>
+</body>
+</html>

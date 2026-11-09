@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIN decoder — CarDNA</title>
+<meta name="description" content="Decode any VIN into make, model, year, engine and plant with NHTSA vPIC. Free, no account, nothing stored.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </svg>
+    </button>
+
+    <nav class="nav" id="site-nav">
+      <a href="decode.html" aria-current="page">Decode VIN</a>
+      <a href="makes.html">Brands</a>
+      <a href="index.html#catalogue">Catalogue</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="garage.html">Garage</a>
+      <a href="about.html">Company</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">VIN decoder</div>
+      <h1>Seventeen characters, one exact car.</h1>
+      <p>
+        Two decoders run on every VIN. NHTSA's vPIC gives the US manufacturer-filed record — engine,
+        drivetrain, dimensions, weights, safety systems and plant. A European structural decode reads
+        the WMI, model year, plant and serial from the VIN itself, which is what still works for
+        European cars the US register has never heard of. Everything is always shown; fields this
+        vehicle did not file appear as “—”. No account, no email, no quota.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="hero-grid" style="grid-template-columns:1fr">
+        <div class="decoder">
+          <h2>Decode a vehicle</h2>
+          <p class="decoder-sub">From the windscreen plate, the door jamb, or your registration document.</p>
+
+          <form class="vin-form" id="vin-form" novalidate>
+            <label class="vin-label" for="vin">Vehicle identification number</label>
+            <div class="vin-row">
+              <input class="vin-input" id="vin" name="vin" maxlength="17" placeholder="1HGCM82633A004352"
+                     autocomplete="off" autocapitalize="characters" spellcheck="false">
+              <button class="btn" type="submit">Read DNA</button>
+            </div>
+            <p class="vin-hint" id="vin-hint">17 characters · never contains I, O or Q · free</p>
+          </form>
+
+          <div id="vin-result" hidden></div>
+          <div class="recent" id="recent"></div>
+
+          <details class="elsewhere">
+            <summary>Decode elsewhere</summary>
+            <ul>
+              <li><a href="https://vincario.com/vin-decoder/" rel="noopener">Vincario</a> — European
+                full specifications, 3 free lookups a month.</li>
+              <li><a href="https://vpic.nhtsa.dot.gov/decoder/" rel="noopener">NHTSA vPIC</a> — the
+                same US public record this page uses, in their own interface.</li>
+              <li><a href="https://www.carfax.com/" rel="noopener">CARFAX</a> — history reports
+                (paid, US).</li>
+            </ul>
+            <p style="margin-top:12px;font-size:.82rem;color:var(--dim-2)">
+              These links leave CarDNA. We do not fetch or store anything from them.
+            </p>
+          </details>
+        </div>
+
+        <div>
+          <h2 style="font-size:1.3rem">What a VIN actually tells you</h2>
+          <p style="color:var(--dim);margin-top:14px">
+            A VIN is a structured record, not a random string. Position 1–3 is the manufacturer and
+            market, 4–8 is the model line, engine and body, position 9 is a check digit, the tenth is
+            the model year and the eleventh is the plant.
+          </p>
+
+          <ul class="feature-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Exact configuration</strong>Engine, body, drive and trim as filed by the manufacturer.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Origin</strong>Plant country and city where the vehicle was built.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span><strong>Shareable</strong>The address bar carries the VIN, so a link reopens the same decode.</span>
+            </li>
+          </ul>
+
+          <div class="notice" style="margin-top:26px">
+            <strong>What we do not show.</strong> vPIC is the US federal record. Non-US vehicles,
+            pre-1981 classics and factory option codes usually live in the OEM catalogue instead —
+            that is the layer we license next, and the reason a VIN can decode to "no record".
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Try it</div>
+        <h2>Three VINs to try</h2>
+        <p>Real, publicly documented VINs. Click one to decode it here.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <span class="card-num">Honda · 2003</span>
+          <h3 style="font-family:var(--mono);font-size:1rem;letter-spacing:.08em">1HGCM82633A004352</h3>
+          <p style="margin-top:10px">A US-market Accord — a clean example of a fully filed record.</p>
+          <p style="margin-top:14px"><button class="btn btn--ghost btn--sm" type="button" data-sample="1HGCM82633A004352">Decode this</button></p>
+        </div>
+
+        <div class="card">
+          <span class="card-num">Seat · 2019</span>
+          <h3 style="font-family:var(--mono);font-size:1rem;letter-spacing:.12em">VSSZZZ5FZKR032237</h3>
+          <p style="margin-top:10px">A European Leon. Expect a thinner result — and that is the honest answer.</p>
+          <p style="margin-top:14px"><button class="btn btn--ghost btn--sm" type="button" data-sample="VSSZZZ5FZKR032237">Decode this</button></p>
+        </div>
+
+        <div class="card">
+          <span class="card-num">Toyota · 2010</span>
+          <h3 style="font-family:var(--mono);font-size:1rem;letter-spacing:.12em">JTDKN36U001234567</h3>
+          <p style="margin-top:10px">A Prius from the site's own examples — good for testing multi-configuration VINs.</p>
+          <p style="margin-top:14px"><button class="btn btn--ghost btn--sm" type="button" data-sample="JTDKN36U001234567">Decode</button></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+            <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+          </svg>
+          <span>
+            <span class="logo-word">CarDNA</span>
+            <span class="logo-sub">by GMOttomotive</span>
+          </span>
+        </a>
+        <p>Vehicle identity and parts intelligence for the people who actually turn the spanner.</p>
+      </div>
+
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="decode.html">VIN decoder</a></li>
+          <li><a href="makes.html">Brands &amp; models</a></li>
+          <li><a href="index.html#catalogue">Catalogue</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About GMOttomotive</a></li>
+          <li><a href="about.html#roadmap">Roadmap</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Data</h4>
+        <ul>
+          <li><a href="about.html#sources">Data sources</a></li>
+          <li><a href="makes.html">NHTSA vPIC index</a></li>
+          <li><a href="about.html#principles">Our principles</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA · <a href="legal.html">Legal</a></span>
+      <span>Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/garage.js"></script>
+<script src="assets/vin-schema.js"></script>
+<script src="assets/vin.js"></script>
+<script>
+  (function () {
+    "use strict";
+    document.querySelectorAll("[data-sample]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var input = document.getElementById("vin");
+        var form = document.getElementById("vin-form");
+        if (!input || !form) { return; }
+        input.value = button.getAttribute("data-sample");
+        form.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (typeof form.requestSubmit === "function") {
+          form.requestSubmit();
+        } else {
+          form.dispatchEvent(new Event("submit", { cancelable: true }));
+        }
+      });
+    });
+  })();
+</script>
+</body>
+</html>

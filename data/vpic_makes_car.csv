@@ -1,0 +1,196 @@
+makeid,makename,vehicletypeid,vehicletypename
+440,ASTON MARTIN,2,Passenger Car
+441,TESLA,2,Passenger Car
+442,JAGUAR,2,Passenger Car
+443,MASERATI,2,Passenger Car
+445,ROLLS-ROYCE,2,Passenger Car
+448,TOYOTA,2,Passenger Car
+449,MERCEDES-BENZ,2,Passenger Car
+452,BMW,2,Passenger Car
+454,BUGATTI,2,Passenger Car
+456,MINI,2,Passenger Car
+460,FORD,2,Passenger Car
+464,LINCOLN,2,Passenger Car
+465,MERCURY,2,Passenger Car
+466,LOTUS,2,Passenger Car
+467,CHEVROLET,2,Passenger Car
+468,BUICK,2,Passenger Car
+469,CADILLAC,2,Passenger Car
+470,HOLDEN,2,Passenger Car
+471,OPEL,2,Passenger Car
+472,GMC,2,Passenger Car
+473,MAZDA,2,Passenger Car
+474,HONDA,2,Passenger Car
+475,ACURA,2,Passenger Car
+476,DODGE,2,Passenger Car
+477,CHRYSLER,2,Passenger Car
+478,NISSAN,2,Passenger Car
+480,INFINITI,2,Passenger Car
+481,MITSUBISHI,2,Passenger Car
+482,VOLKSWAGEN,2,Passenger Car
+485,VOLVO,2,Passenger Car
+492,FIAT,2,Passenger Car
+493,ALFA ROMEO,2,Passenger Car
+497,LANCIA,2,Passenger Car
+498,HYUNDAI,2,Passenger Car
+499,KIA,2,Passenger Car
+502,LAMBORGHINI,2,Passenger Car
+504,SMART,2,Passenger Car
+509,SUZUKI,2,Passenger Car
+515,LEXUS,2,Passenger Car
+523,SUBARU,2,Passenger Car
+533,MAYBACH,2,Passenger Car
+536,PONTIAC,2,Passenger Car
+539,MORGAN,2,Passenger Car
+542,ISUZU,2,Passenger Car
+565,TRIUMPH,2,Passenger Car
+572,SAAB,2,Passenger Car
+582,AUDI,2,Passenger Car
+583,BENTLEY,2,Passenger Car
+584,PORSCHE,2,Passenger Car
+603,FERRARI,2,Passenger Car
+606,AM GENERAL,2,Passenger Car
+629,CREATIVE COACHWORKS,2,Passenger Car
+771,AC PROPULSION,2,Passenger Car
+847,DAIHATSU,2,Passenger Car
+972,FALCON,2,Passenger Car
+986,EV INNOVATIONS,2,Passenger Car
+992,FAW JIAXING HAPPY MESSENGER,2,Passenger Car
+1056,SATURN,2,Passenger Car
+1077,DAEWOO,2,Passenger Car
+1124,AMERICAN MOTORS,2,Passenger Car
+1142,FORMULA 1 STREET COM,2,Passenger Car
+1146,GEO,2,Passenger Car
+1151,FORTUNESPORT VES,2,Passenger Car
+1288,AAS,2,Passenger Car
+1292,EQUUS AUTOMOTIVE,2,Passenger Car
+1393,ELECTRIC MOBILE CARS,2,Passenger Car
+1498,AVERA MOTORS,2,Passenger Car
+1683,BAKKURA MOBILITY,2,Passenger Car
+1755,TH!NK,2,Passenger Car
+1777,CODA,2,Passenger Car
+1869,CONTEMPORARY CLASSIC CARS (CCC),2,Passenger Car
+1896,KOENIGSEGG,2,Passenger Car
+1991,BYD,2,Passenger Car
+2018,KANDI,2,Passenger Car
+2049,KEPLER MOTORS,2,Passenger Car
+2131,MAKING YOU MOBILE,2,Passenger Car
+2236,MCLAREN,2,Passenger Car
+2376,MYCAR,2,Passenger Car
+2408,EAGLE,2,Passenger Car
+2409,PLYMOUTH,2,Passenger Car
+2665,NJD AUTOMOTIVE LLC,2,Passenger Car
+2745,PHOENIX MOTORCARS,2,Passenger Car
+3176,ROCKET SLED MOTORS,2,Passenger Car
+3440,VISION INDUSTRIES,2,Passenger Car
+3540,WARHAWK PERFORMANCE,2,Passenger Car
+3583,UKEYCHEYMA,2,Passenger Car
+3706,TOTAL ELECTRIC VEHICLES,2,Passenger Car
+3766,SPYKER,2,Passenger Car
+4162,OLDSMOBILE,2,Passenger Car
+4220,PANOZ,2,Passenger Car
+4355,SALEEN,2,Passenger Car
+4410,SOLECTRIA,2,Passenger Car
+4451,YESTER YEAR AUTO,2,Passenger Car
+4596,BXR,2,Passenger Car
+4634,ENGINE CONNECTION,2,Passenger Car
+4644,BLUECAR,2,Passenger Car
+4764,MOSLER,2,Passenger Car
+4767,PAGANI,2,Passenger Car
+4859,REVOLOGY,2,Passenger Car
+5015,EMA,2,Passenger Car
+5042,COSTIN SPORTS CAR,2,Passenger Car
+5083,GENESIS,2,Passenger Car
+5122,KARMA,2,Passenger Car
+5208,MATRIX MOTOR COMPANY,2,Passenger Car
+5367,ARMBRUSTER STAGEWAY,2,Passenger Car
+5381,LUMEN,2,Passenger Car
+5464,ASUNA,2,Passenger Car
+5468,MERKUR,2,Passenger Car
+5552,AVANTI,2,Passenger Car
+5553,YUGO,2,Passenger Car
+5554,PEUGEOT,2,Passenger Car
+5555,STERLING MOTOR CAR,2,Passenger Car
+5557,CONSULIER GTP,2,Passenger Car
+5657,DATSUN,2,Passenger Car
+5661,PININFARINA,2,Passenger Car
+5760,VINTAGE AUTO,2,Passenger Car
+5767,LONDONCOACH INC,2,Passenger Car
+5848,MGS GRAND SPORT (MARDIKIAN),2,Passenger Car
+5901,SEBRING,2,Passenger Car
+5938,PANTHER,2,Passenger Car
+6018,DAYTONA COACH BUILDERS,2,Passenger Car
+6069,UCC,2,Passenger Car
+6263,RS SPIDER,2,Passenger Car
+6264,GRUPPE B,2,Passenger Car
+6265,RALLY SPORT,2,Passenger Car
+6313,RENAISSANCE,2,Passenger Car
+6364,JAC 427,2,Passenger Car
+6408,"HUNTER DESIGN GROUP, LLC",2,Passenger Car
+6473,BLACKWATER,2,Passenger Car
+6663,"GULLWING INTERNATIONAL MOTORS, LTD.",2,Passenger Car
+6759,AMERITECH CORPORATION,2,Passenger Car
+6792,STANFORD CUSTOMS,2,Passenger Car
+6880,CLASSIC ROADSTERS,2,Passenger Car
+6986,HERITAGE,2,Passenger Car
+7099,COBRA CARS,2,Passenger Car
+7207,C-R CHEETAH RACE CARS,2,Passenger Car
+7225,PAS,2,Passenger Car
+7425,BUG MOTORS,2,Passenger Car
+7477,EXCALIBUR AUTOMOBILE CORPORATION,2,Passenger Car
+7765,IVES MOTORS CORPORATION (IMC),2,Passenger Car
+7836,AUTODELTA USA INC,2,Passenger Car
+8395,AUTOCAR LTD,2,Passenger Car
+8549,MOKE,2,Passenger Car
+8605,BBC,2,Passenger Car
+8785,"PHOENIX SPORTS CARS, INC.",2,Passenger Car
+9250,VECTOR AEROMOTIVE CORPORATION,2,Passenger Car
+9326,CARBODIES,2,Passenger Car
+9364,CREATIVE COACHWORKS INC.,2,Passenger Car
+9376,WESTFALL MOTORS CORP.,2,Passenger Car
+9401,CLENET,2,Passenger Car
+9448,ELECTRIC CAR COMPANY,2,Passenger Car
+9458,CX AUTOMOTIVE,2,Passenger Car
+9533,LA EXOTICS,2,Passenger Car
+9572,CLASSIC SPORTS CARS,2,Passenger Car
+9720,SF MOTORS INC.,2,Passenger Car
+9759,SCUDERIA CAMERON GLICKENHAUS (SCG),2,Passenger Car
+10029,VINTAGE CRUISER,2,Passenger Car
+10030,VINTAGE MICROBUS,2,Passenger Car
+10031,VINTAGE ROVER,2,Passenger Car
+10047,LITE CAR,2,Passenger Car
+10224,POLESTAR,2,Passenger Car
+10256,CZINGER,2,Passenger Car
+10393,GLICKENHAUS,2,Passenger Car
+10623,DONGFENG,2,Passenger Car
+10647,CRUISE,2,Passenger Car
+10919,LUCID,2,Passenger Car
+11076,CALMOTORS,2,Passenger Car
+11346,AUTOMOBILI PININFARINA,2,Passenger Car
+11792,ALLARD MOTOR WORKS,2,Passenger Car
+11832,SHELBY,2,Passenger Car
+11856,FISKER,2,Passenger Car
+11921,RIMAC,2,Passenger Car
+11938,ZOOX,2,Passenger Car
+12074,ECOCAR,2,Passenger Car
+12400,SUPERCAR SYSTEM,2,Passenger Car
+12550,RUF,2,Passenger Car
+12706,KINDIG,2,Passenger Car
+12771,SSC NORTH AMERICA,2,Passenger Car
+12783,BALLISTIC,2,Passenger Car
+12894,MEYERS MANX,2,Passenger Car
+12948,1955 CUSTOM BELAIR,2,Passenger Car
+12980,ELKINGTON,2,Passenger Car
+12991,MK SPORTSCARS,2,Passenger Car
+13018,SHAY REPRODUCTION,2,Passenger Car
+13022,DELOREAN,2,Passenger Car
+13024,CLENET COACHWORKS,2,Passenger Car
+13025,CHECKER,2,Passenger Car
+13026,BERTONE,2,Passenger Car
+13028,CAMELOT,2,Passenger Car
+13271,ZEEKR,2,Passenger Car
+13380,BACKDRAFT,2,Passenger Car
+13391,FALCON MOTORS,2,Passenger Car
+13585,MAYHEM AUTOWORKZ,2,Passenger Car
+13647,RENAULT,2,Passenger Car
+13887,HEDLEY STUDIOS,2,Passenger Car
