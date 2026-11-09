@@ -8,16 +8,17 @@ three small vanilla-JS modules, no build step, no dependencies, no backend.
 
 ## Run it
 
-The catalogue is loaded from a local JSON file with `fetch`, so it needs to be served over http
-(opening `file://` will show a helpful notice instead of the list):
+The catalogue is loaded from a local file with `fetch`, so it needs to be served over http
+(opening `file://` will show a helpful notice instead of the list). Any static file server works:
 
 ```bash
 cd CarDNA
-python3 -m http.server 8080
-# open http://localhost:8080
+npx serve .
+# open the address it prints
 ```
 
-Deploy by uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx.
+In FreeMilk, **Run** does this for you and publishes the folder to its preview link. Deploy by
+uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx.
 
 ## Pages
 
@@ -26,7 +27,7 @@ Deploy by uploading the folder to any static host — Netlify, Cloudflare Pages,
 | `index.html` | App shell: Overview / Decode VIN / Brands / Catalogue / Pricing as tabs, no page scroll |
 | `decode.html` | Full VIN decoder with example VINs, shareable `?vin=` links and recent lookups |
 | `makes.html` | 319 car brands grouped by country, every model embedded — opening a brand fetches nothing |
-| `pricing.html` | Free / Pro / Workshop tiers and a line-by-line comparison |
+| `pricing.html` | Free / Pro / Workshop / Business tiers, line-by-line comparison, and why the quotas are what they are |
 | `about.html` | GMOttomotive, principles, data sources, roadmap, contact |
 | `garage.html` | Saved vehicles — this browser only, no account |
 | `legal.html` | Privacy, terms, data licences and independence notice |
@@ -75,7 +76,8 @@ numbers presented as real.
 ## Placeholders to replace before launch
 
 - `hello@gmottomotive.com` in `about.html` — swap for the real address.
-- Pricing figures on `index.html` and `pricing.html` — pilot structure only.
+- Pricing figures on `index.html` and `pricing.html` — modelled in `docs/pricing-feasibility.md`;
+  re-run that model when the European vendor contract and the catalogue licence are signed.
 - Planned product names on `about.html` (`Shopfloor`, `GMO Data API`, `Parts Index`) are working titles.
 
 ## Roadmap
@@ -97,6 +99,10 @@ spelled out.
 `docs/eu-decoder-integration.md` covers the paid European full-spec layer: published per-lookup
 prices (Vincario €0.22–€0.49, CarAPI $299/yr, RapidAPI $69/mo), the signed-request proxy architecture
 with a permanent VIN cache, and what it costs at realistic volumes.
+
+`docs/pricing-feasibility.md` is the model behind the plans: vendor cost per European VIN, margin at
+full and typical quota use, overage rates, LTV/CAC, break-even and the revenue scenarios, ending in the
+recommended plan structure.
 
 `docs/public-apis-free.md` extracts the **Vehicle** category from the public-apis repository (18 APIs,
 with auth/CORS and what each is good for) plus adjacent free APIs — recalls, fitment, MOT history,

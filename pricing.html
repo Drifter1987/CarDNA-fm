@@ -47,9 +47,11 @@
       <div class="kicker">Pricing</div>
       <h1>Identity free. Data paid for.</h1>
       <p>
-        Finding out what car you own should never cost money — so US decoding, all 319 brands and the
-        engine data stay free. What costs us money is European factory data (€0.22–€0.49 per lookup) and
-        licensed parts, so those carry a quota and a price.
+        Finding out what car you own should never cost money — so US decoding, all 319 brands, 5,601
+        models and 30,535 engine variants stay free, with no account to create. European factory data is
+        bought per lookup at €0.22–€0.49, so that is what carries a quota: three decodes on the free plan
+        to prove it works, a monthly allowance on the paid ones, and a per-lookup price past it instead of
+        a blocked screen.
       </p>
     </div>
   </section>
@@ -65,7 +67,7 @@
             <li>Unlimited US VIN decodes (104 fields)</li>
             <li>All 319 brands · 5,601 models</li>
             <li>30,535 engine variants</li>
-            <li>25 European decodes / month</li>
+            <li>3 European decodes, once</li>
             <li>1 saved vehicle, shareable links</li>
           </ul>
           <a class="btn btn--ghost" href="decode.html">Start decoding</a>
@@ -78,7 +80,7 @@
           <p class="tier-note">or €99 / year — two months free</p>
           <ul>
             <li>Everything in Free</li>
-            <li>100 European decodes / month</li>
+            <li>10 European decodes / month</li>
             <li>5 saved vehicles</li>
             <li>PDF and CSV export of any record</li>
             <li>Recalls and complaints attached to each vehicle</li>
@@ -88,11 +90,11 @@
 
         <div class="tier">
           <h3>Workshop</h3>
-          <p class="price">€34.90<small>/mo</small></p>
-          <p class="tier-note">or €349 / year · 3 seats</p>
+          <p class="price">€39<small>/mo</small></p>
+          <p class="tier-note">or €390 / year · 3 seats</p>
           <ul>
             <li>Everything in Pro</li>
-            <li>500 European decodes / month</li>
+            <li>40 European decodes / month</li>
             <li>25 saved vehicles, shared garage</li>
             <li>Bulk VIN upload (CSV)</li>
             <li>API key for your own tools</li>
@@ -102,10 +104,11 @@
 
         <div class="tier">
           <h3>Business</h3>
-          <p class="price">from €149<small>/mo</small></p>
+          <p class="price">from €249<small>/mo</small></p>
           <p class="tier-note">for resellers and platforms</p>
           <ul>
             <li>Everything in Workshop</li>
+            <li>450 European decodes / month</li>
             <li>Unlimited seats and vehicles</li>
             <li>Volume API pricing and SLA</li>
             <li>Invoice billing, annual terms</li>
@@ -116,9 +119,10 @@
       </div>
 
       <p style="margin-top:18px;color:var(--dim-2);font-size:.82rem">
-        Pilot pricing, locked for the first 100 accounts for 12 months. Extra European decodes beyond a
-        plan's quota are €0.60 each. European quota not needed? Free stays genuinely free — the US
-        record, the whole catalogue and the engine data never expire.
+        Pilot pricing, locked for the first 100 accounts for 12 months. European decodes past a plan's
+        quota are €0.99 (Pro), €0.85 (Workshop) or €0.55 (Business) each — so a busy month never means a
+        blocked lookup, and a quiet one never means paying for nothing. European quota not needed? Free
+        stays genuinely free — the US record, the whole catalogue and the engine data never expire.
       </p>
     </div>
   </section>
@@ -142,10 +146,12 @@
             </tr>
           </thead>
           <tbody>
+            <tr><td>Price</td><td>€0</td><td class="yes">€9.90 / mo</td><td class="yes">€39 / mo</td><td class="yes">from €249 / mo</td></tr>
+            <tr><td>Annual price</td><td class="no">—</td><td>€99</td><td>€390</td><td>quote</td></tr>
             <tr><td>US VIN decode (104 fields, vPIC)</td><td class="yes">unlimited</td><td class="yes">unlimited</td><td class="yes">unlimited</td><td class="yes">unlimited</td></tr>
             <tr><td>Brands, models, generations, engines</td><td class="yes">all</td><td class="yes">all</td><td class="yes">all</td><td class="yes">all</td></tr>
-            <tr><td>European full specifications</td><td>25 / mo</td><td class="yes">100 / mo</td><td class="yes">500 / mo</td><td class="yes">custom</td></tr>
-            <tr><td>Extra European decodes</td><td class="no">—</td><td>€0.60 each</td><td>€0.45 each</td><td>volume rate</td></tr>
+            <tr><td>European full specifications</td><td>3, once</td><td class="yes">10 / mo</td><td class="yes">40 / mo</td><td class="yes">450 / mo</td></tr>
+            <tr><td>Extra European decodes</td><td class="no">—</td><td>€0.99 each</td><td>€0.85 each</td><td>€0.55 each</td></tr>
             <tr><td>Recalls and complaints</td><td class="no">—</td><td class="yes">included</td><td class="yes">included</td><td class="yes">included</td></tr>
             <tr><td>Saved vehicles</td><td>1</td><td class="yes">5</td><td class="yes">25</td><td class="yes">unlimited</td></tr>
             <tr><td>PDF / CSV export</td><td class="no">—</td><td class="yes">yes</td><td class="yes">yes</td><td class="yes">yes</td></tr>
@@ -155,6 +161,28 @@
             <tr><td>Invoice billing / SLA</td><td class="no">—</td><td class="no">—</td><td class="no">—</td><td class="yes">yes</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="grid-3" style="margin-top:30px">
+        <div class="card">
+          <span class="card-num">01 / what costs money</span>
+          <h3>Only one thing does</h3>
+          <p>The US federal record is public domain and the catalogue is a static file, so both cost us
+            nothing to serve. European factory data is bought per VIN at €0.22–€0.49 — that is the only
+            number that sets a price.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">02 / quota sizing</span>
+          <h3>Sized for your worst month</h3>
+          <p>Every quota is set so the plan still works if you use all of it: 73–74% gross at full quota,
+            87–91% at normal use. No plan is funded by hoping you stay under it.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">03 / overage</span>
+          <h3>A tap, not a wall</h3>
+          <p>Past the quota you pay per lookup instead of being blocked — €0.99, €0.85 or €0.55 against a
+            €0.26 cost. That is the same wholesale-to-retail spread the data vendor charges us.</p>
+        </div>
       </div>
     </div>
   </section>
