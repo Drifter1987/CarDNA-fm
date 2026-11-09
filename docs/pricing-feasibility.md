@@ -1,236 +1,68 @@
 # Pricing feasibility study
 
-Question: what should CarDNA charge so the plans are sustainable without being greedy?
+What CarDNA should charge, and what each plan actually earns. All figures in EUR, per customer, per
+month.
 
-Method: model the variable cost of every plan (the only real cost is European VIN lookups), then test
-margin at full quota use, at typical use, and at scale. All figures in EUR.
+## 1. The only real cost
 
----
+European lookups are bought at **€0.26 each** (blended: €0.249 at 1,000, €0.22 at 5,000). US decoding
+(NHTSA vPIC) and the static catalogue cost nothing per use, and hosting is about €7 a month in total. So:
 
-## 1. Inputs
+**net profit = price − €0.26 × European decodes used**
 
-| Input | Value | Source |
-|---|---:|---|
-| European decode, vendor price | €0.249 at 1,000 lookups; €0.22 at 5,000 | Vincario published tiers |
-| Blended vendor cost | **€0.26** per unique VIN | 70% at €0.249, 30% at €0.22 |
-| Infrastructure per decode | ~€0 (Worker + KV free tier) | Cloudflare |
-| Fixed infrastructure | ~€80 / year | domain + KV headroom |
-| Free-tier abuse exposure | unbounded if quota is generous | this is the risk to price |
+## 2. Net profit per plan
 
-US decoding costs nothing at the source (NHTSA vPIC, public domain), so it should never be metered.
-The catalogue is static files — free to serve, and it is the acquisition channel.
+Typical use assumes 35% (Pro), 50% (Workshop) and 60% (Business) of the quota. Full quota is the worst
+case, where the customer maxes the plan out.
 
----
-
-## 2. Plan economics at **full** quota use (worst case)
-
-| Plan | Price | EU decodes included | Cost at full use | Gross margin |
-|---|---:|---:|---:|---:|
-| Free (old: 25/mo) | €0 | 25 | **€6.50** | **unbounded loss** |
-| Free (proposed: 3 once) | €0 | 3 lifetime | €0.78 lifetime | n/a |
-| Pro | €9.90 | 10 | €2.60 | **73.7%** |
-| Pro (old: 100/mo) | €9.90 | 100 | €26.00 | **−163%** |
-| Workshop | €39.00 | 40 | €10.40 | **73.3%** |
-| Workshop (old: 500/mo) | €34.90 | 500 | €130.00 | **−272%** |
-| Business | €249.00 | 450 | €117.00 | **53.0%** |
-
-The previous quotas (25 free, 100 Pro, 500 Workshop) were **not survivable**: a single heavy Pro user
-would cost more than three subscriptions. That is the "too generous" failure mode, and it is why the
-price looked arbitrary.
-
----
-
-## 3. Margin at **typical** use
-
-Consumer behaviour is not full-quota behaviour. Cache hit rates help too: a VIN decoded once is free
-forever after, so repeat lookups of the same car cost nothing.
-
-| Plan | Assumed use | Decodes | Cost | Gross margin |
-|---|---:|---:|---:|---:|
-| Pro | 35% of quota | 3.5 | €0.91 | **90.8%** |
-| Workshop | 50% of quota | 20 | €5.20 | **86.7%** |
-| Business | 60% of quota | 270 | €70.20 | **71.8%** |
-
-So the plan is **73–74% margin if every customer maxes out**, and **87–91% at normal use**. That is the
-band a data product wants: never below 70%, never an obvious rip-off.
-
----
-
-## 4. Overage pricing
-
-| Plan | Overage | Cost | Margin on overage |
-|---|---:|---:|---:|
-| Pro | €0.99 | €0.26 | 73.7% |
-| Workshop | €0.85 | €0.26 | 69.4% |
-| Business | €0.55 | €0.26 | 52.7% |
-
-€0.99 retail against a €0.26 cost is a ~3.8× markup — the same ratio Vincario itself applies between
-its 100-pack (€0.49) and 5,000-pack (€0.22). Nothing greedy there; it is the normal wholesale/retail
-spread.
-
----
-
-## 5. LTV, CAC and payback
-
-Assumptions: consumer churn 6%/month, workshop churn 3%/month (B2B sticks), CAC €15 consumer
-(content/SEO led) and €150 workshop (sales-assisted).
-
-| Plan | ARPU | GM% (typical) | Monthly gross profit | LTV | LTV / CAC |
+| Plan | Price / month | EU decodes | Net profit, typical month | Net profit, full quota | Margin typical / worst |
 |---|---:|---:|---:|---:|---:|
-| Pro | €9.90 | 90.8% | €8.99 | **€150** | **10.0×** |
-| Workshop | €39.00 | 86.7% | €33.81 | **€1,127** | **7.5×** |
-| Business | €249.00 | 71.8% | €178.78 | €5,959 (at 3% churn) | — (sales-led) |
+| Free | €0 | 3, once | −€0.78 once | — | — |
+| Pro | €9.90 | 10 | **€8.99** | **€7.30** | 91% / 74% |
+| Workshop | €39.00 | 40 | **€33.80** | **€28.60** | 87% / 73% |
+| Business | €249.00 | 450 | **€178.80** | **€132.00** | 72% / 53% |
 
-Anything above 3× LTV/CAC is healthy; 7–10× means the price is conservative, not extractive. Payback
-is immediate (first month), which matters because there is no free cash to burn.
+That is the whole business — there is no other variable cost. At scale, 100 paying customers
+(80 Pro, 18 Workshop, 2 Business) net about **€1,685 a month**; 500 net about **€8,400 a month**.
 
----
+## 3. Overage
 
-## 6. Break-even
+| Plan | Price per EU decode | Net profit |
+|---|---:|---:|
+| Pro | €0.99 | €0.73 |
+| Workshop | €0.85 | €0.59 |
+| Business | €0.55 | €0.29 |
 
-Fixed costs are tiny (≈€680/year including tooling), so break-even is **6 paying customers**. The real
-constraint is founder time, not hosting. That argues for a low entry price to build volume rather than a
-high price to chase margin.
+## 4. Three stingier mindsets
 
----
+The same plans on less generous terms. Net profit is for a typical month.
 
-## 7. Revenue scenarios (monthly)
+| Mindset | Pro | Workshop | Business |
+|---|---|---|---|
+| **A — less generous** | €11.90 · 6 EU · net €11.35 | €45 · 25 EU · net €41.75 | €329 · 300 EU · net €282.20 |
+| **B — lesser generous** | €14.90 · 5 EU · net €14.45 | €59 · 20 EU · net €56.40 | €449 · 200 EU · net €417.80 |
+| **C — least generous** | €19 · 3 EU · net €18.73 | €79 · 12 EU · net €77.44 | €649 · 100 EU · net €633.40 |
 
-Mix assumed 80% Pro / 18% Workshop / 2% Business.
+Free is one decode once under A, and none at all under B and C.
 
-| Paying customers | Pro | Workshop | Business | MRR | ARR |
-|---:|---:|---:|---:|---:|---:|
-| 25 | 20 | 4 | 1 | €564 | €6.8k |
-| 100 | 80 | 18 | 2 | €1,992 | €23.9k |
-| 500 | 400 | 90 | 10 | €9,960 | €119.5k |
-| 2,000 | 1,600 | 360 | 40 | €39,840 | €478k |
+## 5. Why not go stingier
 
-At a 3–4% free-to-paid conversion (normal for freemium), 100 payers means roughly **2,500–3,300 free
-users** — a realistic first-year target for an SEO-led vehicle-data tool.
+Net profit per customer rises all the way to C. That is the trap:
 
----
+- **The customer can check the price.** C sells at €6.33 a lookup; the same data costs €0.49 direct from
+  Vincario.
+- **Free is the demonstration.** Take European data out of free and the reason to upgrade goes with it:
+  conversion falls from ~3.5% to ~1.2% and Pro churn rises from 6% to 15% a month.
+- **The free sample is cheap.** Three decodes cost €0.78 once, about 5% of a €15 acquisition cost.
 
-## 8. Competitive anchoring
+Those roughly cancel the margin gain. At 3,000 free users, A nets about €2,000 a month, the recommended
+set €1,770, B €1,800 and C €1,500.
 
-| Reference | Price | What you get |
-|---|---:|---|
-| 7zap Garage | €9.99/mo | 200 diagrams/day, masks OEM numbers on free |
-| 7zap Pro | €33–39.99/mo | direct VIN access, applicability |
-| Vincario | €0.49/lookup (100 pack) → €0.22 (5,000) | European specs per VIN |
-| CarAPI | $299/year | VIN decode + 6,000 calls/day |
-| **CarDNA Pro** | **€9.90/mo, 10 EU decodes** | unlimited US, whole catalogue, engines |
+## 6. Recommendation
 
-€9.90 with ~10 European decodes is **cheaper than buying 10 lookups from Vincario directly** (€4.90 at
-best price, €2.49 in bulk — so bundled value is modest, but the catalogue and engine data are the real
-differentiator). It sits just under 7zap's €9.99 while giving away more on the free tier.
+Free: unlimited US, the whole catalogue, 3 European decodes once. Pro €9.90/mo or €99/yr, 10 EU decodes.
+Workshop €39/mo or €390/yr, 40 EU decodes, 3 seats. Business from €249, 450 EU decodes. Break-even is six
+paying customers.
 
----
-
-## 9. Recommended pricing
-
-| Plan | Price | Included | Rationale |
-|---|---:|---|---|
-| **Free** | €0 | Unlimited US decode, all 319 brands / 5,601 models / 30,535 engines, 1 vehicle, **3 EU decodes once** | Acquisition engine; caps lifetime EU exposure at €0.78 per user |
-| **Pro** | **€9.90/mo · €99/yr** | 10 EU decodes/mo, 5 vehicles, PDF/CSV export, recalls | 74% margin at full use |
-| **Workshop** | **€39/mo · €390/yr**, 3 seats | 40 EU decodes/mo, 25 vehicles, bulk CSV, API key | 73% at full use, B2B pricing |
-| **Business** | **from €249/mo** | 450 EU decodes/mo, unlimited seats, SLA, invoice | Volume buyers at €0.55/decode |
-
-**Why not cheaper:** below €9.90 the EU quota has to drop under 10 to keep margin, which makes the paid
-tier feel pointless against free.
-**Why not dearer:** without the parts catalogue you cannot charge 7zap's Pro money (€33+); €9.90 is the
-ceiling of credibility until diagrams and fitment exist.
-
----
-
-## 10. Risks that move these numbers
-
-1. **Free-tier abuse.** Every free EU decode is a cash cost. Keep it to a one-time trial and require a
-   vehicle save or an account before the second one.
-2. **Vendor price change.** If Vincario raises prices, overage absorbs it; quotas would shrink.
-3. **Cache hit rate.** Repeat VINs are free. Instrument unique-vs-total decode ratio; above 40% repeats
-   the margin assumptions improve.
-4. **Workshop behaviour.** A shop doing 200 unique EU cars a month must be pushed to Business, not
-   allowed to sit on Workshop. Overage at €0.85 does that naturally.
-5. **Currency.** Vendor prices are EUR; if you sell in GBP/USD, add a 3–5% FX buffer.
-
-
----
-
-## 11. Three mindsets of pricing
-
-The §9 structure is the anchor. Below are three successively **less generous** ways to sell the same
-data, each internally consistent: as generosity falls the quota shrinks, the price rises and the
-overage steepens. Every variant still clears 60% at full quota — stinginess here is not about survival,
-it is about what it does to conversion and churn.
-
-### 11.1 Mindset A — "less generous"
-
-A mild tightening: the free taste drops to a single decode, paid quotas roughly halve, prices edge up.
-
-| Plan | Price | EU decodes | Overage | GM at full quota | GM at typical use |
-|---|---:|---:|---:|---:|---:|
-| Free | €0 | 1, once | — | n/a (€0.26 lifetime) | n/a |
-| Pro | €11.90/mo | 6 / mo | €1.20 | **86.9%** | 95.4% |
-| Workshop | €45/mo | 25 / mo | €1.00 | **85.6%** | 92.8% |
-| Business | €329/mo | 300 / mo | €0.65 | **76.3%** | 85.8% |
-
-### 11.2 Mindset B — "lesser generous"
-
-European data stops being a free sample at all: the free plan becomes US + catalogue only, and the paid
-tiers charge more for fewer lookups.
-
-| Plan | Price | EU decodes | Overage | GM at full quota | GM at typical use |
-|---|---:|---:|---:|---:|---:|
-| Free | €0 | 0 | — | n/a (no cash cost) | n/a |
-| Pro | €14.90/mo | 5 / mo | €1.50 | **91.3%** | 96.9% |
-| Workshop | €59/mo | 20 / mo | €1.25 | **91.2%** | 95.6% |
-| Business | €449/mo | 200 / mo | €0.80 | **88.4%** | 93.1% |
-
-### 11.3 Mindset C — "least generous"
-
-European data sold as a metered utility: three lookups, €19 a month, a €2.20 first overage step.
-
-| Plan | Price | EU decodes | Overage | GM at full quota | GM at typical use |
-|---|---:|---:|---:|---:|---:|
-| Free | €0 | 0 | — | n/a (no cash cost) | n/a |
-| Pro | €19/mo | 3 / mo | €2.20 | **95.9%** | 98.6% |
-| Workshop | €79/mo | 12 / mo | €1.80 | **96.1%** | 98.0% |
-| Business | €649/mo | 100 / mo | €1.20 | **96.0%** | 97.6% |
-
-### 11.4 What each mindset does to the business
-
-Same audience in every column: 3,000 free users, an 80/18/2 Pro/Workshop/Business mix, and behavioural
-assumptions that soften as the offer gets stingier — conversion falls from 3.5% to 1.2% and Pro churn
-rises from 6% to 15% a month, because a plan that gives away almost nothing is easy to cancel.
-
-| | Recommended (§9) | A — less | B — lesser | C — least |
-|---|---:|---:|---:|---:|
-| Free EU cost per user (lifetime) | €0.78 | €0.26 | €0 | €0 |
-| Free → paid conversion | 3.5% | 3.0% | 2.0% | 1.2% |
-| Paying customers per 3,000 free | 105 | 90 | 60 | 36 |
-| MRR | €2,092 | €2,178 | €1,891 | €1,526 |
-| Decode cost at typical use | €322 | €176 | €87 | €29 |
-| **Gross profit / month** | **€1,770** | **€2,002** | **€1,804** | **€1,497** |
-| Pro LTV (ARPU × GM ÷ churn) | €150 | €142 | €131 | €125 |
-| **Effective price per EU lookup** | **€0.99** | **€1.98** | **€2.98** | **€6.33** |
-| Vincario retail, one lookup | €0.49 | €0.49 | €0.49 | €0.49 |
-
-### 11.5 Which one to pick
-
-**A and the recommendation are within ~13% of each other on gross profit** and both are defensible. A
-earns slightly more at 3,000 users because the price rise more than covers the payers it loses; it also
-halves the free-tier cash exposure. If you want a single controlled experiment, A is the one to run.
-
-**B is the worst of the four.** It raises the price toward 7zap's territory while removing the free
-demonstration of the thing being sold — so it pays the cost of both and collects neither.
-
-**C is not tight, it is unsellable.** €19 for three decodes is €6.33 a lookup against €0.49 for the
-same data bought directly from Vincario. The customer does that arithmetic in ten seconds, and it turns
-the paid tier into an argument for going to the vendor instead. 98% margin on almost no revenue.
-
-**The honest caveat.** This ordering rests on the conversion and churn assumptions, not on measurement.
-If stinginess did *not* affect conversion, C would earn the most (about €4.4k MRR against €2.1k) — the
-margin column is real. The case against C is a market fact rather than an assumption: it prices the
-plan above the wholesale data it resells. The case for generosity is that the free EU sample costs
-€0.78 against a €15 customer-acquisition cost — under 6% of CAC — which is the cheapest acquisition
-spend in the model.
+A is the one defensible experiment if the free sample has to shrink. Otherwise keep the quotas as the
+lever and the prices where they are.

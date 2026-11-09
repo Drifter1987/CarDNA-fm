@@ -100,9 +100,9 @@ spelled out.
 prices (Vincario €0.22–€0.49, CarAPI $299/yr, RapidAPI $69/mo), the signed-request proxy architecture
 with a permanent VIN cache, and what it costs at realistic volumes.
 
-`docs/pricing-feasibility.md` is the model behind the plans: vendor cost per European VIN, margin at
-full and typical quota use, overage rates, LTV/CAC, break-even and the revenue scenarios, ending in the
-recommended plan structure and the three stingier plan sets it was chosen over (§11).
+`docs/pricing-feasibility.md` is the one-page model behind the plans: the single cost (€0.26 per European
+lookup), net profit per plan at typical use and at full quota, overage, the three stingier plan sets it
+was chosen over, and why.
 
 `docs/public-apis-free.md` extracts the **Vehicle** category from the public-apis repository (18 APIs,
 with auth/CORS and what each is good for) plus adjacent free APIs — recalls, fitment, MOT history,
