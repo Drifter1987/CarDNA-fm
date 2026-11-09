@@ -102,7 +102,7 @@ with a permanent VIN cache, and what it costs at realistic volumes.
 
 `docs/pricing-feasibility.md` is the model behind the plans: vendor cost per European VIN, margin at
 full and typical quota use, overage rates, LTV/CAC, break-even and the revenue scenarios, ending in the
-recommended plan structure.
+recommended plan structure and the three stingier plan sets it was chosen over (§11).
 
 `docs/public-apis-free.md` extracts the **Vehicle** category from the public-apis repository (18 APIs,
 with auth/CORS and what each is good for) plus adjacent free APIs — recalls, fitment, MOT history,

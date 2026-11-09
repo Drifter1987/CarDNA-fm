@@ -152,3 +152,85 @@ ceiling of credibility until diagrams and fitment exist.
 4. **Workshop behaviour.** A shop doing 200 unique EU cars a month must be pushed to Business, not
    allowed to sit on Workshop. Overage at €0.85 does that naturally.
 5. **Currency.** Vendor prices are EUR; if you sell in GBP/USD, add a 3–5% FX buffer.
+
+
+---
+
+## 11. Three mindsets of pricing
+
+The §9 structure is the anchor. Below are three successively **less generous** ways to sell the same
+data, each internally consistent: as generosity falls the quota shrinks, the price rises and the
+overage steepens. Every variant still clears 60% at full quota — stinginess here is not about survival,
+it is about what it does to conversion and churn.
+
+### 11.1 Mindset A — "less generous"
+
+A mild tightening: the free taste drops to a single decode, paid quotas roughly halve, prices edge up.
+
+| Plan | Price | EU decodes | Overage | GM at full quota | GM at typical use |
+|---|---:|---:|---:|---:|---:|
+| Free | €0 | 1, once | — | n/a (€0.26 lifetime) | n/a |
+| Pro | €11.90/mo | 6 / mo | €1.20 | **86.9%** | 95.4% |
+| Workshop | €45/mo | 25 / mo | €1.00 | **85.6%** | 92.8% |
+| Business | €329/mo | 300 / mo | €0.65 | **76.3%** | 85.8% |
+
+### 11.2 Mindset B — "lesser generous"
+
+European data stops being a free sample at all: the free plan becomes US + catalogue only, and the paid
+tiers charge more for fewer lookups.
+
+| Plan | Price | EU decodes | Overage | GM at full quota | GM at typical use |
+|---|---:|---:|---:|---:|---:|
+| Free | €0 | 0 | — | n/a (no cash cost) | n/a |
+| Pro | €14.90/mo | 5 / mo | €1.50 | **91.3%** | 96.9% |
+| Workshop | €59/mo | 20 / mo | €1.25 | **91.2%** | 95.6% |
+| Business | €449/mo | 200 / mo | €0.80 | **88.4%** | 93.1% |
+
+### 11.3 Mindset C — "least generous"
+
+European data sold as a metered utility: three lookups, €19 a month, a €2.20 first overage step.
+
+| Plan | Price | EU decodes | Overage | GM at full quota | GM at typical use |
+|---|---:|---:|---:|---:|---:|
+| Free | €0 | 0 | — | n/a (no cash cost) | n/a |
+| Pro | €19/mo | 3 / mo | €2.20 | **95.9%** | 98.6% |
+| Workshop | €79/mo | 12 / mo | €1.80 | **96.1%** | 98.0% |
+| Business | €649/mo | 100 / mo | €1.20 | **96.0%** | 97.6% |
+
+### 11.4 What each mindset does to the business
+
+Same audience in every column: 3,000 free users, an 80/18/2 Pro/Workshop/Business mix, and behavioural
+assumptions that soften as the offer gets stingier — conversion falls from 3.5% to 1.2% and Pro churn
+rises from 6% to 15% a month, because a plan that gives away almost nothing is easy to cancel.
+
+| | Recommended (§9) | A — less | B — lesser | C — least |
+|---|---:|---:|---:|---:|
+| Free EU cost per user (lifetime) | €0.78 | €0.26 | €0 | €0 |
+| Free → paid conversion | 3.5% | 3.0% | 2.0% | 1.2% |
+| Paying customers per 3,000 free | 105 | 90 | 60 | 36 |
+| MRR | €2,092 | €2,178 | €1,891 | €1,526 |
+| Decode cost at typical use | €322 | €176 | €87 | €29 |
+| **Gross profit / month** | **€1,770** | **€2,002** | **€1,804** | **€1,497** |
+| Pro LTV (ARPU × GM ÷ churn) | €150 | €142 | €131 | €125 |
+| **Effective price per EU lookup** | **€0.99** | **€1.98** | **€2.98** | **€6.33** |
+| Vincario retail, one lookup | €0.49 | €0.49 | €0.49 | €0.49 |
+
+### 11.5 Which one to pick
+
+**A and the recommendation are within ~13% of each other on gross profit** and both are defensible. A
+earns slightly more at 3,000 users because the price rise more than covers the payers it loses; it also
+halves the free-tier cash exposure. If you want a single controlled experiment, A is the one to run.
+
+**B is the worst of the four.** It raises the price toward 7zap's territory while removing the free
+demonstration of the thing being sold — so it pays the cost of both and collects neither.
+
+**C is not tight, it is unsellable.** €19 for three decodes is €6.33 a lookup against €0.49 for the
+same data bought directly from Vincario. The customer does that arithmetic in ten seconds, and it turns
+the paid tier into an argument for going to the vendor instead. 98% margin on almost no revenue.
+
+**The honest caveat.** This ordering rests on the conversion and churn assumptions, not on measurement.
+If stinginess did *not* affect conversion, C would earn the most (about €4.4k MRR against €2.1k) — the
+margin column is real. The case against C is a market fact rather than an assumption: it prices the
+plan above the wholesale data it resells. The case for generosity is that the free EU sample costs
+€0.78 against a €15 customer-acquisition cost — under 6% of CAC — which is the cheapest acquisition
+spend in the model.
