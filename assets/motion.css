@@ -1,0 +1,271 @@
+/* CarDNA — motion layer
+   Additive animation on top of assets/style.css. Everything here is inert unless
+   assets/motion.js puts .has-motion on <html>, and it is skipped entirely when the
+   visitor prefers reduced motion. Pure CSS transforms and opacity: no layout work. */
+
+/* ---------------------------------------------------------------- entry reveal */
+html.has-motion .motion-reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity .6s cubic-bezier(.22, .61, .36, 1),
+    transform .6s cubic-bezier(.22, .61, .36, 1);
+  transition-delay: calc(var(--motion-i, 0) * 65ms);
+}
+html.has-motion .motion-reveal.is-in { opacity: 1; transform: none; }
+
+/* a block's kicker rule draws itself in as the block arrives */
+html.has-motion .motion-reveal .kicker::before {
+  transform: scaleX(.15);
+  transform-origin: left center;
+  transition: transform .55s cubic-bezier(.22, .61, .36, 1) .1s;
+}
+html.has-motion .motion-reveal.is-in .kicker::before { transform: scaleX(1); }
+
+/* ---------------------------------------------------------------- panels and tabs */
+@keyframes panel-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+.panel.is-entering > .container {
+  animation: panel-in .38s cubic-bezier(.22, .61, .36, 1) both;
+}
+
+@keyframes tab-pop {
+  0%   { transform: scale(.93); }
+  60%  { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+.tab.is-popping { animation: tab-pop .34s cubic-bezier(.34, 1.56, .64, 1); }
+
+/* ---------------------------------------------------------------- header */
+.header-inner { transition: min-height .28s ease; }
+body.is-scrolled .header-inner { min-height: 56px; }
+body.is-scrolled .site-header { box-shadow: 0 20px 44px -34px #000; }
+
+/* ---------------------------------------------------------------- hero */
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html.has-motion .hero h1 em,
+  html.has-motion .panel h1 em {
+    background-image: linear-gradient(100deg,
+      var(--lime) 0%, #f4ffd0 36%, var(--lime) 62%, var(--lime) 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: title-sheen 7s ease-in-out infinite;
+  }
+}
+@keyframes title-sheen {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+@keyframes dot-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(198, 242, 78, .45); }
+  70%  { box-shadow: 0 0 0 7px rgba(198, 242, 78, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(198, 242, 78, 0); }
+}
+html.has-motion .hero-meta .dot { animation: dot-pulse 2.8s ease-out infinite; }
+html.has-motion .hero-meta span:nth-child(2) .dot { animation-delay: .5s; }
+html.has-motion .hero-meta span:nth-child(3) .dot { animation-delay: 1s; }
+
+/* ---------------------------------------------------------------- buttons */
+html.has-motion .btn { position: relative; overflow: hidden; }
+html.has-motion .btn::after {
+  content: "";
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: -45%;
+  width: 34%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .5), transparent);
+  transform: skewX(-18deg);
+  opacity: 0;
+  pointer-events: none;
+}
+html.has-motion .btn:hover::after { animation: btn-sheen .72s ease; }
+@keyframes btn-sheen {
+  0%   { left: -45%; opacity: .85; }
+  100% { left: 130%; opacity: 0; }
+}
+
+/* ---------------------------------------------------------------- cards and tiers */
+html.has-motion .card { position: relative; }
+html.has-motion .card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(198, 242, 78, .10), transparent 62%);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+html.has-motion .card:hover::after { opacity: 1; }
+html.has-motion .card:hover { transform: translateY(-2px); }
+
+/* no overflow:hidden on .tier — the "Most popular" tag sits above the top edge */
+html.has-motion .tier { position: relative; }
+html.has-motion .tier::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(198, 242, 78, .09), transparent 64%);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+html.has-motion .tier:hover::after { opacity: 1; }
+
+@keyframes tier-glow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(198, 242, 78, .18), 0 26px 60px -42px rgba(198, 242, 78, .5); }
+  50%      { box-shadow: 0 0 0 1px rgba(198, 242, 78, .42), 0 26px 72px -30px rgba(198, 242, 78, .8); }
+}
+html.has-motion .tier--featured { animation: tier-glow 5.5s ease-in-out infinite; }
+
+/* ---------------------------------------------------------------- chips, pills, rows */
+html.has-motion .make-pill,
+html.has-motion .chip,
+html.has-motion .engine-list li,
+html.has-motion .garage-item {
+  transition: transform .18s ease, border-color .18s ease,
+              background .18s ease, color .18s ease;
+}
+html.has-motion .make-pill:hover,
+html.has-motion .chip.has-data:hover { transform: translateY(-2px); }
+
+html.has-motion .brand-row { position: relative; }
+html.has-motion .brand-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--lime);
+  transform: scaleY(0);
+  transition: transform .22s ease;
+}
+html.has-motion .brand-row:hover::before,
+html.has-motion .brand-row[aria-expanded="true"]::before { transform: scaleY(1); }
+
+html.has-motion .timeline li { transition: background .2s ease; }
+html.has-motion .timeline li:hover { background: rgba(255, 255, 255, .015); }
+
+/* ---------------------------------------------------------------- catalogue diagram */
+html.has-motion .diagram-frame .wires path {
+  stroke-dasharray: 5 7;
+  animation: wire-flow 2.6s linear infinite;
+}
+@keyframes wire-flow { to { stroke-dashoffset: -24; } }
+
+html.has-motion .diagram-frame circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: callout-pulse 3.4s ease-in-out infinite;
+}
+html.has-motion .diagram-frame circle:nth-of-type(2) { animation-delay: .35s; }
+html.has-motion .diagram-frame circle:nth-of-type(3) { animation-delay: .7s; }
+html.has-motion .diagram-frame circle:nth-of-type(4) { animation-delay: 1.05s; }
+html.has-motion .diagram-frame circle:nth-of-type(5) { animation-delay: 1.4s; }
+html.has-motion .diagram-frame circle:nth-of-type(6) { animation-delay: 1.75s; }
+
+@keyframes callout-pulse {
+  0%, 100% { transform: scale(1); opacity: .88; }
+  50%      { transform: scale(1.14); opacity: 1; }
+}
+
+/* ---------------------------------------------------------------- VIN scan
+   A 17-slot readout that flips random characters and locks them left to right
+   while the decode is in flight. Built and removed by assets/motion.js. */
+.vin-scan {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  border: 1px solid rgba(198, 242, 78, .22);
+  background: rgba(7, 9, 13, .88);
+  backdrop-filter: blur(8px);
+  opacity: 1;
+  transition: opacity .28s ease, transform .28s ease;
+  pointer-events: none;
+}
+.vin-scan.is-done { opacity: 0; transform: scale(1.015); }
+.vin-scan-inner { width: min(100%, 440px); padding: 0 22px; text-align: center; }
+
+.vin-scan-label {
+  font: 600 9px/1 var(--mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--lime);
+  margin-bottom: 18px;
+}
+.vin-scan-chars { display: flex; justify-content: center; gap: 3px; }
+.vin-scan-char {
+  width: clamp(11px, 3.6vw, 18px);
+  text-align: center;
+  font: 600 clamp(.62rem, 2.6vw, .82rem)/1 var(--mono);
+  color: var(--dim-2);
+  border-bottom: 1px solid rgba(255, 255, 255, .14);
+  padding-bottom: 7px;
+  transition: color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.vin-scan-char.is-locked {
+  color: var(--lime);
+  border-color: rgba(198, 242, 78, .8);
+  transform: translateY(-1px);
+}
+
+.vin-scan-track {
+  margin-top: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .1);
+  overflow: hidden;
+}
+.vin-scan-bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, transparent, var(--lime));
+}
+.vin-scan.is-live .vin-scan-bar {
+  animation: scan-bar 1.05s cubic-bezier(.3, .7, .3, 1) forwards;
+}
+@keyframes scan-bar {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+/* ---------------------------------------------------------------- decode result */
+@keyframes field-in {
+  from { opacity: 0; transform: translate3d(0, 9px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+html.has-motion .dna.is-revealing > * {
+  animation: field-in .44s cubic-bezier(.22, .61, .36, 1) both;
+  animation-delay: calc(var(--motion-i, 0) * 45ms);
+}
+
+/* ---------------------------------------------------------------- responsive */
+@media (max-width: 520px) {
+  .vin-scan-inner { padding: 0 12px; }
+  .vin-scan-chars { gap: 1px; }
+  .vin-scan-label { margin-bottom: 14px; letter-spacing: .16em; }
+}
+
+/* ---------------------------------------------------------------- reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html.has-motion .motion-reveal { opacity: 1; transform: none; }
+  html.has-motion .dna.is-revealing > * { animation: none; }
+  .vin-scan { display: none; }
+  html.has-motion .tier--featured { animation: none; }
+  html.has-motion .diagram-frame circle,
+  html.has-motion .diagram-frame .wires path { animation: none; }
+}

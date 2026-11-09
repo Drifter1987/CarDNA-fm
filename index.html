@@ -6,6 +6,7 @@
 <title>CarDNA — read any vehicle in 17 characters | GMOttomotive</title>
 <meta name="description" content="CarDNA decodes a VIN into the exact vehicle, and browses 319 car brands with 5,600+ models, generations and engines. A GMOttomotive product.">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/motion.css">
 </head>
 <body class="is-app">
 
@@ -65,9 +66,9 @@
       </p>
 
       <div class="stats" style="margin-top:34px">
-        <div class="stat"><b>319</b><span>brands</span></div>
-        <div class="stat"><b>5,600+</b><span>models</span></div>
-        <div class="stat"><b>30,535</b><span>engine variants</span></div>
+        <div class="stat"><b data-count="319">319</b><span>brands</span></div>
+        <div class="stat"><b data-count="5600" data-suffix="+">5,600+</b><span>models</span></div>
+        <div class="stat"><b data-count="30535">30,535</b><span>engine variants</span></div>
         <div class="stat"><b>0</b><span>accounts required</span></div>
       </div>
 
@@ -211,7 +212,7 @@
             <rect x="250" y="150" width="52" height="72" rx="8" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="1.4"/>
             <path d="M112 244h190" stroke="rgba(255,255,255,.2)" stroke-width="1.4"/>
             <path d="M250 244v50M148 244v50" stroke="rgba(255,255,255,.2)" stroke-width="1.4"/>
-            <g stroke="rgba(198,242,78,.55)" stroke-width="1">
+            <g class="wires" stroke="rgba(198,242,78,.55)" stroke-width="1">
               <path d="M172 186h64"/><path d="M276 186h84"/><path d="M236 160h124"/>
               <path d="M172 226h60"/><path d="M296 226h64"/><path d="M186 268h174"/>
             </g>
@@ -372,5 +373,6 @@
     });
   })();
 </script>
+<script src="assets/motion.js"></script>
 </body>
 </html>

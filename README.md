@@ -3,8 +3,8 @@
 **A GMOttomotive product.**
 
 CarDNA turns a VIN into the exact vehicle — make, model, year, engine, plant — and is the front door
-of GMOttomotive's vehicle-data family. This repository is the public site: static HTML, one stylesheet,
-three small vanilla-JS modules, no build step, no dependencies, no backend.
+of GMOttomotive's vehicle-data family. This repository is the public site: static HTML, two stylesheets,
+four small vanilla-JS modules, no build step, no dependencies, no backend.
 
 ## Run it
 
@@ -38,6 +38,8 @@ uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx
 |---|---|
 | `assets/style.css` | The whole design system: dark blueprint palette, acid-lime accent, mono labels |
 | `assets/app.js` | Mobile nav, current year, delegated copy-to-clipboard, and the tab controller (hash-routed, arrow-key navigable) |
+| `assets/motion.css` | Motion layer: entry reveals, panel and tab transitions, pointer spotlight, button sheen, the animated parts diagram and the VIN scan. Inert unless `motion.js` runs |
+| `assets/motion.js` | Scroll reveals with stagger, counting stats, tab transitions, a pointer-tracked card glow and the 17-slot VIN scan that runs while a decode is in flight. Returns immediately when the visitor prefers reduced motion |
 | `assets/vin.js` | VIN validation, vPIC decode over the shared 104-field schema, decode warnings, recent lookups in `localStorage`, `?vin=` deep links |
 | `assets/vin-schema.js` | The single 104-field VIN schema, shared by the decoder and the comparison tool |
 | `tools/vin-compare.html` | Keyless decoder comparison: vPIC, AI Kit Edge, AI Kit Unified, NHTSA recalls — full schema per VIN, plus field-by-field diff |
