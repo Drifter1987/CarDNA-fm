@@ -88,8 +88,13 @@ Nothing in `assets/` talks to Supabase yet. Wiring it in is a separate, reviewab
 
 ## 6. If you already ran an earlier version
 
-The first version of `schema.sql` had two lint warnings from the Advisor Center. Run this once to
-clear them; it is also what the file now contains, so a fresh project needs nothing.
+The first version of `schema.sql` had two lint warnings from the Advisor Center. Open
+[`supabase/patch-001-lint.sql`](../supabase/patch-001-lint.sql), copy it, and run it once; it is also
+what the file now contains, so a fresh project needs nothing.
+
+**Copy from the line that starts with `create`.** If the editor's first token is `sql`, that is the
+markdown fence tag from the code block, not SQL — Postgres rejects the batch with
+`42601: syntax error at or near "sql"` and nothing runs.
 
 ```sql
 -- 1. Pin the search path of the timestamp trigger (Function Search Path Mutable)
