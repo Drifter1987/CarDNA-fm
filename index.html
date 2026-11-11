@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/motion.css">
 </head>
-<body class="is-app">
+<body class="is-app" data-require-auth>
 
 <header class="site-header">
   <div class="container header-inner">
@@ -52,7 +52,7 @@
       <p class="hero-lede">
         CarDNA turns a 17-character VIN into the exact vehicle — make, model, year, engine, factory and
         trim — then opens the catalogue behind it: 319 brands, 5,600+ models, 7,000 generations and
-        30,535 engine variants. Free, no account, and the catalogue is static.
+        30,535 engine variants. Free with an account, and the catalogue is static.
       </p>
 
       <div class="hero-meta">
@@ -70,7 +70,7 @@
         <div class="stat"><b data-count="319">319</b><span>brands</span></div>
         <div class="stat"><b data-count="5600" data-suffix="+">5,600+</b><span>models</span></div>
         <div class="stat"><b data-count="30535">30,535</b><span>engine variants</span></div>
-        <div class="stat"><b>0</b><span>accounts required</span></div>
+        <div class="stat"><b data-count="104">104</b><span>fields per VIN</span></div>
       </div>
 
       <div class="grid-4" style="margin-top:34px">
@@ -352,6 +352,8 @@
   </div>
 </footer>
 
+<script src="assets/supabase-config.js"></script>
+<script src="assets/auth.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/garage.js"></script>
 <script src="assets/vin-schema.js"></script>

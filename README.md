@@ -29,7 +29,9 @@ uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx
 | `makes.html` | 319 car brands grouped by country, every model embedded — opening a brand fetches nothing |
 | `pricing.html` | Free / Pro / Workshop / Business tiers, line-by-line comparison, and why the quotas are what they are |
 | `about.html` | GMOttomotive, principles, data sources, roadmap, contact |
-| `garage.html` | Saved vehicles — this browser only, no account |
+| `garage.html` | Saved vehicles, select all or some, and export the full record as Excel, PDF, Markdown or CSV |
+| `signin.html` | Email and password sign-in; the app is behind it |
+| `admin.html` | Owner console: account list, plan grants, suspension |
 | `vault.html` | Private vault: a VIN list encrypted with a pass phrase in this browser, exportable as an encrypted file |
 | `legal.html` | Privacy, terms, data licences and independence notice |
 
@@ -39,6 +41,10 @@ uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx
 |---|---|
 | `assets/style.css` | The whole design system: dark blueprint palette, acid-lime accent, mono labels |
 | `assets/app.js` | Mobile nav, current year, delegated copy-to-clipboard, and the tab controller (hash-routed, arrow-key navigable) |
+| `assets/supabase-config.js` | Project URL and the publishable key. Only those two — never a secret key or a database password |
+| `assets/auth.js` | Accounts over the Supabase REST API: sign-in, sign-up, session refresh, profile (plan and role), the sign-in gate, and the account chip in the header |
+| `assets/admin.js` | Owner console: stats, account list, plan changes and suspension |
+| `assets/export.js` | Full-record export: Markdown, CSV, a real .xlsx (merged sheet + one sheet per model, written without a library) and print-to-PDF |
 | `assets/motion.css` | Motion layer: entry reveals, panel and tab transitions, pointer spotlight, button sheen, the animated parts diagram and the VIN scan. Inert unless `motion.js` runs |
 | `assets/motion.js` | Scroll reveals with stagger, counting stats, tab transitions, a pointer-tracked card glow and the 17-slot VIN scan that runs while a decode is in flight. Returns immediately when the visitor prefers reduced motion |
 | `assets/vin.js` | VIN validation, vPIC decode over the shared 104-field schema, decode warnings, recent lookups in `localStorage`, `?vin=` deep links |
@@ -67,8 +73,9 @@ uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx
 - **Generations and engines:** gor3a/vehicle-makes-models (ODbL), shipped as `data/engines.csv`
   (30,535 variants). Loaded lazily the first time a brand is opened, then cached in memory.
 
-Nothing about the visitor is stored server-side. Recent lookups live in `localStorage` and can be
-cleared by clearing site data.
+Accounts live in Supabase. An account stores an email, a hashed password, a display name, a plan
+and a role; the vehicle data you decode is still sent straight from the browser to NHTSA. Recent
+lookups, the garage and the vault stay in `localStorage`.
 
 ## Private vault
 

@@ -857,3 +857,104 @@ body.is-app .site-header { flex: none; }
   .vault-vin { width: 100%; }
   .vault-note { order: 3; width: 100%; }
 }
+
+
+/* ---------------------------------------------------------------- accounts */
+.account-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font: 500 11px/1 var(--mono);
+  color: var(--dim);
+}
+.account-chip-who {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+.account-chip-plan {
+  color: var(--lime);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+.account-chip-link { color: var(--blue); text-decoration: none; }
+.account-chip-out {
+  background: none;
+  border: 0;
+  color: var(--dim);
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+.account-chip-out:hover { color: var(--text); }
+
+@media (max-width: 560px) {
+  .account-chip-who { display: none; }
+  .account-chip { padding: 6px 10px; }
+}
+
+/* ---------------------------------------------------------------- garage toolbar */
+.garage-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.garage-selectall {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 11px/1 var(--mono);
+  color: var(--dim);
+  cursor: pointer;
+}
+.garage-toolbar-spacer { flex: 1 1 auto; }
+.garage-check { display: flex; align-items: center; margin-right: 2px; }
+.garage-item.is-selected { border-color: rgba(198, 242, 78, .5); background: rgba(198, 242, 78, .04); }
+
+/* ---------------------------------------------------------------- download menu */
+.download-menu { position: relative; }
+.download-menu > summary { list-style: none; cursor: pointer; }
+.download-menu > summary::-webkit-details-marker { display: none; }
+.download-menu > summary::after { content: " ▾"; }
+.download-menu[open] > summary { box-shadow: 0 8px 24px rgba(198, 242, 78, .18); }
+.download-menu-list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+  min-width: 280px;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px -20px #000;
+}
+.download-menu-list button {
+  display: grid;
+  gap: 3px;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.download-menu-list button:hover { background: rgba(255, 255, 255, .06); }
+.download-menu-list b { font: 600 .86rem/1 var(--sans); }
+.download-menu-list span { font: 500 10px/1.5 var(--mono); color: var(--dim-2); }
+
+/* ---------------------------------------------------------------- admin */
+.plan-select {
+  font: 500 11px/1 var(--mono);
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 8px 10px;
+}

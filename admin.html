@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — CarDNA</title>
+<meta name="description" content="Owner console: accounts, plans, access.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/motion.css">
+</head>
+<body data-require-auth>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a class="btn btn--ghost btn--sm" href="garage.html">Garage</a>
+      <a class="btn btn--ghost btn--sm" href="decode.html">Decode</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">Owner console</div>
+      <h1>Accounts, plans and access.</h1>
+      <p>
+        Every account starts on Free. Grant Pro, Workshop or Business here, or suspend an account to
+        cut off access immediately — the gate is enforced by the database, not by this page.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div id="admin-denied" hidden>
+        <div class="notice">
+          <strong>This account is not an owner.</strong> Only an owner can open this console. To
+          promote an account, run this once in the Supabase SQL Editor (it is not stored here):
+          <code>update public.profiles set role = 'owner' where email = 'you@example.com';</code>
+        </div>
+      </div>
+
+      <div id="admin-app" hidden>
+        <div class="stats" style="margin-bottom:26px">
+          <div class="stat"><b id="stat-total">0</b><span>accounts</span></div>
+          <div class="stat"><b id="stat-paid">0</b><span>paid plans</span></div>
+          <div class="stat"><b id="stat-suspended">0</b><span>suspended</span></div>
+          <div class="stat"><b id="stat-week">0</b><span>new this week</span></div>
+        </div>
+
+        <div class="notice" style="margin-bottom:22px">
+          <strong>Plan mix.</strong>
+          <span id="plan-mix" style="font-family:var(--mono);font-size:.85rem"></span>
+        </div>
+
+        <div class="search-bar">
+          <input class="search-input" id="admin-search" placeholder="Search by email or name…" autocomplete="off">
+        </div>
+
+        <p class="results-meta" id="admin-meta">Loading…</p>
+
+        <div class="compare-wrap">
+          <table class="compare">
+            <thead>
+              <tr>
+                <th scope="col">Account</th>
+                <th scope="col">Plan</th>
+                <th scope="col">Role</th>
+                <th scope="col">Joined</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-rows"></tbody>
+          </table>
+        </div>
+
+        <p class="vault-status" id="admin-status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:0;margin-top:0">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA</span>
+      <span>Owner console · actions are written to <code>profiles</code></span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/supabase-config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/admin.js"></script>
+</body>
+</html>

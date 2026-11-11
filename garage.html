@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Garage — CarDNA</title>
-<meta name="description" content="Vehicles you saved in CarDNA, stored only in this browser.">
+<meta name="description" content="Your saved vehicles, with full decode export to Excel, Markdown, CSV or PDF.">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/motion.css">
 </head>
-<body>
+<body data-require-auth>
 
 <header class="site-header">
   <div class="container header-inner">
@@ -37,19 +37,43 @@
       <div class="kicker">Garage</div>
       <h1>Your saved vehicles.</h1>
       <p>
-        Kept in this browser only — no account, no server. Save a car from any decode result, then open
-        it again with its full 104-field record.
+        Save a car from any decode result, then export one or many with the full 104-field record.
         <span class="mono-dim" id="garage-count">empty</span>
-      </p>
-      <p style="margin-top:14px;font-size:.86rem;color:var(--dim-2)">
-        An account-backed garage is designed but not wired into this page yet. Until it ships, nothing
-        here leaves this browser.
       </p>
     </div>
   </section>
 
   <section class="section section--tight">
     <div class="container">
+      <div class="garage-toolbar">
+        <label class="garage-selectall">
+          <input type="checkbox" id="garage-select-all">
+          <span>Select all</span>
+        </label>
+
+        <span class="garage-toolbar-spacer"></span>
+
+        <details class="download-menu" id="garage-download">
+          <summary class="btn">Download DNA</summary>
+          <div class="download-menu-list">
+            <button type="button" data-download="xlsx">
+              <b>Excel</b><span>.xlsx · merged sheet + one sheet per model</span>
+            </button>
+            <button type="button" data-download="pdf">
+              <b>PDF</b><span>print-ready, one page per vehicle</span>
+            </button>
+            <button type="button" data-download="md">
+              <b>Markdown</b><span>.md · readable in any editor</span>
+            </button>
+            <button type="button" data-download="csv">
+              <b>CSV</b><span>.csv · one row per field</span>
+            </button>
+          </div>
+        </details>
+      </div>
+
+      <p class="vault-status" id="garage-export-status" aria-live="polite"></p>
+
       <div id="garage-list"></div>
 
       <p style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
@@ -59,8 +83,8 @@
 
       <div class="notice" style="margin-top:28px">
         <strong>Where this lives.</strong> Saved vehicles sit in this browser's local storage under
-        <code>cardna.garage</code>. Clearing site data, using private mode, or switching device will lose
-        them. An account-backed garage is on the roadmap.
+        <code>cardna.garage</code>, tied to the account you are signed in as. Clearing site data,
+        using private mode, or switching device will lose them until garage sync ships.
       </div>
     </div>
   </section>
@@ -76,8 +100,12 @@
   </div>
 </footer>
 
+<script src="assets/supabase-config.js"></script>
+<script src="assets/auth.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/garage.js"></script>
+<script src="assets/vin-schema.js"></script>
+<script src="assets/export.js"></script>
 <script src="assets/motion.js"></script>
 </body>
 </html>
