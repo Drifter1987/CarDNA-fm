@@ -55,14 +55,20 @@
       <div id="admin-app" hidden>
         <div class="stats" style="margin-bottom:26px">
           <div class="stat"><b id="stat-total">0</b><span>accounts</span></div>
+          <div class="stat"><b id="stat-staff">0</b><span>staff</span></div>
           <div class="stat"><b id="stat-paid">0</b><span>paid plans</span></div>
-          <div class="stat"><b id="stat-suspended">0</b><span>suspended</span></div>
+          <div class="stat"><b id="stat-blocked">0</b><span>blocked</span></div>
           <div class="stat"><b id="stat-week">0</b><span>new this week</span></div>
         </div>
 
         <div class="notice" style="margin-bottom:22px">
           <strong>Plan mix.</strong>
           <span id="plan-mix" style="font-family:var(--mono);font-size:.85rem"></span>
+        </div>
+
+        <div class="notice" style="margin-bottom:22px">
+          <strong>Recent activity.</strong>
+          <ul class="activity-list" id="admin-activity"><li>Loading…</li></ul>
         </div>
 
         <div class="search-bar">
@@ -78,6 +84,7 @@
                 <th scope="col">Account</th>
                 <th scope="col">Plan</th>
                 <th scope="col">Role</th>
+                <th scope="col">Status</th>
                 <th scope="col">Joined</th>
                 <th scope="col">Actions</th>
               </tr>

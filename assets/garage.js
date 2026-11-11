@@ -144,6 +144,10 @@
         });
 
         window.CarDNAExport.save(format, vehicles, fieldsByVin);
+
+        if (window.CarDNAAuth && window.CarDNAAuth.log) {
+          window.CarDNAAuth.log("export", { format: format, count: vehicles.length });
+        }
         status(vehicles.length + (vehicles.length === 1 ? " vehicle" : " vehicles") +
           " exported as " + format.toUpperCase() +
           (format === "pdf" ? " — choose “Save as PDF” in the print dialog." : "."), "ok");

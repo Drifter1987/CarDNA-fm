@@ -649,6 +649,10 @@
 
         addRecent(vin, label);
         render(vin, fields, notes, structural);
+
+        if (window.CarDNAAuth && window.CarDNAAuth.log) {
+          window.CarDNAAuth.log("decode", { vin: vin, fields: Object.keys(fields).length });
+        }
         renderRecent(recentHost, function (picked) {
           input.value = picked;
           decode(picked, true);

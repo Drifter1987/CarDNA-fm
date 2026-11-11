@@ -131,6 +131,7 @@
     });
     adopt(data);
     state.profile = await fetchProfile(state.session);
+    log("sign_in", { plan: state.profile && state.profile.plan });
     return state.profile;
   }
 
@@ -174,12 +175,33 @@
     return { free: "Free", pro: "Pro", workshop: "Workshop", business: "Business", suspended: "Suspended" }[plan] || plan;
   }
 
-  function isSuspended() {
-    return Boolean(state.profile && state.profile.plan === "suspended");
+  function roleLabel(role) {
+    return { owner: "Owner", admin: "Admin", user: "User" }[role] || "User";
+  }
+
+  function isBlocked() {
+    return Boolean(state.profile &&
+      (state.profile.status === "blocked" || state.profile.plan === "suspended"));
   }
 
   function isOwner() {
     return Boolean(state.profile && state.profile.role === "owner");
+  }
+
+  function isStaff() {
+    return Boolean(state.profile && (state.profile.role === "owner" || state.profile.role === "admin"));
+  }
+
+  /* Fire-and-forget activity record. The row is owned by the signed-in user, so the insert
+     policy only ever allows writing your own events. */
+  function log(kind, detail) {
+    if (!configured() || !state.session) { return; }
+    call("/rest/v1/events", {
+      method: "POST",
+      token: state.session.access_token,
+      headers: { Prefer: "return=minimal" },
+      body: { user_id: state.session.id, kind: kind, detail: detail || null }
+    }).catch(function () { /* activity is best-effort */ });
   }
 
   function gate() {
@@ -241,12 +263,15 @@
   }
 
   function renderSuspended() {
-    if (!isSuspended() || document.getElementById("access-suspended")) { return; }
+    if (!isBlocked() || document.getElementById("access-suspended")) { return; }
     var box = document.createElement("div");
     box.id = "access-suspended";
     box.className = "decode-warning";
     box.style.margin = "0 0 18px";
-    box.innerHTML = "<strong>Access suspended.</strong> This account cannot use CarDNA. " +
+    box.innerHTML = "<strong>Access blocked.</strong> This account cannot use CarDNA. " +
+      (state.profile && state.profile.blocked_reason
+        ? "Reason: " + state.profile.blocked_reason + ". "
+        : "") +
       "Contact GMOttomotive if you believe this is a mistake.";
     var main = document.querySelector("main");
     if (main) { main.insertBefore(box, main.firstChild); }
@@ -288,7 +313,10 @@
 
     gate();
     renderChip();
-    if (state.session) { renderSuspended(); }
+    if (state.session) {
+      log("page_view", { path: location.pathname.split("/").pop() || "index.html" });
+      renderSuspended();
+    }
   }
 
   function ready(callback) {
@@ -305,8 +333,11 @@
     signOut: signOut,
     updateProfile: updateProfile,
     planLabel: planLabel,
+    roleLabel: roleLabel,
     isOwner: isOwner,
-    isSuspended: isSuspended,
+    isStaff: isStaff,
+    isBlocked: isBlocked,
+    log: log,
     renderChip: renderChip,
     fetchProfile: fetchProfile,
     call: call
