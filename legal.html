@@ -25,6 +25,7 @@
     </a>
     <div class="header-actions">
       <a class="btn btn--ghost btn--sm" href="index.html">Home</a>
+      <a class="btn btn--ghost btn--sm" href="vault.html">Vault</a>
     </div>
   </div>
 </header>
@@ -45,10 +46,12 @@
           <h3 id="privacy">Privacy</h3>
           <p>
             CarDNA has no accounts and no backend. A VIN you decode is sent to NHTSA's public vPIC API
-            from your browser; we never receive or store it. Recent lookups and saved vehicles live in
-            your browser's local storage (<code>cardna.recent</code>, <code>cardna.garage</code>) and
-            disappear when you clear site data. There are no analytics, advertising or tracking cookies
-            on this site.
+            from your browser; we never receive or store it. Recent lookups, saved vehicles and your
+            private vault live in your browser's local storage (<code>cardna.recent</code>,
+            <code>cardna.garage</code>, <code>cardna.vault</code>) and disappear when you clear site
+            data. The first two are readable by anyone using this browser; the vault is encrypted with a
+            pass phrase you choose and cannot be read without it. There are no analytics, advertising or
+            tracking cookies on this site.
           </p>
           <p>
             If a paid European decoder is added later, it will run through a proxy that keeps the API key

@@ -1,0 +1,12 @@
+# Anything private stays out of this repository — it is public.
+
+# VIN lists, exports, keys, scratch files
+private/
+*.cardna
+cardna-vault-*.json
+cardna-vins-*.txt
+
+# local environment
+.env
+.env.*
+.DS_Store

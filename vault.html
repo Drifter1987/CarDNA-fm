@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Private vault — CarDNA</title>
+<meta name="description" content="Keep a list of VINs encrypted inside your own browser, or as an encrypted file only you can open.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/motion.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </svg>
+    </button>
+
+    <nav class="nav" id="site-nav">
+      <a href="decode.html">Decode VIN</a>
+      <a href="makes.html">Brands</a>
+      <a href="index.html#catalogue">Catalogue</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="garage.html">Garage</a>
+      <a href="vault.html" aria-current="page">Vault</a>
+      <a href="about.html">Company</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">Private vault</div>
+      <h1>A VIN list only you can read.</h1>
+      <p>
+        CarDNA has no database and no accounts — nothing you do here is stored on a server. This page
+        keeps a list of VINs encrypted with a pass phrase inside your own browser, and can export the
+        encrypted copy as a file you keep yourself. Nobody else can open either without that phrase.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container" id="vault-app">
+
+      <div class="vault-panel" id="vault-locked" hidden>
+        <div class="vault-toolbar">
+          <span class="vault-count">Locked</span>
+        </div>
+
+        <p style="color:var(--dim);font-size:.92rem">
+          This browser holds an encrypted vault. Enter its pass phrase to open it for this tab only.
+        </p>
+
+        <div class="vault-key" style="margin-top:16px">
+          <input type="password" id="vault-unlock-pass" placeholder="Pass phrase"
+                 autocomplete="current-password">
+          <button class="btn" type="button" id="vault-unlock">Unlock</button>
+          <button class="btn btn--ghost" type="button" id="vault-forget">Delete vault</button>
+        </div>
+
+        <p class="vault-io">
+          Lost the pass phrase? There is no recovery — delete the vault and start again.
+        </p>
+      </div>
+
+      <div class="vault-panel" id="vault-open" hidden>
+        <div class="vault-toolbar">
+          <span class="vault-count" id="vault-count">0 VINs</span>
+          <span class="vault-spacer"></span>
+          <button class="btn btn--ghost btn--sm" type="button" id="vault-lock">Lock</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="vault-forget-open">Delete</button>
+        </div>
+
+        <label class="sr-only" for="vault-text">VINs, one per line</label>
+        <textarea id="vault-text" class="vault-text" spellcheck="false"
+          placeholder="1HGCM82633A004352, Honda Accord 2003&#10;JTDKN36U001234567&#10;# a line starting with # is ignored"></textarea>
+
+        <div class="vault-actions">
+          <button class="btn btn--sm" type="button" id="vault-save">Save encrypted</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="vault-download">Download encrypted file</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="vault-export">Export plain text</button>
+        </div>
+
+        <div class="vault-key">
+          <input type="password" id="vault-pass" placeholder="Pass phrase (min 8 characters)"
+                 autocomplete="new-password">
+          <input type="password" id="vault-pass2" placeholder="Repeat pass phrase"
+                 autocomplete="new-password">
+        </div>
+
+        <p class="vault-io">
+          Leave the pass phrase fields blank to keep the one you unlocked with.
+        </p>
+
+        <ul class="vault-list" id="vault-list"></ul>
+      </div>
+
+      <p class="vault-status" id="vault-status" aria-live="polite"></p>
+
+      <div class="vault-io">
+        <label class="btn btn--ghost btn--sm" for="vault-file">Load an encrypted vault file</label>
+        <input type="file" id="vault-file" accept=".json,application/json" hidden>
+        <span>Nothing leaves this tab.</span>
+      </div>
+
+      <noscript>
+        <div class="notice" style="margin-top:20px">
+          <strong>The vault needs JavaScript.</strong> It runs entirely in your browser, so with
+          scripting off there is nothing to encrypt with.
+        </div>
+      </noscript>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">What “secret” means here</div>
+        <h2>Encrypted in the tab, never uploaded.</h2>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <span class="card-num">01 / encryption</span>
+          <h3>AES-256-GCM</h3>
+          <p>The key comes from your pass phrase through PBKDF2-SHA256 with 210,000 rounds. Only the
+            cipher text is stored — never the VINs, never the phrase.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">02 / storage</span>
+          <h3>Two places, both yours</h3>
+          <p>The encrypted copy sits in this browser under <code>cardna.vault</code>, and the file you
+            download is the same cipher text. Both need the pass phrase to open.</p>
+        </div>
+        <div class="card">
+          <span class="card-num">03 / honest limits</span>
+          <h3>As strong as the phrase</h3>
+          <p>This is a browser vault, not a password manager. A short or reused pass phrase is the weak
+            link, and anyone using your unlocked device can read an open vault.</p>
+        </div>
+      </div>
+
+      <div class="notice" style="margin-top:26px">
+        <strong>No recovery.</strong> If you lose the pass phrase, the VINs cannot be decrypted — not by
+        us, not by anyone. Keep an encrypted file copy somewhere safe, and keep the phrase somewhere
+        that is not the same place. A plain-text export is offered for convenience, and it is exactly
+        that: unencrypted.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+            <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+          </svg>
+          <span>
+            <span class="logo-word">CarDNA</span>
+            <span class="logo-sub">by GMOttomotive</span>
+          </span>
+        </a>
+        <p>Vehicle identity and parts intelligence for the people who actually turn the spanner.</p>
+      </div>
+
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="decode.html">VIN decoder</a></li>
+          <li><a href="makes.html">Brands &amp; models</a></li>
+          <li><a href="garage.html">Garage</a></li>
+          <li><a href="vault.html">Private vault</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About GMOttomotive</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Data</h4>
+        <ul>
+          <li><a href="about.html#sources">Data sources</a></li>
+          <li><a href="legal.html">Legal</a></li>
+          <li><a href="about.html#principles">Our principles</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© <span id="year">2026</span> GMOttomotive · CarDNA · <a href="legal.html">Legal</a></span>
+      <span>Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/vault.js"></script>
+</body>
+</html>

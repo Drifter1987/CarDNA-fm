@@ -4,7 +4,7 @@
 
 CarDNA turns a VIN into the exact vehicle — make, model, year, engine, plant — and is the front door
 of GMOttomotive's vehicle-data family. This repository is the public site: static HTML, two stylesheets,
-four small vanilla-JS modules, no build step, no dependencies, no backend.
+a handful of small vanilla-JS modules, no build step, no dependencies, no backend.
 
 ## Run it
 
@@ -30,6 +30,7 @@ uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx
 | `pricing.html` | Free / Pro / Workshop / Business tiers, line-by-line comparison, and why the quotas are what they are |
 | `about.html` | GMOttomotive, principles, data sources, roadmap, contact |
 | `garage.html` | Saved vehicles — this browser only, no account |
+| `vault.html` | Private vault: a VIN list encrypted with a pass phrase in this browser, exportable as an encrypted file |
 | `legal.html` | Privacy, terms, data licences and independence notice |
 
 ## Assets
@@ -45,6 +46,7 @@ uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx
 | `tools/vin-compare.html` | Keyless decoder comparison: vPIC, AI Kit Edge, AI Kit Unified, NHTSA recalls — full schema per VIN, plus field-by-field diff |
 | `assets/makes.js` | Loads the static catalogue, groups brands by country, instant search across brands and models |
 | `assets/garage.js` | Saved vehicles in `localStorage`: save, list, remove, clear — shared by the decoder and `garage.html` |
+| `assets/vault.js` | Private vault: PBKDF2-SHA256 key derivation, AES-256-GCM encryption, VIN parsing and encrypted import/export — see below |
 | `data/vehicles.csv` | Static catalogue: 15,068 rows, one per model, six vehicle kinds (1.1 MB) — CC BY 4.0 |
 | `data/engines.csv` | 30,535 engine variants with generation, years, body, power, torque and dimensions (5 MB) — ODbL |
 | `data/catalog_car_makes.json` | Make metadata with country codes, used to group the brands |
@@ -67,6 +69,23 @@ uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx
 
 Nothing about the visitor is stored server-side. Recent lookups live in `localStorage` and can be
 cleared by clearing site data.
+
+## Private vault
+
+There is no database. Everything the browser keeps is in `localStorage`, per device:
+
+- `cardna.recent` — the last six VINs you decoded
+- `cardna.garage` — vehicles you saved
+- `cardna.vault` — your encrypted VIN list
+
+`vault.html` encrypts that list with AES-256-GCM, the key derived from your pass phrase through
+PBKDF2-SHA256 (210,000 iterations, random salt and IV). Only the cipher text is written; the pass
+phrase is never stored. "Download encrypted file" saves the same cipher text as JSON and "Load an
+encrypted vault file" reads it back, so the list survives clearing the browser. There is no recovery
+if the phrase is lost.
+
+Plain VIN lists never belong in this repository — `.gitignore` excludes `private/`, `*.cardna` and
+exported `cardna-vault-*` / `cardna-vins-*` files.
 
 ## What is deliberately not here yet
 
