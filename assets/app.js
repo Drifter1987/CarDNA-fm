@@ -2,6 +2,53 @@
 (function () {
   "use strict";
 
+  /* ---------------------------------------------------------------- theme
+     Dark by default; light when the visitor picks it, remembered per browser.
+     The toggle sits in the header actions so it is reachable on every page. */
+  var THEME_KEY = "cardna.theme";
+  var root = document.documentElement;
+
+  function applyTheme(theme) {
+    if (theme === "light") { root.setAttribute("data-theme", "light"); }
+    else { root.removeAttribute("data-theme"); }
+    document.querySelectorAll("[data-theme-toggle]").forEach(function (button) {
+      button.textContent = theme === "light" ? "Dark" : "Light";
+      button.setAttribute("aria-label",
+        theme === "light" ? "Switch to dark mode" : "Switch to light mode");
+    });
+  }
+
+  function currentTheme() {
+    try { return window.localStorage.getItem(THEME_KEY) || "dark"; }
+    catch (err) { return "dark"; }
+  }
+
+  applyTheme(currentTheme());
+
+  function addToggle() {
+    var host = document.querySelector(".header-actions") || document.querySelector(".nav");
+    if (!host || host.querySelector("[data-theme-toggle]")) { return; }
+
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "theme-toggle";
+    button.setAttribute("data-theme-toggle", "");
+    if (host.classList.contains("nav")) { button.style.marginLeft = "6px"; }
+    button.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+      try { window.localStorage.setItem(THEME_KEY, next); } catch (err) { /* ignore */ }
+      applyTheme(next);
+    });
+    host.appendChild(button);
+    applyTheme(currentTheme());
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", addToggle);
+  } else {
+    addToggle();
+  }
+
   /* mobile navigation */
   var toggle = document.querySelector(".nav-toggle");
   var nav = document.getElementById("site-nav");

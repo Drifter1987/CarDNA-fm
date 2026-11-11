@@ -1,7 +1,171 @@
-/* CarDNA — garage: saved vehicles, selection and full-record export. */
+/* CarDNA — garage.
+   Two layers: localStorage is the always-available copy, and when a session exists the same
+   rows are mirrored to public.vehicles so they follow the account across devices. Nothing is
+   lost offline; the server copy wins on conflict, the local copy is uploaded if it is new. */
 
 (function () {
   "use strict";
+
+  var KEY = "cardna.garage";
+  var MAX = 100;
+
+  /* ------------------------------------------------------------------ local store */
+
+  function read() {
+    try {
+      var raw = window.localStorage.getItem(KEY);
+      var list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function write(list) {
+    try { window.localStorage.setItem(KEY, JSON.stringify(list)); } catch (err) { /* ignore */ }
+  }
+
+  /* ------------------------------------------------------------------ server mirror */
+
+  function config() { return window.CARDNA_SUPABASE || {}; }
+
+  function session() {
+    return window.CarDNAAuth && window.CarDNAAuth.state && window.CarDNAAuth.state.session;
+  }
+
+  function serverReady() {
+    var cfg = config();
+    return Boolean(session() && cfg.url && cfg.key);
+  }
+
+  async function api(path, options) {
+    var cfg = config();
+    var opts = options || {};
+    var s = session();
+
+    var response = await fetch(String(cfg.url).replace(/\/+$/, "") + path, {
+      method: opts.method || "GET",
+      headers: {
+        apikey: cfg.key,
+        Authorization: "Bearer " + s.access_token,
+        "Content-Type": "application/json",
+        Prefer: opts.prefer || "return=minimal"
+      },
+      body: opts.body === undefined ? undefined : JSON.stringify(opts.body)
+    });
+
+    if (!response.ok) {
+      var text = await response.text();
+      throw new Error("Supabase " + response.status + ": " + (text || "request failed"));
+    }
+    if (opts.raw) { return response; }
+    var body = await response.text();
+    return body ? JSON.parse(body) : null;
+  }
+
+  function row(entry) {
+    return {
+      vin: entry.vin,
+      model_year: entry.year || null,
+      make: entry.make || null,
+      model: entry.model || null,
+      note: entry.label || null
+    };
+  }
+
+  function push(entry) {
+    if (!serverReady()) { return Promise.resolve(); }
+    return api("/rest/v1/vehicles?on_conflict=user_id,vin", {
+      method: "POST",
+      prefer: "resolution=merge-duplicates,return=minimal",
+      body: row(entry)
+    }).catch(function () { /* offline or blocked: the local copy remains */ });
+  }
+
+  function drop(vin) {
+    if (!serverReady()) { return Promise.resolve(); }
+    return api("/rest/v1/vehicles?vin=eq." + encodeURIComponent(vin), { method: "DELETE" })
+      .catch(function () { /* ignore */ });
+  }
+
+  /* Pull the account's rows, merge them over the local copy, and upload anything the
+     server has never seen. Returns the merged list. */
+  async function pull() {
+    if (!serverReady()) { return read(); }
+
+    var rows;
+    try {
+      rows = await api("/rest/v1/vehicles?select=vin,model_year,make,model,note,created_at" +
+        "&order=created_at.desc&limit=" + MAX, { raw: false });
+    } catch (err) {
+      return read();
+    }
+
+    var local = read();
+    var byVin = Object.create(null);
+    var seen = Object.create(null);
+
+    local.forEach(function (item) { byVin[item.vin] = item; });
+
+    (rows || []).forEach(function (remote) {
+      seen[remote.vin] = true;
+      byVin[remote.vin] = {
+        vin: remote.vin,
+        year: remote.model_year || "",
+        make: remote.make || "",
+        model: remote.model || "",
+        label: remote.note || "",
+        savedAt: remote.created_at || ""
+      };
+    });
+
+    var merged = Object.keys(byVin).map(function (vin) { return byVin[vin]; }).slice(0, MAX);
+    write(merged);
+
+    local.forEach(function (item) {
+      if (!seen[item.vin]) { push(item); }
+    });
+
+    return merged;
+  }
+
+  window.CarDNAGarage = {
+    list: read,
+    has: function (vin) {
+      return read().some(function (item) { return item.vin === vin; });
+    },
+    save: function (entry) {
+      var list = read().filter(function (item) { return item.vin !== entry.vin; });
+      var record = {
+        vin: entry.vin,
+        year: entry.year || "",
+        make: entry.make || "",
+        model: entry.model || "",
+        label: entry.label || "",
+        savedAt: new Date().toISOString()
+      };
+      list.unshift(record);
+      write(list.slice(0, MAX));
+      push(record);
+      return list.length;
+    },
+    remove: function (vin) {
+      var list = read().filter(function (item) { return item.vin !== vin; });
+      write(list);
+      drop(vin);
+      return list.length;
+    },
+    clear: function () {
+      write([]);
+      if (!serverReady()) { return; }
+      api("/rest/v1/vehicles?user_id=eq." + encodeURIComponent(session().id),
+        { method: "DELETE" }).catch(function () { /* ignore */ });
+    },
+    pull: pull,
+    count: function () { return read().length; }
+  };
+
+  /* ------------------------------------------------------------------ garage page */
 
   document.addEventListener("DOMContentLoaded", function () {
     var host = document.getElementById("garage-list");
@@ -13,9 +177,7 @@
     var selected = Object.create(null);
     var busy = false;
 
-    function items() {
-      return window.CarDNAGarage ? window.CarDNAGarage.list() : [];
-    }
+    function items() { return window.CarDNAGarage.list(); }
 
     function status(text, tone) {
       if (!statusEl) { return; }
@@ -24,7 +186,6 @@
       else { statusEl.removeAttribute("data-tone"); }
     }
 
-    /* No tick means "everything": one car, or all of them, is one click either way. */
     function chosen() {
       var all = items();
       var picked = all.filter(function (item) { return selected[item.vin]; });
@@ -114,7 +275,7 @@
         var empty = document.createElement("div");
         empty.className = "notice";
         empty.innerHTML = "<strong>Nothing saved yet.</strong> Decode a VIN and press " +
-          "“Save to garage” — it is kept in this browser, never on a server.";
+          "“Save to garage” — it is mirrored to your account when you are signed in.";
         host.appendChild(empty);
         syncSelectAll();
         return;
@@ -148,6 +309,7 @@
         if (window.CarDNAAuth && window.CarDNAAuth.log) {
           window.CarDNAAuth.log("export", { format: format, count: vehicles.length });
         }
+
         status(vehicles.length + (vehicles.length === 1 ? " vehicle" : " vehicles") +
           " exported as " + format.toUpperCase() +
           (format === "pdf" ? " — choose “Save as PDF” in the print dialog." : "."), "ok");
@@ -184,7 +346,7 @@
     var clearBtn = document.getElementById("garage-clear");
     if (clearBtn) {
       clearBtn.addEventListener("click", function () {
-        if (window.confirm("Remove every saved vehicle from this browser?")) {
+        if (window.confirm("Remove every saved vehicle from this browser and your account?")) {
           window.CarDNAGarage.clear();
           selected = Object.create(null);
           render();
@@ -194,5 +356,10 @@
     }
 
     render();
+
+    if (serverReady()) {
+      window.CarDNAGarage.pull().then(function () { render(); })
+        .catch(function () { /* local copy is enough */ });
+    }
   });
 })();

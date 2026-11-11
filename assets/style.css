@@ -2,23 +2,72 @@
    Dark, technical, blueprint-inspired. No external assets. */
 
 :root {
-  --ink: #07090d;
-  --panel: #0d1117;
-  --panel-2: #11161f;
-  --panel-3: #161c27;
-  --line: rgba(255, 255, 255, .09);
-  --line-strong: rgba(255, 255, 255, .16);
-  --text: #e9edf5;
-  --dim: #8d96a8;
-  --dim-2: #5d6678;
+  --ink: #0a0e15;
+  --panel: #111721;
+  --panel-2: #151d29;
+  --panel-3: #1b2431;
+  --line: rgba(255, 255, 255, .12);
+  --line-strong: rgba(255, 255, 255, .2);
+  --text: #eef2f8;
+  --dim: #a3adbf;
+  --dim-2: #6f7a8e;
   --lime: #c6f24e;
   --lime-ink: #0b1206;
-  --blue: #6ea8ff;
-  --red: #ff7a7a;
+  --blue: #7db3ff;
+  --red: #ff8a8a;
   --radius: 14px;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
 }
+
+/* Light mode — set on <html data-theme="light"> by the toggle in app.js. */
+[data-theme="light"] {
+  --ink: #f4f6fa;
+  --panel: #ffffff;
+  --panel-2: #f7f9fc;
+  --panel-3: #eef2f8;
+  --line: rgba(10, 16, 28, .12);
+  --line-strong: rgba(10, 16, 28, .22);
+  --text: #0d1420;
+  --dim: #4a5568;
+  --dim-2: #6b7686;
+  --lime: #4f8a00;
+  --lime-ink: #ffffff;
+  --blue: #1f5fbf;
+  --red: #b3261e;
+}
+
+[data-theme="light"] body::before {
+  background-image:
+    linear-gradient(rgba(10, 16, 28, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 16, 28, .05) 1px, transparent 1px);
+}
+
+[data-theme="light"] .site-header { background: rgba(244, 246, 250, .9); }
+[data-theme="light"] .tabbar { background: rgba(244, 246, 250, .94); }
+[data-theme="light"] .btn--ghost:hover { background: rgba(10, 16, 28, .05); }
+[data-theme="light"] .tab:hover { background: rgba(10, 16, 28, .06); }
+[data-theme="light"] .trim,
+[data-theme="light"] .vin-input,
+[data-theme="light"] .vault-text,
+[data-theme="light"] .search-input { background: #fff; }
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  color: var(--dim);
+  padding: 8px 10px;
+  font: 600 10px/1 var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--lime); }
+
 
 * { box-sizing: border-box; }
 

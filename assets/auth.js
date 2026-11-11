@@ -281,7 +281,9 @@
 
       var plan = document.createElement("span");
       plan.className = "account-chip-plan";
-      plan.textContent = planLabel(state.profile.plan);
+      /* Staff are shown by role, everyone else by plan, so "FREE ADMIN" never appears. */
+      plan.textContent = isOwner() ? "Owner"
+        : (state.profile.role === "admin" ? "Admin" : planLabel(state.profile.plan));
       chip.appendChild(plan);
 
       if (isOwner()) {
