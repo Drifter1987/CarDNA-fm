@@ -46,8 +46,10 @@
     <div class="container">
       <div id="admin-denied" hidden>
         <div class="notice">
-          <strong>This account is not an owner.</strong> Only an owner can open this console. To
-          promote an account, run this once in the Supabase SQL Editor (it is not stored here):
+          <strong>This account is not an owner.</strong> Owners are granted in the database, not
+          on this page. Run the account migration once in the Supabase SQL Editor (it adds
+          <code>role</code>, <code>status</code> and <code>email</code> to <code>profiles</code>),
+          then:<br><br>
           <code>update public.profiles set role = 'owner' where email = 'you@example.com';</code>
         </div>
       </div>

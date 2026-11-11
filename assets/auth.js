@@ -107,7 +107,7 @@
         rows = await call("/rest/v1/profiles?select=id,display_name,created_at&limit=1",
           { token: session.access_token });
       } catch (err2) {
-        return { id: session.id, email: session.email, plan: "free", role: "member" };
+        return { id: session.id, email: session.email, plan: "free", role: "user" };
       }
     }
 
@@ -116,7 +116,7 @@
       id: row.id || session.id,
       display_name: row.display_name || "",
       plan: row.plan || "free",
-      role: row.role || "member",
+      role: row.role || "user",
       created_at: row.created_at || "",
       email: session.email
     };
