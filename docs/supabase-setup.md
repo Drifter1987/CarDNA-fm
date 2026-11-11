@@ -48,11 +48,18 @@ early 2027; new code should use publishable and secret.
 
 ## 3. Auth settings
 
-Dashboard → **Authentication**:
+Dashboard → **Authentication → URL Configuration**. This is still on the default
+`http://localhost:3000`, which is why confirmation links would go nowhere:
 
-- **URL Configuration** → set *Site URL* to the deployed site (the GitHub Pages / FreeMilk address)
-  and add it plus `http://localhost:3000` to *Redirect URLs*. Without this, confirmation and magic
-  links bounce to the wrong place.
+- **Site URL** — `https://drifter1987.github.io/CarDNA-fm/`
+- **Redirect URLs** — add all three:
+  - `https://drifter1987.github.io/CarDNA-fm/**`
+  - `http://localhost:3000/**`
+  - `https://cardna-eumz--preview.freemilk.app/**` (the preview link)
+
+The `/**` matters: Supabase matches the path as well as the host, and a bare URL will reject
+anything deeper than the root.
+
 - **Email** — confirmation is on by default. The built-in SMTP sender is heavily rate-limited and
   fine for development only; a real launch needs custom SMTP.
 - Providers — email + password is enough to start. GitHub OAuth can be added later; the CarDNA
@@ -78,3 +85,34 @@ Nothing in `assets/` talks to Supabase yet. Wiring it in is a separate, reviewab
   few seconds' delay. Worth knowing before launch, not a problem while building.
 - **Nano compute** — 500 MB database, shared CPU. The catalogue stays as static files in the repo
   and is not stored here, which keeps the database tiny.
+
+## 6. If you already ran an earlier version
+
+The first version of `schema.sql` had two lint warnings from the Advisor Center. Run this once to
+clear them; it is also what the file now contains, so a fresh project needs nothing.
+
+```sql
+-- 1. Pin the search path of the timestamp trigger (Function Search Path Mutable)
+create or replace function public.touch_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+-- 2. Only the trigger needs to call this, not every signed-in visitor
+--    (Public Can Execute SECURITY DEFINER Function)
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+```
+
+Two advisories are expected and should be left alone:
+
+- **RLS Enabled No Policy — `public.decode_cache`**: there is deliberately no policy, so the browser
+  can never read the cache. Only the secret key from a server function can.
+- **Unused Index — `vehicles`, `vault_entries`**: they exist for queries that start when data
+  arrives; the advisor is just noting the tables are empty.
