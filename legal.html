@@ -57,6 +57,12 @@
             If a paid European decoder is added later, it will run through a proxy that keeps the API key
             server-side and stores only the decoded result, keyed by VIN — never your identity.
           </p>
+          <p>
+            The database schema for accounts, a synced garage and an owner-only VIN list is written but
+            not in use yet, so nothing about you reaches a server today. When it is switched on, saved
+            vehicles will be readable only by their owner, enforced in the database rather than in the
+            page — see the <a href="docs/supabase-setup.md">setup guide</a>.
+          </p>
         </div>
 
         <div class="card">
