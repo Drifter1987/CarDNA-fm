@@ -8,17 +8,17 @@ a handful of small vanilla-JS modules, no build step, no dependencies, no backen
 
 ## Run it
 
-The catalogue is loaded from a local file with `fetch`, so it needs to be served over http
-(opening `file://` will show a helpful notice instead of the list). Any static file server works:
+Two places, and no others: **GitHub** holds the public files, **Supabase** holds account data.
+GitHub Pages serves this repository at `https://drifter1987.github.io/CarDNA-fm/` — no separate host,
+no build step, no third platform.
+
+To run it locally, any static file server works:
 
 ```bash
 cd CarDNA
 npx serve .
 # open the address it prints
 ```
-
-In FreeMilk, **Run** does this for you and publishes the folder to its preview link. Deploy by
-uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx.
 
 ## Pages
 
