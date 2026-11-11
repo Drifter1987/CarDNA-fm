@@ -54,7 +54,6 @@ uploading the folder to any static host — Netlify, Cloudflare Pages, S3, nginx
 | `data/vpic_makes.csv` | 12,423 manufacturer records — the full NHTSA registry, for reference |
 | `data/vpic_makes_car.csv` | The 195 makes filed as "Passenger Car" |
 | `data/public-apis-README.md` | The complete public-apis catalogue — ~2,000 free APIs in 51 categories |
-| `supabase/schema.sql` | The Postgres schema for accounts: `profiles`, `vehicles`, `vault_entries` and a server-only `decode_cache`, with row-level security and grants. Run once in the Supabase SQL Editor |
 ## Data
 
 - **VIN decode:** two layers. NHTSA vPIC (`https://vpic.nhtsa.dot.gov/api`, public domain, no key)
@@ -87,17 +86,6 @@ if the phrase is lost.
 
 Plain VIN lists never belong in this repository — `.gitignore` excludes `private/`, `*.cardna` and
 exported `cardna-vault-*` / `cardna-vins-*` files.
-
-## Backend (written, not wired)
-
-There is no server in use. The database for accounts is specified and ready to run:
-`supabase/schema.sql` creates `profiles`, `vehicles` (the synced garage) and `vault_entries` (the
-owner-only VIN list), all with row-level security so a row is readable only by the account that owns
-it, plus a `decode_cache` that is reachable only with the secret key. `docs/supabase-setup.md` is the
-step-by-step: which button, what to paste, which key goes where.
-
-Nothing in `assets/` calls it yet — the garage and vault still work entirely in the browser. See
-`docs/supabase-setup.md` §4 for the wiring order.
 
 ## What is deliberately not here yet
 
@@ -136,10 +124,6 @@ with a permanent VIN cache, and what it costs at realistic volumes.
 `docs/pricing-feasibility.md` is the one-page model behind the plans: the single cost (€0.26 per European
 lookup), net profit per plan at typical use and at full quota, overage, the three stingier plan sets it
 was chosen over, and why.
-
-`docs/supabase-setup.md` covers the database side: creating the tables from `supabase/schema.sql`,
-where the publishable and secret keys live and which one may go in a page, the Auth URL settings, and
-the order in which the app gets wired to it.
 
 `docs/public-apis-free.md` extracts the **Vehicle** category from the public-apis repository (18 APIs,
 with auth/CORS and what each is good for) plus adjacent free APIs — recalls, fitment, MOT history,
