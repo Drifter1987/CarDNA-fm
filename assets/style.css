@@ -1003,3 +1003,24 @@ body.is-app .site-header { flex: none; }
 }
 .status-pill.is-blocked { color: var(--red); border-color: rgba(255, 122, 122, .5); }
 .status-pill.is-active { color: var(--lime); border-color: rgba(198, 242, 78, .4); }
+
+
+/* ---------------------------------------------------------------- support view */
+.support-banner {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: rgba(110, 168, 255, .12);
+  border-bottom: 1px solid rgba(110, 168, 255, .45);
+  font: 500 11px/1.5 var(--mono);
+  letter-spacing: .03em;
+  color: #cfe2ff;
+}
+.support-banner strong { color: #fff; }
+.is-support-view .account-chip-plan { color: var(--blue); }

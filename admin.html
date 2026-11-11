@@ -68,6 +68,16 @@
           <span id="plan-mix" style="font-family:var(--mono);font-size:.85rem"></span>
         </div>
 
+        <div class="notice" id="admin-preview" hidden style="margin-bottom:22px">
+          <strong>View the console as:</strong>
+          <select id="preview-role" class="plan-select" style="margin-left:10px">
+            <option value="">Owner (you)</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+          <span class="mono-dim" style="margin-left:10px">read-only preview of what that role can do</span>
+        </div>
+
         <div class="notice" style="margin-bottom:22px">
           <strong>Recent activity.</strong>
           <ul class="activity-list" id="admin-activity"><li>Loading…</li></ul>

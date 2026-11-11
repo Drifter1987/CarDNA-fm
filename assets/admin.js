@@ -24,6 +24,13 @@
   var rows = [];
   var activity = [];
   var query = "";
+  var previewRole = "";
+
+  /* Owner sees everything; admin sees the same table but may only act on users; the user
+     preview is deliberately read-only so nothing can be changed by accident. */
+  function actingRole() {
+    return previewRole || (auth.state.profile && auth.state.profile.role) || "user";
+  }
 
   function status(text, tone) {
     if (!statusEl) { return; }
@@ -152,8 +159,9 @@
 
   function canManage(row) {
     if (row.role === "owner") { return false; }
-    if (auth.isOwner()) { return true; }
-    return row.role === "user";        /* admins manage users only */
+    if (actingRole() === "owner") { return true; }
+    if (actingRole() === "admin") { return row.role === "user"; }
+    return false;
   }
 
   function matches(row) {
@@ -208,7 +216,7 @@
       tr.appendChild(planCell);
 
       var roleCell = document.createElement("td");
-      if (auth.isOwner() && row.id !== (auth.state.profile && auth.state.profile.id)) {
+      if (actingRole() === "owner" && row.id !== (auth.state.profile && auth.state.profile.id)) {
         var roleSelect = document.createElement("select");
         roleSelect.className = "role-select";
         roleSelect.setAttribute("aria-label", "Role for " + label(row));
@@ -247,7 +255,20 @@
         block.textContent = isBlocked(row) ? "Unblock" : "Block";
         block.addEventListener("click", function () { setBlocked(row, block); });
         actions.appendChild(block);
-      } else {
+      }
+
+      if (actingRole() === "owner" && row.id !== (auth.state.profile && auth.state.profile.id)) {
+        var view = document.createElement("button");
+        view.type = "button";
+        view.className = "btn btn--ghost btn--sm";
+        view.style.marginLeft = "6px";
+        view.textContent = "View as";
+        view.title = "Open the app with this role's view — read-only, no notification";
+        view.addEventListener("click", function () { openSupportView(row); });
+        actions.appendChild(view);
+      }
+
+      if (!actions.children.length) {
         actions.innerHTML = '<span class="mono-dim">—</span>';
       }
       tr.appendChild(actions);
@@ -325,6 +346,20 @@
     }
   }
 
+  /* ------------------------------------------------------------------ support view */
+
+  function openSupportView(row) {
+    try {
+      window.sessionStorage.setItem("cardna.viewAs", JSON.stringify({
+        id: row.id,
+        email: row.email || "",
+        role: row.role || "user",
+        plan: row.plan || "free"
+      }));
+    } catch (err) { /* storage blocked */ }
+    location.href = "index.html";
+  }
+
   /* ------------------------------------------------------------------ load */
 
   async function loadAccounts() {
@@ -350,6 +385,19 @@
     renderStats();
     renderRows();
     loadActivity();
+
+    var previewEl = document.getElementById("preview-role");
+    if (previewEl && auth.isOwner()) {
+      document.getElementById("admin-preview").hidden = false;
+      previewEl.value = previewRole;
+      previewEl.addEventListener("change", function () {
+        previewRole = previewEl.value;
+        renderRows();
+        status(previewRole
+          ? "Previewing the " + auth.roleLabel(previewRole) + " view — read-only."
+          : "Back to the owner view.", previewRole ? "" : "ok");
+      });
+    }
   }
 
   /* ------------------------------------------------------------------ boot */

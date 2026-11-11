@@ -192,6 +192,55 @@
     return Boolean(state.profile && (state.profile.role === "owner" || state.profile.role === "admin"));
   }
 
+  /* ------------------------------------------------------------------ support view
+     An owner can open the app "as" another account to see the same pages and controls that
+     role sees. This is a read-only preview inside the owner's own session — it is not a
+     session for that user, and it writes nothing on their behalf. */
+
+  function viewAsProfile() {
+    if (!isOwner()) { return null; }
+    try {
+      var raw = window.sessionStorage.getItem("cardna.viewAs");
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function renderSupportView(target) {
+    if (!target || document.getElementById("support-banner")) { return; }
+
+    var bar = document.createElement("div");
+    bar.id = "support-banner";
+    bar.className = "support-banner";
+
+    var text = document.createElement("span");
+    text.innerHTML = "<strong>Support view</strong> · " +
+      String(target.email || target.id || "account") + " · " +
+      roleLabel(target.role) + " · " + planLabel(target.plan) +
+      " — read-only, they are not notified and nothing is written as them.";
+    bar.appendChild(text);
+
+    var exit = document.createElement("button");
+    exit.type = "button";
+    exit.className = "btn btn--ghost btn--sm";
+    exit.textContent = "Exit support view";
+    exit.addEventListener("click", function () {
+      try { window.sessionStorage.removeItem("cardna.viewAs"); } catch (err) { /* ignore */ }
+      location.reload();
+    });
+    bar.appendChild(exit);
+
+    document.body.insertBefore(bar, document.body.firstChild);
+    document.body.classList.add("is-support-view");
+
+    document.querySelectorAll("form, #garage-download, #vault-app, #garage-clear").forEach(function (node) {
+      node.setAttribute("aria-disabled", "true");
+      node.style.pointerEvents = "none";
+      node.style.opacity = ".55";
+    });
+  }
+
   /* Fire-and-forget activity record. The row is owned by the signed-in user, so the insert
      policy only ever allows writing your own events. */
   function log(kind, detail) {
@@ -316,6 +365,7 @@
     if (state.session) {
       log("page_view", { path: location.pathname.split("/").pop() || "index.html" });
       renderSuspended();
+      renderSupportView(viewAsProfile());
     }
   }
 
@@ -337,6 +387,7 @@
     isOwner: isOwner,
     isStaff: isStaff,
     isBlocked: isBlocked,
+    viewAsProfile: viewAsProfile,
     log: log,
     renderChip: renderChip,
     fetchProfile: fetchProfile,
