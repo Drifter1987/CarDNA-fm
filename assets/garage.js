@@ -79,23 +79,44 @@
       model_year: entry.year || null,
       make: entry.make || null,
       model: entry.model || null,
-      note: entry.label || null
+      note: entry.label || null,
+      /* Re-saving a car that was removed clears the soft delete. */
+      deleted_at: null
     };
   }
 
   function push(entry) {
     if (!serverReady()) { return Promise.resolve(); }
-    return api("/rest/v1/vehicles?on_conflict=user_id,vin", {
+
+    var url = "/rest/v1/vehicles?on_conflict=user_id,vin";
+    return api(url, {
       method: "POST",
       prefer: "resolution=merge-duplicates,return=minimal",
       body: row(entry)
-    }).catch(function () { /* offline or blocked: the local copy remains */ });
+    }).catch(function () {
+      /* The deleted_at column may not be in the database yet. */
+      var plain = row(entry);
+      delete plain.deleted_at;
+      return api(url, {
+        method: "POST",
+        prefer: "resolution=merge-duplicates,return=minimal",
+        body: plain
+      }).catch(function () { /* offline or blocked: the local copy remains */ });
+    });
   }
 
+  /* A removal is a soft delete once the column exists, so the row — and its audit trail —
+     survives. Without the column it falls back to the old hard delete. */
   function drop(vin) {
     if (!serverReady()) { return Promise.resolve(); }
-    return api("/rest/v1/vehicles?vin=eq." + encodeURIComponent(vin), { method: "DELETE" })
-      .catch(function () { /* ignore */ });
+
+    var url = "/rest/v1/vehicles?vin=eq." + encodeURIComponent(vin);
+    return api(url, {
+      method: "PATCH",
+      body: { deleted_at: new Date().toISOString() }
+    }).catch(function () {
+      return api(url, { method: "DELETE" }).catch(function () { /* ignore */ });
+    });
   }
 
   /* Pull the account's rows, merge them over the local copy, and upload anything the
@@ -106,9 +127,15 @@
     var rows;
     try {
       rows = await api("/rest/v1/vehicles?select=vin,model_year,make,model,note,created_at" +
-        "&order=created_at.desc&limit=" + MAX, { raw: false });
+        "&deleted_at=is.null&order=created_at.desc&limit=" + MAX);
     } catch (err) {
-      return read();
+      /* No deleted_at column yet: read the same rows without the filter. */
+      try {
+        rows = await api("/rest/v1/vehicles?select=vin,model_year,make,model,note,created_at" +
+          "&order=created_at.desc&limit=" + MAX);
+      } catch (err2) {
+        return read();
+      }
     }
 
     var local = read();
@@ -523,5 +550,12 @@
         applyExportLimits();
       });
     }
+
+    /* A plan granted in the console lands here without a reload. */
+    document.addEventListener("cardna:profile", function () {
+      renderLimit(items().length);
+      applyExportLimits();
+      window.CarDNAGarage.pull().then(function () { render(); }).catch(function () { /* ignore */ });
+    });
   });
 })();

@@ -567,6 +567,52 @@
     });
   }
 
+  /* ------------------------------------------------------------------ profile watch
+     A plan granted in the console should reach the account without a reload. Polling the
+     profile is cheap and needs no client library; when the plan, role or status moves, the
+     chip, the gates and the garage are rebuilt and a cardna:profile event is fired. */
+  var PROFILE_POLL = 60000;
+  var pollTimer = null;
+
+  function sameGrant(a, b) {
+    return Boolean(a && b) &&
+      a.plan === b.plan && a.role === b.role && a.status === b.status;
+  }
+
+  async function refreshProfile() {
+    if (!state.session || document.hidden) { return null; }
+
+    var fresh;
+    try { fresh = await fetchProfile(state.session); }
+    catch (err) { return null; }
+    if (!fresh) { return null; }
+
+    if (!sameGrant(state.profile, fresh)) {
+      state.profile = fresh;
+
+      var suspended = document.getElementById("access-suspended");
+      if (suspended && !isBlocked()) { suspended.remove(); }
+
+      renderChip();
+      applyNavGate();
+      renderSuspended();
+
+      try {
+        document.dispatchEvent(new CustomEvent("cardna:profile", { detail: fresh }));
+      } catch (err) { /* older browsers */ }
+    }
+
+    return fresh;
+  }
+
+  function startProfileWatch() {
+    if (pollTimer || !state.session) { return; }
+    pollTimer = window.setInterval(refreshProfile, PROFILE_POLL);
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) { refreshProfile(); }
+    });
+  }
+
   /* ------------------------------------------------------------------ boot */
 
   async function boot() {
@@ -624,6 +670,7 @@
       log("page_view", { path: location.pathname.split("/").pop() || "index.html" });
       renderSuspended();
       renderSupportView(viewAsProfile());
+      startProfileWatch();
     }
   }
 
@@ -663,6 +710,7 @@
     isStaff: isStaff,
     isBlocked: isBlocked,
     viewAsProfile: viewAsProfile,
+    refreshProfile: refreshProfile,
     log: log,
     renderChip: renderChip,
     fetchProfile: fetchProfile,
