@@ -135,6 +135,32 @@
 
   /* ------------------------------------------------------------------ activity */
 
+  /* One line of detail for any event, whatever shape it has. */
+  function eventDetail(event) {
+    var d = event.detail || {};
+    if (d.vin) { return d.vin; }
+    if (d.format) { return "." + d.format; }
+    if (d.summary) {
+      return d.summary +
+        (d.target_label ? " · " + d.target_label : "") +
+        (d.by ? " · by " + d.by : "");
+    }
+    if (d.path) { return d.path; }
+    return "";
+  }
+
+  /* Access changes are written to the same activity table as decodes and exports, so a
+     grant has a name and a time next to it instead of vanishing. */
+  function noteChange(kind, row, summary) {
+    if (!auth.log) { return; }
+    auth.log(kind, {
+      target_id: row.id,
+      target_label: label(row),
+      summary: summary,
+      by: (auth.state.profile && auth.state.profile.email) || ""
+    });
+  }
+
   function renderActivity() {
     if (!activityEl) { return; }
     activityEl.innerHTML = "";
@@ -164,9 +190,7 @@
 
       var detail = document.createElement("span");
       detail.className = "act-when";
-      detail.textContent = event.detail && event.detail.vin
-        ? event.detail.vin
-        : (event.detail && event.detail.format ? "." + event.detail.format : "");
+      detail.textContent = eventDetail(event);
       li.appendChild(detail);
 
       var when = document.createElement("span");
@@ -344,30 +368,69 @@
 
   /* ------------------------------------------------------------------ one account's activity */
 
+  function rowById(id) {
+    for (var i = 0; i < rows.length; i += 1) {
+      if (rows[i].id === id) { return rows[i]; }
+    }
+    return null;
+  }
+
+  function facts(row) {
+    if (!row) { return ""; }
+    return "Role " + auth.roleLabel(roleOf(row)) +
+      " · plan " + auth.planLabel(planOf(row)) +
+      " · joined " + joined(row) +
+      " · " + (isBlocked(row)
+        ? "blocked" + (row.blocked_reason ? ": " + row.blocked_reason : "")
+        : "active");
+  }
+
   async function loadUserActivity(id, who) {
     var panel = document.getElementById("admin-user-activity");
     var list = document.getElementById("user-activity-list");
     if (!panel || !list) { return; }
 
+    var row = rowById(id);
     panel.hidden = false;
     setText("user-activity-title", "Activity · " + who);
-    setText("user-activity-meta", "last 25 events");
+    setText("user-activity-facts", facts(row));
+    setText("user-activity-meta", "");
     list.innerHTML = "<li>Loading…</li>";
 
-    var events;
+    var token = auth.state.session.access_token;
+    var mine = [];
+    var about = [];
+
+    /* What they did themselves… */
     try {
-      events = await auth.call(
+      mine = await auth.call(
         "/rest/v1/events?select=kind,detail,created_at&user_id=eq." +
           encodeURIComponent(id) + "&order=created_at.desc&limit=25",
-        { token: auth.state.session.access_token });
-    } catch (err) {
-      list.innerHTML = "<li>Could not read this account's activity.</li>";
-      return;
-    }
+        { token: token }) || [];
+    } catch (err) { mine = []; }
+
+    /* …and what was done to them: plan grants, role changes, blocks. */
+    try {
+      about = await auth.call(
+        "/rest/v1/events?select=kind,detail,created_at&detail->>target_id=eq." +
+          encodeURIComponent(id) + "&order=created_at.desc&limit=25",
+        { token: token }) || [];
+    } catch (err) { about = []; }
+
+    var seen = {};
+    var events = mine.concat(about).filter(function (event) {
+      var key = String(event.created_at || "") + "|" + String(event.kind || "");
+      if (seen[key]) { return false; }
+      seen[key] = true;
+      return true;
+    }).sort(function (a, b) {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }).slice(0, 25);
 
     list.innerHTML = "";
-    if (!events || !events.length) {
-      list.innerHTML = "<li>Nothing recorded for this account yet.</li>";
+    if (!events.length) {
+      list.innerHTML = "<li>Nothing readable for this account. If it has used CarDNA, the " +
+        "staff read policy on <code>events</code> is the missing piece.</li>";
       return;
     }
 
@@ -381,9 +444,7 @@
 
       var detail = document.createElement("span");
       detail.className = "act-who";
-      detail.textContent = event.detail && event.detail.vin
-        ? event.detail.vin
-        : (event.detail && event.detail.format ? "." + event.detail.format : "");
+      detail.textContent = eventDetail(event);
       li.appendChild(detail);
 
       var at = document.createElement("span");
@@ -606,10 +667,12 @@
     }
 
     control.disabled = true;
+    var from = planOf(row);
     status("Saving " + label(row) + " → " + auth.planLabel(plan) + "…", "");
     try {
       await rpc("admin_set_plan", { target_id: row.id, new_plan: plan });
       row.plan = plan;
+      noteChange("plan_change", row, auth.planLabel(from) + " → " + auth.planLabel(plan));
       status(label(row) + " is now " + auth.planLabel(plan) + ".", "ok");
       renderStats();
     } catch (err) {
@@ -628,10 +691,12 @@
     }
 
     control.disabled = true;
+    var from = roleOf(row);
     status("Setting " + label(row) + " to " + auth.roleLabel(role) + "…", "");
     try {
       await rpc("owner_set_role", { target_id: row.id, new_role: role });
       row.role = role;
+      noteChange("role_change", row, auth.roleLabel(from) + " → " + auth.roleLabel(role));
       status(label(row) + " is now " + auth.roleLabel(role) + ".", "ok");
       renderRows();
       renderStats();
@@ -665,6 +730,9 @@
       });
       row.status = blocking ? "blocked" : "active";
       row.blocked_reason = blocking ? reason : null;
+      noteChange("status_change", row, blocking
+        ? "Blocked" + (reason ? ": " + reason : "")
+        : "Unblocked");
       status(blocking ? label(row) + " is blocked." : label(row) + " can use CarDNA again.", "ok");
       renderRows();
       renderStats();

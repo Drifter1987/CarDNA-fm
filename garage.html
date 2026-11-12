@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Garage — CarDNA</title>
 <meta name="description" content="Your saved vehicles, with full decode export to Excel, Markdown, CSV or PDF.">
-<link rel="stylesheet" href="assets/style.css?v=p3">
-<link rel="stylesheet" href="assets/motion.css?v=p3">
+<link rel="stylesheet" href="assets/style.css?v=p4">
+<link rel="stylesheet" href="assets/motion.css?v=p4">
 </head>
 <body data-require-auth>
 
@@ -75,6 +75,11 @@
 
       <p class="vault-status" id="garage-export-status" aria-live="polite"></p>
 
+      <p class="vault-status" id="garage-undo-row" hidden>
+        <span id="garage-undo-text"></span>
+        <button class="link-button" type="button" id="garage-undo">Undo</button>
+      </p>
+
       <div id="garage-list"></div>
 
       <p style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
@@ -126,12 +131,12 @@
   </div>
 </footer>
 
-<script src="assets/supabase-config.js?v=p3"></script>
-<script src="assets/auth.js?v=p3"></script>
-<script src="assets/app.js?v=p3"></script>
-<script src="assets/garage.js?v=p3"></script>
-<script src="assets/vin-schema.js?v=p3"></script>
-<script src="assets/export.js?v=p3"></script>
-<script src="assets/motion.js?v=p3"></script>
+<script src="assets/supabase-config.js?v=p4"></script>
+<script src="assets/auth.js?v=p4"></script>
+<script src="assets/app.js?v=p4"></script>
+<script src="assets/garage.js?v=p4"></script>
+<script src="assets/vin-schema.js?v=p4"></script>
+<script src="assets/export.js?v=p4"></script>
+<script src="assets/motion.js?v=p4"></script>
 </body>
 </html>

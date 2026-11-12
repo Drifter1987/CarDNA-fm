@@ -204,6 +204,7 @@
     var selected = Object.create(null);
     var busy = false;
     var pulled = false;
+    var lastRemoved = null;
 
     function items() { return window.CarDNAGarage.list(); }
 
@@ -223,6 +224,20 @@
       if (!a || !lim) { el.textContent = ""; return; }
       el.textContent = a.planLabel(planName()) + " plan · " + count + " of " +
         (lim.vehicles ? lim.vehicles : "unlimited") + " saved vehicles";
+    }
+
+    /* Removing a car is one tap, so the last removal can be put back. */
+    function renderUndo() {
+      var host = document.getElementById("garage-undo-row");
+      var text = document.getElementById("garage-undo-text");
+      if (!host || !text) { return; }
+
+      host.hidden = !lastRemoved;
+      if (!lastRemoved) { return; }
+
+      var name = [lastRemoved.year, lastRemoved.make, lastRemoved.model]
+        .filter(Boolean).join(" ") || lastRemoved.vin;
+      text.textContent = "Removed " + name + ". ";
     }
 
     function chosen() {
@@ -280,6 +295,7 @@
       del.addEventListener("click", function () {
         window.CarDNAGarage.remove(item.vin);
         delete selected[item.vin];
+        lastRemoved = item;
         render();
       });
       right.appendChild(del);
@@ -310,6 +326,7 @@
       }
 
       renderLimit(list.length);
+      renderUndo();
 
       host.innerHTML = "";
       if (!list.length && serverReady() && !pulled) {
@@ -435,6 +452,18 @@
     }
 
     render();
+
+    var undoBtn = document.getElementById("garage-undo");
+    if (undoBtn) {
+      undoBtn.addEventListener("click", function () {
+        if (!lastRemoved) { return; }
+        var saved = window.CarDNAGarage.save(lastRemoved);
+        if (saved && saved.ok === false) { status(saved.error, "error"); return; }
+        lastRemoved = null;
+        render();
+        status("Restored.", "ok");
+      });
+    }
 
     var passwordForm = document.getElementById("password-form");
     if (passwordForm) {
