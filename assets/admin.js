@@ -589,7 +589,10 @@
       rowsEl.appendChild(tr);
     });
 
-    metaEl.textContent = list.length + " of " + rows.length + " accounts";
+    /* Sample rows are display-only, so they must not inflate the real account count. */
+    metaEl.textContent = previewRole
+      ? list.length + " shown · " + rows.length + " real + " + DEMO_ROWS.length + " sample"
+      : list.length + " of " + rows.length + " accounts";
   }
 
   /* ------------------------------------------------------------------ writes */
