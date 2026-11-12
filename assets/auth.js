@@ -354,7 +354,7 @@
   }
 
   function renderChip() {
-    var host = document.querySelector(".header-actions");
+    var host = document.querySelector(".header-actions") || document.querySelector(".nav");
     if (!host) { return; }
 
     var existing = host.querySelector("[data-account-chip]");

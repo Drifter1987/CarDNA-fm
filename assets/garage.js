@@ -176,6 +176,7 @@
     var menuEl = document.getElementById("garage-download");
     var selected = Object.create(null);
     var busy = false;
+    var pulled = false;
 
     function items() { return window.CarDNAGarage.list(); }
 
@@ -271,6 +272,14 @@
       }
 
       host.innerHTML = "";
+      if (!list.length && serverReady() && !pulled) {
+        var syncing = document.createElement("div");
+        syncing.className = "notice";
+        syncing.innerHTML = "<strong>Syncing your garage…</strong> Checking your account for saved vehicles.";
+        host.appendChild(syncing);
+        syncSelectAll();
+        return;
+      }
       if (!list.length) {
         var empty = document.createElement("div");
         empty.className = "notice";
@@ -397,8 +406,15 @@
     }
 
     if (serverReady()) {
-      window.CarDNAGarage.pull().then(function () { render(); })
-        .catch(function () { /* local copy is enough */ });
+      window.CarDNAGarage.pull().then(function () {
+        pulled = true;
+        render();
+      }).catch(function () {
+        pulled = true;
+        render();
+      });
+    } else {
+      pulled = true;
     }
   });
 })();

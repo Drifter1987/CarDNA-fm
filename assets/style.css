@@ -71,7 +71,7 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   margin: 0;
@@ -80,6 +80,7 @@ body {
   font: 16px/1.6 var(--sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* faint blueprint grid behind everything */
@@ -140,7 +141,16 @@ img, svg { display: block; max-width: 100%; }
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
 }
-.header-inner { display: flex; align-items: center; gap: 26px; min-height: 66px; }
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px 20px;
+  flex-wrap: wrap;
+  min-height: 66px;
+  min-width: 0;
+}
+.logo { flex: 0 0 auto; }
+.header-actions { min-width: 0; flex-wrap: wrap; }
 
 .logo { display: flex; align-items: center; gap: 11px; color: var(--text); text-decoration: none; }
 .logo:hover { text-decoration: none; }
@@ -638,6 +648,7 @@ body.is-app .site-header { flex: none; }
 
 .app-scroll {
   flex: 1 1 auto;
+  min-height: 0;            /* without this the flex child grows and the page cannot scroll */
   overflow-y: auto;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
