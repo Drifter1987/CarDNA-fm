@@ -157,6 +157,76 @@
     }
   }
 
+  /* ------------------------------------------------------------------ recovery */
+
+  function hashParams() {
+    var out = {};
+    var raw = String(location.hash || "").replace(/^#/, "");
+    if (!raw) { return out; }
+    raw.split("&").forEach(function (pair) {
+      var at = pair.indexOf("=");
+      if (at === -1) { return; }
+      out[decodeURIComponent(pair.slice(0, at))] = decodeURIComponent(pair.slice(at + 1));
+    });
+    return out;
+  }
+
+  function clearHash() {
+    if (!location.hash) { return; }
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, "", location.pathname + location.search);
+    }
+  }
+
+  /* Supabase puts the recovery / magic-link tokens in the URL fragment. */
+  function tokensFromHash() {
+    var p = hashParams();
+    if (!p.access_token) { return null; }
+    var session = {
+      access_token: p.access_token,
+      refresh_token: p.refresh_token || "",
+      expires_at: p.expires_in ? Math.floor(Date.now() / 1000) + Number(p.expires_in) : 0,
+      email: "",
+      id: ""
+    };
+    return { type: p.type || "", session: session, error: p.error_description || "" };
+  }
+
+  async function hydrateSession(session) {
+    if (!session || !session.access_token) { return null; }
+    try {
+      var me = await call("/auth/v1/user", { token: session.access_token });
+      session.email = (me && me.email) || "";
+      session.id = (me && me.id) || "";
+    } catch (err) { return null; }
+    writeSession(session);
+    state.session = session;
+    return session;
+  }
+
+  /* Ask Supabase to email a recovery link that comes back to this site. */
+  function recoverPassword(email) {
+    var dir = location.origin + location.pathname.replace(/[^/]*$/, "");
+    return call("/auth/v1/recover", {
+      method: "POST",
+      body: { email: email, redirect_to: dir + "reset.html" }
+    });
+  }
+
+  /* Requires a signed-in session — either a normal one or the recovery token. */
+  async function updatePassword(password, sessionOverride) {
+    var session = sessionOverride || state.session;
+    if (!session) { throw new Error("Open the recovery link again."); }
+    await call("/auth/v1/user", {
+      method: "PUT",
+      token: session.access_token,
+      body: { password: password }
+    });
+    writeSession(null);
+    state.session = null;
+    state.profile = null;
+  }
+
   async function updateProfile(patch) {
     if (!state.session) { throw new Error("Not signed in."); }
     await call("/rest/v1/profiles?id=eq." + encodeURIComponent(state.session.id), {
@@ -357,7 +427,24 @@
 
     state.session = readSession();
     state.session = await ensureFresh(state.session);
-    if (state.session) { state.profile = await fetchProfile(state.session); }
+
+    /* A recovery or magic link lands with its tokens in the fragment. */
+    var fromLink = tokensFromHash();
+    if (fromLink && fromLink.session) {
+      if (fromLink.type === "recovery") {
+        location.replace("reset.html" + location.hash);
+        return;
+      }
+      var hydrated = await hydrateSession(fromLink.session);
+      if (hydrated) {
+        state.session = hydrated;
+        state.profile = await fetchProfile(hydrated);
+        clearHash();
+        log("sign_in", { via: fromLink.type || "link" });
+      }
+    }
+
+    if (state.session && !state.profile) { state.profile = await fetchProfile(state.session); }
 
     state.ready = true;
     waiters.splice(0).forEach(function (fn) { fn(state.profile); });
@@ -383,6 +470,11 @@
     signIn: signIn,
     signUp: signUp,
     signOut: signOut,
+    recoverPassword: recoverPassword,
+    updatePassword: updatePassword,
+    tokensFromHash: tokensFromHash,
+    hydrateSession: hydrateSession,
+    clearHash: clearHash,
     updateProfile: updateProfile,
     planLabel: planLabel,
     roleLabel: roleLabel,

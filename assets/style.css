@@ -1073,3 +1073,16 @@ body.is-app .site-header { flex: none; }
 }
 .support-banner strong { color: #fff; }
 .is-support-view .account-chip-plan { color: var(--blue); }
+
+
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--blue);
+  font: 500 .86rem/1.4 var(--sans);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link-button:hover { color: var(--lime); }

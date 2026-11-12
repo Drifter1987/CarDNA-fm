@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reset password — CarDNA</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/motion.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="index.html" aria-label="CarDNA home">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      </svg>
+      <span>
+        <span class="logo-word">CarDNA</span>
+        <span class="logo-sub">by GMOttomotive</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <a class="btn btn--ghost btn--sm" href="signin.html">Sign in</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section section--tight">
+    <div class="container" style="max-width:520px">
+      <div class="kicker">Account</div>
+      <h1 style="font-size:clamp(1.8rem,4vw,2.4rem)" id="reset-title">Choose a new password.</h1>
+      <p style="color:var(--dim);margin-top:14px" id="reset-lede">
+        This page only works from the link in the recovery email. If you opened it directly, ask for a new link below.
+      </p>
+
+      <div class="vault-panel" style="margin-top:24px">
+        <form id="reset-form">
+          <div class="vault-key" style="margin-top:0">
+            <input type="password" id="new-password" autocomplete="new-password"
+                   placeholder="New password (min 8 characters)">
+            <input type="password" id="new-password2" autocomplete="new-password"
+                   placeholder="Repeat new password">
+          </div>
+          <div class="vault-actions">
+            <button class="btn" type="submit">Set password</button>
+          </div>
+        </form>
+
+        <form id="request-form" hidden>
+          <div class="vault-key" style="margin-top:0">
+            <input type="email" id="reset-email" autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="vault-actions">
+            <button class="btn" type="submit">Email me a reset link</button>
+          </div>
+        </form>
+
+        <p class="vault-status" id="reset-status" aria-live="polite"></p>
+      </div>
+
+      <div class="notice" style="margin-top:22px">
+        <strong>What happens next.</strong> The password is sent straight to Supabase over HTTPS and
+        hashed by Postgres. Nothing is written to this site, and this page closes the session it was
+        given as soon as the password is set.
+      </div>
+
+      <p style="margin-top:18px;font-size:.86rem;color:var(--dim-2)">
+        <a href="signin.html">Back to sign in</a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<script src="assets/supabase-config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/motion.js"></script>
+<script>
+  (function () {
+    "use strict";
+
+    var auth = window.CarDNAAuth;
+    var titleEl = document.getElementById("reset-title");
+    var ledeEl = document.getElementById("reset-lede");
+    var resetForm = document.getElementById("reset-form");
+    var requestForm = document.getElementById("request-form");
+    var pass1 = document.getElementById("new-password");
+    var pass2 = document.getElementById("new-password2");
+    var emailEl = document.getElementById("reset-email");
+    var statusEl = document.getElementById("reset-status");
+
+    function status(text, tone) {
+      statusEl.textContent = text || "";
+      if (tone) { statusEl.setAttribute("data-tone", tone); }
+      else { statusEl.removeAttribute("data-tone"); }
+    }
+
+    if (!auth.configured()) {
+      status("Accounts are not configured: add the publishable key to assets/supabase-config.js.", "error");
+      resetForm.hidden = true;
+      requestForm.hidden = true;
+      return;
+    }
+
+    /* The recovery link carries its tokens in the fragment. Anything else is someone
+       opening this page by hand, so we offer to send a fresh link instead. */
+    var link = auth.tokensFromHash();
+    var linkSession = link && link.session;
+
+    if (link && link.error) {
+      status("That link is no longer valid: " + link.error + " Ask for a new one below.", "error");
+      linkSession = null;
+    }
+
+    if (!linkSession) {
+      titleEl.textContent = "Get a reset link.";
+      ledeEl.textContent = "Enter the address on your account and Supabase will email you a link " +
+        "that opens this page.";
+      resetForm.hidden = true;
+      requestForm.hidden = false;
+    } else {
+      auth.clearHash();
+      auth.hydrateSession(linkSession);
+    }
+
+    resetForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var password = pass1.value || "";
+
+      if (password.length < 8) {
+        status("Use at least 8 characters.", "error");
+        pass1.focus();
+        return;
+      }
+      if (pass1.value !== pass2.value) {
+        status("The two passwords do not match.", "error");
+        pass2.focus();
+        return;
+      }
+
+      status("Saving the new password…", "");
+
+      try {
+        await auth.updatePassword(password, linkSession);
+        status("Password changed. Redirecting to sign in…", "ok");
+        setTimeout(function () { location.replace("signin.html"); }, 1200);
+      } catch (err) {
+        status(err.message || "The password could not be saved.", "error");
+      }
+    });
+
+    requestForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      var email = (emailEl.value || "").trim();
+      if (!email || email.indexOf("@") === -1) {
+        status("Enter the email address on the account.", "error");
+        emailEl.focus();
+        return;
+      }
+
+      status("Sending the link…", "");
+      try {
+        await auth.recoverPassword(email);
+        status("If that address has an account, a reset link is on its way. " +
+          "Open it on this device — it expires in an hour.", "ok");
+      } catch (err) {
+        status(err.message || "The link could not be sent.", "error");
+      }
+    });
+  })();
+</script>
+</body>
+</html>

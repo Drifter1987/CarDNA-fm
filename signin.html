@@ -51,6 +51,10 @@
             <button class="btn" type="submit" data-mode="in">Sign in</button>
             <button class="btn btn--ghost" type="button" data-mode="up">Create account</button>
           </div>
+
+          <p style="margin-top:14px">
+            <button type="button" class="link-button" id="forgot-password">Forgot password?</button>
+          </p>
         </form>
 
         <p class="vault-status" id="signin-status" aria-live="polite"></p>
@@ -141,6 +145,26 @@
     document.querySelectorAll("[data-mode]").forEach(function (button) {
       button.addEventListener("click", function () { submit(button.getAttribute("data-mode")); });
     });
+
+    var forgot = document.getElementById("forgot-password");
+    if (forgot) {
+      forgot.addEventListener("click", async function () {
+        var email = (emailEl.value || "").trim();
+        if (!email || email.indexOf("@") === -1) {
+          status("Type your email address above, then tap Forgot password.", "error");
+          emailEl.focus();
+          return;
+        }
+        status("Sending the reset link…", "");
+        try {
+          await window.CarDNAAuth.recoverPassword(email);
+          status("If that address has an account, a reset link is on its way. " +
+            "Open it on this device — it expires in an hour.", "ok");
+        } catch (err) {
+          status(err.message || "The reset link could not be sent.", "error");
+        }
+      });
+    }
   })();
 </script>
 </body>
