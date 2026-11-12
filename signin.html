@@ -161,7 +161,14 @@
           status("If that address has an account, a reset link is on its way. " +
             "Open it on this device — it expires in an hour.", "ok");
         } catch (err) {
-          status(err.message || "The reset link could not be sent.", "error");
+          var message = String(err.message || "");
+          if (/rate limit|too many/i.test(message)) {
+            status("Email is rate-limited right now — Supabase's built-in mailer allows only a " +
+              "couple an hour. Sign in if you can, then change your password on the Garage page; " +
+              "or try again later.", "error");
+          } else {
+            status(message || "The reset link could not be sent.", "error");
+          }
         }
       });
     }

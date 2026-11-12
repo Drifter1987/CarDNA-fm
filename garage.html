@@ -83,8 +83,33 @@
 
       <div class="notice" style="margin-top:28px">
         <strong>Where this lives.</strong> Saved vehicles sit in this browser's local storage under
-        <code>cardna.garage</code>, tied to the account you are signed in as. Clearing site data,
-        using private mode, or switching device will lose them until garage sync ships.
+        <code>cardna.garage</code>, tied to the account you are signed in as, and mirror to Supabase so
+        they follow you between devices.
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="vault-panel" style="max-width:520px">
+        <h3 style="font-size:1rem">Password</h3>
+        <p style="color:var(--dim);font-size:.9rem;margin-top:6px">
+          Change it here without an email — the signed-in session is the proof of identity.
+        </p>
+
+        <form id="password-form">
+          <div class="vault-key">
+            <input type="password" id="password-new" autocomplete="new-password"
+                   placeholder="New password (min 8 characters)">
+            <input type="password" id="password-new2" autocomplete="new-password"
+                   placeholder="Repeat new password">
+          </div>
+          <div class="vault-actions">
+            <button class="btn btn--sm" type="submit">Change password</button>
+          </div>
+        </form>
+
+        <p class="vault-status" id="password-status" aria-live="polite"></p>
       </div>
     </div>
   </section>

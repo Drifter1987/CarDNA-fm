@@ -357,6 +357,45 @@
 
     render();
 
+    var passwordForm = document.getElementById("password-form");
+    if (passwordForm) {
+      passwordForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var a = document.getElementById("password-new");
+        var b = document.getElementById("password-new2");
+        var out = document.getElementById("password-status");
+
+        function say(text, tone) {
+          out.textContent = text || "";
+          if (tone) { out.setAttribute("data-tone", tone); }
+          else { out.removeAttribute("data-tone"); }
+        }
+
+        if ((a.value || "").length < 8) {
+          say("Use at least 8 characters.", "error");
+          a.focus();
+          return;
+        }
+        if (a.value !== b.value) {
+          say("The two passwords do not match.", "error");
+          b.focus();
+          return;
+        }
+
+        say("Saving…", "");
+
+        try {
+          await window.CarDNAAuth.changePassword(a.value);
+          a.value = "";
+          b.value = "";
+          say("Password changed. Use it the next time you sign in.", "ok");
+          if (window.CarDNAAuth.log) { window.CarDNAAuth.log("password_change", {}); }
+        } catch (err) {
+          say(err.message || "The password could not be changed.", "error");
+        }
+      });
+    }
+
     if (serverReady()) {
       window.CarDNAGarage.pull().then(function () { render(); })
         .catch(function () { /* local copy is enough */ });

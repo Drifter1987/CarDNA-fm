@@ -222,6 +222,18 @@
     });
   }
 
+  /* Change the password of the signed-in account. The live session is proof of identity,
+     so no email round-trip is needed — which matters when the mailer is rate limited. */
+  async function changePassword(password) {
+    if (!state.session) { throw new Error("Sign in first."); }
+    await call("/auth/v1/user", {
+      method: "PUT",
+      token: state.session.access_token,
+      body: { password: password }
+    });
+    return true;
+  }
+
   /* Requires a signed-in session — either a normal one or the recovery token. */
   async function updatePassword(password, sessionOverride) {
     var session = sessionOverride || state.session;
@@ -486,6 +498,7 @@
     signOut: signOut,
     recoverPassword: recoverPassword,
     updatePassword: updatePassword,
+    changePassword: changePassword,
     tokensFromHash: tokensFromHash,
     hydrateSession: hydrateSession,
     clearHash: clearHash,
