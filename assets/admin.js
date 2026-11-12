@@ -69,6 +69,19 @@
     return row.email || row.display_name || (row.id ? row.id.slice(0, 8) : "account");
   }
 
+  /* Rows can arrive with a role or plan that is not exactly what the console writes
+     ("User", " user ", an empty string from an older migration). Every comparison goes
+     through these two, so one oddly cased row cannot hide its own controls. */
+  function roleOf(row) {
+    var raw = String(row.role || "user").toLowerCase().trim();
+    return raw === "owner" || raw === "admin" ? raw : "user";
+  }
+
+  function planOf(row) {
+    var raw = String(row.plan || "free").toLowerCase().trim();
+    return PLANS.indexOf(raw) === -1 ? "free" : raw;
+  }
+
   function joined(row) {
     if (!row.created_at) { return "—"; }
     try { return new Date(row.created_at).toISOString().slice(0, 10); }
@@ -76,7 +89,8 @@
   }
 
   function isBlocked(row) {
-    return row.status === "blocked" || row.plan === "suspended";
+    return String(row.status || "").toLowerCase() === "blocked" ||
+      String(row.plan || "").toLowerCase() === "suspended";
   }
 
   async function rpc(name, body) {
@@ -91,9 +105,13 @@
   /* ------------------------------------------------------------------ stats */
 
   function renderStats() {
-    var staff = rows.filter(function (r) { return r.role === "owner" || r.role === "admin"; }).length;
+    var staff = rows.filter(function (r) {
+      var role = roleOf(r);
+      return role === "owner" || role === "admin";
+    }).length;
     var paid = rows.filter(function (r) {
-      return r.plan === "pro" || r.plan === "workshop" || r.plan === "business";
+      var plan = planOf(r);
+      return plan === "pro" || plan === "workshop" || plan === "business";
     }).length;
     var blocked = rows.filter(isBlocked).length;
     var weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -109,7 +127,7 @@
     document.getElementById("stat-week").textContent = String(fresh);
 
     var mix = {};
-    rows.forEach(function (r) { mix[r.plan || "free"] = (mix[r.plan || "free"] || 0) + 1; });
+    rows.forEach(function (r) { mix[planOf(r)] = (mix[planOf(r)] || 0) + 1; });
     document.getElementById("plan-mix").textContent =
       PLANS.filter(function (p) { return mix[p]; })
         .map(function (p) { return auth.planLabel(p) + " " + mix[p]; }).join("  ·  ") || "no accounts yet";
@@ -384,16 +402,17 @@
   /* ------------------------------------------------------------------ table */
 
   function canManage(row) {
-    if (row.role === "owner") { return false; }
+    var role = roleOf(row);
+    if (role === "owner") { return false; }
     if (actingRole() === "owner") { return true; }
-    if (actingRole() === "admin") { return row.role === "user"; }
+    if (actingRole() === "admin") { return role === "user"; }
     return false;
   }
 
   function matches(row) {
     if (!query) { return true; }
-    var hay = (label(row) + " " + (row.display_name || "") + " " + (row.plan || "") + " " +
-      (row.role || "")).toLowerCase();
+    var hay = (label(row) + " " + (row.display_name || "") + " " + planOf(row) + " " +
+      roleOf(row)).toLowerCase();
     return hay.indexOf(query) !== -1;
   }
 
@@ -424,7 +443,8 @@
       var box = document.createElement("div");
       box.className = "access-stack";
 
-      var rowRole = row.role || "user";
+      var rowRole = roleOf(row);
+      var rowPlan = planOf(row);
       var ownerView = actingRole() === "owner";
 
       /* Only the owner changes roles. An admin grants plans, not permissions. */
@@ -470,7 +490,7 @@
         /* An admin may grant Free, Pro and Workshop. Business is the owner's alone, and an
            account already on it is shown rather than offered — a select that did not contain
            the current value would silently downgrade the account on the next change. */
-        var adminCeiling = !ownerView && (row.plan || "free") === "business";
+        var adminCeiling = !ownerView && rowPlan === "business";
 
         if (adminCeiling) {
           var ceilingText = document.createElement("span");
@@ -496,7 +516,7 @@
             var option = document.createElement("option");
             option.value = id;
             option.textContent = auth.planLabel(id);
-            if ((row.plan || "free") === id) { option.selected = true; }
+            if (rowPlan === id) { option.selected = true; }
             planSelect.appendChild(option);
           });
 
@@ -511,7 +531,7 @@
       } else if (rowRole === "user") {
         var planText = document.createElement("span");
         planText.className = "access-static";
-        planText.textContent = auth.planLabel(row.plan || "free");
+        planText.textContent = auth.planLabel(rowPlan);
         box.appendChild(planText);
       }
 
@@ -578,7 +598,7 @@
     /* Mirrors the database trigger: the console is not the last line of defence. */
     if (plan === "business" && actingRole() !== "owner") {
       status("Only the owner can grant the Business plan.", "error");
-      control.value = row.plan || "free";
+      control.value = planOf(row);
       return;
     }
 
@@ -591,7 +611,7 @@
       renderStats();
     } catch (err) {
       status(err.message || "That change did not save.", "error");
-      control.value = row.plan || "free";
+      control.value = planOf(row);
     } finally {
       control.disabled = false;
     }
@@ -600,7 +620,7 @@
   async function setRole(row, role, control) {
     if (actingRole() !== "owner") {
       status("Only the owner can change a role.", "error");
-      control.value = row.role || "user";
+      control.value = roleOf(row);
       return;
     }
 
@@ -659,8 +679,8 @@
       window.sessionStorage.setItem("cardna.viewAs", JSON.stringify({
         id: row.id,
         email: row.email || "",
-        role: row.role || "user",
-        plan: row.plan || "free"
+        role: roleOf(row),
+        plan: planOf(row)
       }));
     } catch (err) { /* storage blocked */ }
     location.href = "index.html";
