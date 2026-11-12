@@ -105,7 +105,12 @@
       var selected = tab.getAttribute("data-tab") === name;
       tab.setAttribute("aria-selected", selected ? "true" : "false");
       tab.setAttribute("tabindex", selected ? "0" : "-1");
-      if (selected) { found = true; }
+      if (selected) {
+        found = true;
+        /* Keep the active tab inside the scroller instead of letting it sit off-screen. */
+        try { tab.scrollIntoView({ block: "nearest", inline: "nearest" }); }
+        catch (err) { /* older browsers */ }
+      }
     });
 
     if (!found) { return false; }

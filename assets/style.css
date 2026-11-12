@@ -52,6 +52,12 @@
 [data-theme="light"] .vault-text,
 [data-theme="light"] .search-input { background: #fff; }
 
+/* The lime→white sheen is unreadable on a light page; use a darker ramp instead. */
+[data-theme="light"] .hero h1 em,
+[data-theme="light"] .panel h1 em {
+  background-image: linear-gradient(100deg, #2f7a00 0%, #8fd12f 45%, #2f7a00 100%);
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -1052,7 +1058,8 @@ body.is-app .site-header { flex: none; }
 }
 .activity-list li {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 4px 10px;
   align-items: baseline;
   border-bottom: 1px solid var(--line);
   padding-bottom: 6px;
@@ -1060,7 +1067,7 @@ body.is-app .site-header { flex: none; }
 .activity-list li:last-child { border-bottom: 0; }
 .activity-list .act-kind { color: var(--lime); text-transform: uppercase; letter-spacing: .1em; }
 .activity-list .act-who { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.activity-list .act-when { margin-left: auto; color: var(--dim-2); white-space: nowrap; }
+.activity-list .act-when { margin-left: auto; color: var(--dim-2); white-space: nowrap; flex: 0 0 auto; }
 
 .role-select {
   font: 500 11px/1 var(--mono);

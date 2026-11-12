@@ -26,6 +26,25 @@
   var query = "";
   var previewRole = "";
 
+  /* Sample rows so an owner can SEE what the admin and user views look like before
+     there is a second real account. They are displayed only; every control on them
+     is disabled and no RPC is ever sent for them. */
+  var DEMO_ROWS = [
+    { id: "demo-admin", demo: true, email: "admin@example.com", display_name: "Sam (sample)",
+      role: "admin", plan: "free", status: "active", created_at: new Date().toISOString() },
+    { id: "demo-user", demo: true, email: "rider@example.com", display_name: "Rider (sample)",
+      role: "user", plan: "pro", status: "active", created_at: new Date().toISOString() },
+    { id: "demo-blocked", demo: true, email: "abuser@example.com", display_name: "Blocked (sample)",
+      role: "user", plan: "free", status: "blocked", blocked_reason: "Abuse",
+      created_at: new Date().toISOString() }
+  ];
+
+  function displayRows() {
+    var base = rows.filter(matches);
+    if (!previewRole) { return base; }
+    return base.concat(DEMO_ROWS.filter(matches));
+  }
+
   /* Owner sees everything; admin sees the same table but may only act on users; the user
      preview is deliberately read-only so nothing can be changed by accident. */
   function actingRole() {
@@ -85,6 +104,7 @@
     document.getElementById("stat-staff").textContent = String(staff);
     document.getElementById("stat-paid").textContent = String(paid);
     document.getElementById("stat-blocked").textContent = String(blocked);
+    document.getElementById("stat-active").textContent = String(rows.length - blocked);
     document.getElementById("stat-week").textContent = String(fresh);
 
     var mix = {};
@@ -172,7 +192,7 @@
   }
 
   function renderRows() {
-    var list = rows.filter(matches);
+    var list = displayRows();
     rowsEl.innerHTML = "";
 
     if (!list.length) {
@@ -199,7 +219,7 @@
       box.className = "access-stack";
 
       var rowRole = row.role || "user";
-      var canEditRole = editable && row.id !== (auth.state.profile && auth.state.profile.id);
+      var canEditRole = editable && !row.demo && row.id !== (auth.state.profile && auth.state.profile.id);
 
       if (canEditRole) {
         var roleWrap = document.createElement("label");
@@ -237,7 +257,7 @@
 
       /* The plan only means something for a normal user, so it appears under the
          role and only when the role is user. */
-      if (rowRole === "user" && editable) {
+      if (rowRole === "user" && editable && !row.demo) {
         var planWrap = document.createElement("label");
         planWrap.className = "access-field";
         var planLab = document.createElement("span");
@@ -285,7 +305,7 @@
       tr.appendChild(date);
 
       var actions = document.createElement("td");
-      if (editable) {
+      if (editable && !row.demo) {
         var block = document.createElement("button");
         block.type = "button";
         block.className = "btn btn--ghost btn--sm";
@@ -294,7 +314,7 @@
         actions.appendChild(block);
       }
 
-      if (actingRole() === "owner" && row.id !== (auth.state.profile && auth.state.profile.id)) {
+      if (actingRole() === "owner" && !row.demo && row.id !== (auth.state.profile && auth.state.profile.id)) {
         var view = document.createElement("button");
         view.type = "button";
         view.className = "btn btn--ghost btn--sm";
