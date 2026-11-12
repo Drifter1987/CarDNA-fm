@@ -177,7 +177,7 @@
 
     if (!list.length) {
       var empty = document.createElement("tr");
-      empty.innerHTML = '<td colspan="6" style="color:var(--dim-2)">' +
+      empty.innerHTML = '<td colspan="5" style="color:var(--dim-2)">' +
         (rows.length ? "No account matches that search." : "No accounts yet.") + "</td>";
       rowsEl.appendChild(empty);
       metaEl.textContent = rows.length + " accounts";
@@ -194,47 +194,84 @@
           ? '<div class="mono-dim">' + escapeHtml(row.display_name) + "</div>" : "");
       tr.appendChild(who);
 
-      var planCell = document.createElement("td");
-      if (editable) {
-        var planSelect = document.createElement("select");
-        planSelect.className = "plan-select";
-        planSelect.setAttribute("aria-label", "Plan for " + label(row));
-        PLANS.forEach(function (plan) {
-          var option = document.createElement("option");
-          option.value = plan;
-          option.textContent = auth.planLabel(plan);
-          if ((row.plan || "free") === plan) { option.selected = true; }
-          planSelect.appendChild(option);
-        });
-        planSelect.addEventListener("change", function () {
-          setPlan(row, planSelect.value, planSelect);
-        });
-        planCell.appendChild(planSelect);
-      } else {
-        planCell.textContent = auth.planLabel(row.plan || "free");
-      }
-      tr.appendChild(planCell);
+      var cell = document.createElement("td");
+      var box = document.createElement("div");
+      box.className = "access-stack";
 
-      var roleCell = document.createElement("td");
-      if (actingRole() === "owner" && row.id !== (auth.state.profile && auth.state.profile.id)) {
+      var rowRole = row.role || "user";
+      var canEditRole = editable && row.id !== (auth.state.profile && auth.state.profile.id);
+
+      if (canEditRole) {
+        var roleWrap = document.createElement("label");
+        roleWrap.className = "access-field";
+        var roleLab = document.createElement("span");
+        roleLab.className = "access-label";
+        roleLab.textContent = "Role";
+
         var roleSelect = document.createElement("select");
         roleSelect.className = "role-select";
         roleSelect.setAttribute("aria-label", "Role for " + label(row));
-        ROLES.forEach(function (role) {
+
+        var roleOptions = actingRole() === "owner" ? ["user", "admin", "owner"] : ["user", "admin"];
+        roleOptions.forEach(function (role) {
           var option = document.createElement("option");
           option.value = role;
           option.textContent = auth.roleLabel(role);
-          if ((row.role || "user") === role) { option.selected = true; }
+          if (rowRole === role) { option.selected = true; }
           roleSelect.appendChild(option);
         });
+
+        roleWrap.appendChild(roleLab);
+        roleWrap.appendChild(roleSelect);
+        box.appendChild(roleWrap);
+
         roleSelect.addEventListener("change", function () {
           setRole(row, roleSelect.value, roleSelect);
         });
-        roleCell.appendChild(roleSelect);
       } else {
-        roleCell.textContent = auth.roleLabel(row.role || "user");
+        var roleText = document.createElement("span");
+        roleText.className = "access-static";
+        roleText.textContent = auth.roleLabel(rowRole);
+        box.appendChild(roleText);
       }
-      tr.appendChild(roleCell);
+
+      /* The plan only means something for a normal user, so it appears under the
+         role and only when the role is user. */
+      if (rowRole === "user" && editable) {
+        var planWrap = document.createElement("label");
+        planWrap.className = "access-field";
+        var planLab = document.createElement("span");
+        planLab.className = "access-label";
+        planLab.textContent = "Plan";
+
+        var planSelect = document.createElement("select");
+        planSelect.className = "plan-select";
+        planSelect.setAttribute("aria-label", "Plan for " + label(row));
+
+        auth.plans().forEach(function (plan) {
+          var option = document.createElement("option");
+          option.value = plan.id;
+          option.textContent = plan.label;
+          if ((row.plan || "free") === plan.id) { option.selected = true; }
+          planSelect.appendChild(option);
+        });
+
+        planWrap.appendChild(planLab);
+        planWrap.appendChild(planSelect);
+        box.appendChild(planWrap);
+
+        planSelect.addEventListener("change", function () {
+          setPlan(row, planSelect.value, planSelect);
+        });
+      } else if (rowRole === "user") {
+        var planText = document.createElement("span");
+        planText.className = "access-static";
+        planText.textContent = auth.planLabel(row.plan || "free");
+        box.appendChild(planText);
+      }
+
+      cell.appendChild(box);
+      tr.appendChild(cell);
 
       var statusCell = document.createElement("td");
       var pill = document.createElement("span");

@@ -1105,3 +1105,15 @@ body.is-app .site-header { flex: none; }
   text-underline-offset: 3px;
 }
 .link-button:hover { color: var(--lime); }
+
+
+/* ---------------------------------------------------------------- access stack */
+.access-stack { display: grid; gap: 6px; justify-items: start; }
+.access-field { display: grid; gap: 3px; }
+.access-label {
+  font: 600 8px/1 var(--mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--dim-2);
+}
+.access-static { font: 500 11px/1.5 var(--mono); color: var(--text); }

@@ -262,8 +262,19 @@
 
   /* ------------------------------------------------------------------ helpers */
 
+  /* The plan catalogue. Database values are stable; only the labels change as the
+     commercial names settle. Tier 1/2/3 are deliberate placeholders. */
+  var PLANS = [
+    { id: "free", label: "Free" },
+    { id: "pro", label: "Tier 1" },
+    { id: "workshop", label: "Tier 2" },
+    { id: "business", label: "Tier 3" }
+  ];
+
   function planLabel(plan) {
-    return { free: "Free", pro: "Pro", workshop: "Workshop", business: "Business", suspended: "Suspended" }[plan] || plan;
+    if (plan === "suspended") { return "Suspended"; }
+    var found = PLANS.filter(function (p) { return p.id === plan; })[0];
+    return found ? found.label : (plan || "Free");
   }
 
   function roleLabel(role) {
@@ -504,6 +515,7 @@
     clearHash: clearHash,
     updateProfile: updateProfile,
     planLabel: planLabel,
+    plans: function () { return PLANS.slice(); },
     roleLabel: roleLabel,
     isOwner: isOwner,
     isStaff: isStaff,
