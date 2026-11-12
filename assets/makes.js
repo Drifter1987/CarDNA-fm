@@ -494,7 +494,7 @@
       if (metaEl) {
         var models = list.reduce(function (total, brand) { return total + brand.models.length; }, 0);
         metaEl.textContent = list.length + " brands \u00b7 " + models.toLocaleString() +
-          " models \u00b7 " + groups.length + " countries";
+          " models \u00b7 " + groups.length + (groups.length === 1 ? " country" : " countries");
       }
     }
 
