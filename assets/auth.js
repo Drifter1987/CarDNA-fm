@@ -204,12 +204,13 @@
     return session;
   }
 
-  /* Ask Supabase to email a recovery link that comes back to this site. */
+  /* Ask Supabase to email a recovery link that comes back to this site.
+     redirect_to is a query parameter on GoTrue for this endpoint. */
   function recoverPassword(email) {
     var dir = location.origin + location.pathname.replace(/[^/]*$/, "");
-    return call("/auth/v1/recover", {
+    return call("/auth/v1/recover?redirect_to=" + encodeURIComponent(dir + "reset.html"), {
       method: "POST",
-      body: { email: email, redirect_to: dir + "reset.html" }
+      body: { email: email }
     });
   }
 
@@ -429,18 +430,23 @@
     state.session = await ensureFresh(state.session);
 
     /* A recovery or magic link lands with its tokens in the fragment. */
+    var page = location.pathname.split("/").pop() || "index.html";
     var fromLink = tokensFromHash();
     if (fromLink && fromLink.session) {
       if (fromLink.type === "recovery") {
-        location.replace("reset.html" + location.hash);
-        return;
-      }
-      var hydrated = await hydrateSession(fromLink.session);
-      if (hydrated) {
-        state.session = hydrated;
-        state.profile = await fetchProfile(hydrated);
-        clearHash();
-        log("sign_in", { via: fromLink.type || "link" });
+        /* reset.html reads these tokens itself — redirecting from there would loop. */
+        if (page !== "reset.html") {
+          location.replace("reset.html" + location.hash);
+          return;
+        }
+      } else {
+        var hydrated = await hydrateSession(fromLink.session);
+        if (hydrated) {
+          state.session = hydrated;
+          state.profile = await fetchProfile(hydrated);
+          clearHash();
+          log("sign_in", { via: fromLink.type || "link" });
+        }
       }
     }
 
