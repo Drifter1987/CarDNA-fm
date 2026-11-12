@@ -425,7 +425,11 @@
       box.className = "access-stack";
 
       var rowRole = row.role || "user";
-      var canEditRole = editable && !row.demo && row.id !== (auth.state.profile && auth.state.profile.id);
+      var ownerView = actingRole() === "owner";
+
+      /* Only the owner changes roles. An admin grants plans, not permissions. */
+      var canEditRole = ownerView && editable && !row.demo &&
+        row.id !== (auth.state.profile && auth.state.profile.id);
 
       if (canEditRole) {
         var roleWrap = document.createElement("label");
@@ -438,8 +442,7 @@
         roleSelect.className = "role-select";
         roleSelect.setAttribute("aria-label", "Role for " + label(row));
 
-        var roleOptions = actingRole() === "owner" ? ["user", "admin", "owner"] : ["user", "admin"];
-        roleOptions.forEach(function (role) {
+        ["user", "admin", "owner"].forEach(function (role) {
           var option = document.createElement("option");
           option.value = role;
           option.textContent = auth.roleLabel(role);
@@ -464,31 +467,47 @@
       /* The plan only means something for a normal user, so it appears under the
          role and only when the role is user. */
       if (rowRole === "user" && editable && !row.demo) {
-        var planWrap = document.createElement("label");
-        planWrap.className = "access-field";
-        var planLab = document.createElement("span");
-        planLab.className = "access-label";
-        planLab.textContent = "Plan";
+        /* An admin may grant Free, Pro and Workshop. Business is the owner's alone, and an
+           account already on it is shown rather than offered — a select that did not contain
+           the current value would silently downgrade the account on the next change. */
+        var adminCeiling = !ownerView && (row.plan || "free") === "business";
 
-        var planSelect = document.createElement("select");
-        planSelect.className = "plan-select";
-        planSelect.setAttribute("aria-label", "Plan for " + label(row));
+        if (adminCeiling) {
+          var ceilingText = document.createElement("span");
+          ceilingText.className = "access-static";
+          ceilingText.textContent = "Business · owner only";
+          box.appendChild(ceilingText);
+        } else {
+          var planOptions = ownerView ? PLANS.slice() : PLANS.filter(function (plan) {
+            return plan !== "business";
+          });
 
-        auth.plans().forEach(function (plan) {
-          var option = document.createElement("option");
-          option.value = plan.id;
-          option.textContent = plan.label;
-          if ((row.plan || "free") === plan.id) { option.selected = true; }
-          planSelect.appendChild(option);
-        });
+          var planWrap = document.createElement("label");
+          planWrap.className = "access-field";
+          var planLab = document.createElement("span");
+          planLab.className = "access-label";
+          planLab.textContent = ownerView ? "Plan" : "Plan · up to Workshop";
 
-        planWrap.appendChild(planLab);
-        planWrap.appendChild(planSelect);
-        box.appendChild(planWrap);
+          var planSelect = document.createElement("select");
+          planSelect.className = "plan-select";
+          planSelect.setAttribute("aria-label", "Plan for " + label(row));
 
-        planSelect.addEventListener("change", function () {
-          setPlan(row, planSelect.value, planSelect);
-        });
+          planOptions.forEach(function (id) {
+            var option = document.createElement("option");
+            option.value = id;
+            option.textContent = auth.planLabel(id);
+            if ((row.plan || "free") === id) { option.selected = true; }
+            planSelect.appendChild(option);
+          });
+
+          planWrap.appendChild(planLab);
+          planWrap.appendChild(planSelect);
+          box.appendChild(planWrap);
+
+          planSelect.addEventListener("change", function () {
+            setPlan(row, planSelect.value, planSelect);
+          });
+        }
       } else if (rowRole === "user") {
         var planText = document.createElement("span");
         planText.className = "access-static";
@@ -556,6 +575,13 @@
   /* ------------------------------------------------------------------ writes */
 
   async function setPlan(row, plan, control) {
+    /* Mirrors the database trigger: the console is not the last line of defence. */
+    if (plan === "business" && actingRole() !== "owner") {
+      status("Only the owner can grant the Business plan.", "error");
+      control.value = row.plan || "free";
+      return;
+    }
+
     control.disabled = true;
     status("Saving " + label(row) + " → " + auth.planLabel(plan) + "…", "");
     try {
@@ -572,6 +598,12 @@
   }
 
   async function setRole(row, role, control) {
+    if (actingRole() !== "owner") {
+      status("Only the owner can change a role.", "error");
+      control.value = row.role || "user";
+      return;
+    }
+
     control.disabled = true;
     status("Setting " + label(row) + " to " + auth.roleLabel(role) + "…", "");
     try {
