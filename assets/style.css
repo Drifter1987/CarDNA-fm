@@ -421,6 +421,16 @@ img, svg { display: block; max-width: 100%; }
   .nav[data-open="true"] { display: flex; }
   .nav a { padding: 12px 8px; }
   .header-inner { position: relative; }
+  /* The action row gets its own line instead of pushing Account off-screen. */
+  .header-actions {
+    flex: 1 1 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+    gap: 6px;
+    padding-bottom: 8px;
+  }
+  .header-actions .btn { padding: 8px 11px; font-size: .8rem; }
+  .account-chip { flex-wrap: wrap; }
   .hero { padding: 52px 0 44px; }
   .dna-rows { grid-template-columns: 1fr; }
   .vin-row { flex-direction: column; }
@@ -692,7 +702,7 @@ body.is-app .site-header { flex: none; }
   gap: 8px;
 }
 @media (max-width: 520px) {
-  .header-actions .btn:first-child { display: none; }
+  .header-actions .btn:first-child { display: inline-flex; }
 }
 
 
