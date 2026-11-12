@@ -460,6 +460,9 @@
   /* ------------------------------------------------------------------ boot */
 
   auth.ready(function (profile) {
+    var loadingEl = document.getElementById("admin-loading");
+    if (loadingEl) { loadingEl.hidden = true; }
+
     if (!profile || (profile.role !== "owner" && profile.role !== "admin")) {
       appEl.hidden = true;
       deniedEl.hidden = false;
