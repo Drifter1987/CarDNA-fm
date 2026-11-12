@@ -9,7 +9,15 @@
   var BASE = String(CONFIG.url || "").replace(/\/+$/, "");
   var KEY = String(CONFIG.key || "").trim();
   var SESSION_KEY = "cardna.session";
-  var PUBLIC_PAGES = { "about.html": 1, "legal.html": 1, "pricing.html": 1, "signin.html": 1 };
+  /* Pages reachable without a session. reset.html handles its own recovery token,
+     so it must never be bounced to the sign-in gate. */
+  var PUBLIC_PAGES = {
+    "about.html": 1,
+    "legal.html": 1,
+    "pricing.html": 1,
+    "signin.html": 1,
+    "reset.html": 1
+  };
 
   var state = { session: null, profile: null, ready: false };
   var waiters = [];
