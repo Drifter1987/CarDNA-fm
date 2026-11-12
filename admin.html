@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin — CarDNA</title>
 <meta name="description" content="Owner console: accounts, plans, access.">
-<link rel="stylesheet" href="assets/style.css?v=p2">
-<link rel="stylesheet" href="assets/motion.css?v=p2">
+<link rel="stylesheet" href="assets/style.css?v=p3">
+<link rel="stylesheet" href="assets/motion.css?v=p3">
 </head>
 <body data-require-auth>
 
@@ -57,7 +57,26 @@
       </div>
 
       <div id="admin-app" hidden>
-        <div class="stats" style="margin-bottom:26px">
+        <div class="notice" id="admin-preview" hidden style="margin-bottom:22px">
+          <strong>View as:</strong>
+          <select id="view-role" class="role-select" style="margin-left:10px" aria-label="View the app as">
+            <option value="owner">Owner</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+          <select id="view-plan" class="plan-select" style="margin-left:6px" aria-label="As which plan" hidden>
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+            <option value="workshop">Workshop</option>
+            <option value="business">Business</option>
+          </select>
+          <a class="btn btn--ghost btn--sm" href="index.html" style="margin-left:10px">Open the app in this view</a>
+          <div class="mono-dim" style="margin-top:8px" id="view-summary">
+            Owner view — every control is live.
+          </div>
+        </div>
+
+        <div class="stats" style="margin-bottom:18px">
           <div class="stat"><b id="stat-total">0</b><span>accounts</span></div>
           <div class="stat"><b id="stat-staff">0</b><span>staff</span></div>
           <div class="stat"><b id="stat-paid">0</b><span>paid plans</span></div>
@@ -71,19 +90,45 @@
           <span id="plan-mix" style="font-family:var(--mono);font-size:.85rem"></span>
         </div>
 
-        <div class="notice" id="admin-preview" hidden style="margin-bottom:22px">
-          <strong>View the console as:</strong>
-          <select id="preview-role" class="plan-select" style="margin-left:10px">
-            <option value="">Owner (you)</option>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
-          </select>
-          <span class="mono-dim" style="margin-left:10px">read-only preview of what that role can do</span>
+        <div id="admin-analytics" hidden>
+          <div class="kpi" style="margin-bottom:22px">
+            <div class="kpi-cell"><b id="kpi-decodes">0</b><span>decodes · 7 days</span></div>
+            <div class="kpi-cell"><b id="kpi-exports">0</b><span>exports · 7 days</span></div>
+            <div class="kpi-cell"><b id="kpi-signins">0</b><span>sign-ins · 7 days</span></div>
+            <div class="kpi-cell"><b id="kpi-people">0</b><span>accounts active · 7 days</span></div>
+          </div>
+
+          <div class="notice" style="margin-bottom:22px">
+            <strong>Activity, last 14 days.</strong>
+            <div class="spark" id="spark"></div>
+            <div class="spark-caption" id="spark-caption"></div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:22px">
+            <div class="notice">
+              <strong>Most active accounts.</strong>
+              <ul class="mini-list" id="top-accounts"><li>Loading…</li></ul>
+            </div>
+            <div class="notice">
+              <strong>Blocked accounts.</strong>
+              <ul class="mini-list" id="blocked-list"><li>None.</li></ul>
+            </div>
+          </div>
         </div>
 
         <div class="notice" style="margin-bottom:22px">
           <strong>Recent activity.</strong>
           <ul class="activity-list" id="admin-activity"><li>Loading…</li></ul>
+        </div>
+
+        <div class="notice" id="admin-user-activity" hidden style="margin-bottom:22px">
+          <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+            <strong id="user-activity-title">Activity</strong>
+            <span class="mono-dim" id="user-activity-meta"></span>
+            <button type="button" class="btn btn--ghost btn--sm" id="user-activity-close"
+                    style="margin-left:auto">Close</button>
+          </div>
+          <ul class="activity-list" id="user-activity-list"></ul>
         </div>
 
         <div class="search-bar">
@@ -123,9 +168,9 @@
   </div>
 </footer>
 
-<script src="assets/supabase-config.js?v=p2"></script>
-<script src="assets/auth.js?v=p2"></script>
-<script src="assets/motion.js?v=p2"></script>
-<script src="assets/admin.js?v=p2"></script>
+<script src="assets/supabase-config.js?v=p3"></script>
+<script src="assets/auth.js?v=p3"></script>
+<script src="assets/motion.js?v=p3"></script>
+<script src="assets/admin.js?v=p3"></script>
 </body>
 </html>

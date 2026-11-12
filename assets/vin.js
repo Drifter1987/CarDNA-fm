@@ -477,13 +477,23 @@
         var button = event.target.closest ? event.target.closest("[data-save]") : null;
         if (!button || !window.CarDNAGarage) { return; }
 
-        window.CarDNAGarage.save({
+        var saved = window.CarDNAGarage.save({
           vin: button.getAttribute("data-save"),
           year: button.getAttribute("data-year") || "",
           make: button.getAttribute("data-make") || "",
           model: button.getAttribute("data-model") || ""
         });
 
+        /* A plan can cap how many vehicles the garage keeps; the garage says so, and the
+           button stays usable so the message can be read and the car saved after a removal. */
+        if (saved && saved.ok === false) {
+          setHint(saved.error, true);
+          button.title = saved.error;
+          button.textContent = "Garage full";
+          return;
+        }
+
+        setHint("");
         button.textContent = "Saved ✓";
         button.disabled = true;
       });

@@ -25,6 +25,7 @@
   var activity = [];
   var query = "";
   var previewRole = "";
+  var previewPlan = "free";
 
   /* Sample rows so an owner can SEE what the admin and user views look like before
      there is a second real account. They are displayed only; every control on them
@@ -130,7 +131,7 @@
     var byId = {};
     rows.forEach(function (row) { byId[row.id] = label(row); });
 
-    activity.forEach(function (event) {
+    activity.slice(0, 40).forEach(function (event) {
       var li = document.createElement("li");
 
       var kind = document.createElement("span");
@@ -152,27 +153,232 @@
 
       var when = document.createElement("span");
       when.className = "act-when";
-      try {
-        when.textContent = new Date(event.created_at).toLocaleString();
-      } catch (err) { when.textContent = ""; }
+      when.textContent = stamp(event.created_at);
       li.appendChild(when);
 
       activityEl.appendChild(li);
     });
   }
 
-  async function loadActivity() {
+  async function loadEvents() {
     if (!activityEl) { return; }
     try {
       activity = await auth.call(
-        "/rest/v1/events?select=kind,detail,created_at,user_id&order=created_at.desc&limit=40",
+        "/rest/v1/events?select=kind,detail,created_at,user_id&order=created_at.desc&limit=500",
         { token: auth.state.session.access_token });
     } catch (err) {
       activity = [];
-      activityEl.innerHTML = "<li>Activity is not available — run the events SQL once.</li>";
+      activityEl.innerHTML = "<li>Activity is not available — the events table may be missing.</li>";
+      renderAnalytics();
       return;
     }
     renderActivity();
+    renderAnalytics();
+  }
+
+  /* ------------------------------------------------------------------ analytics */
+
+  function setText(id, value) {
+    var el = document.getElementById(id);
+    if (el) { el.textContent = value; }
+  }
+
+  function stamp(value) {
+    if (!value) { return "—"; }
+    try { return new Date(value).toLocaleString(); }
+    catch (err) { return "—"; }
+  }
+
+  function miniRow(text, count, onClick) {
+    var li = document.createElement("li");
+
+    var name = document.createElement(onClick ? "button" : "span");
+    if (onClick) { name.type = "button"; }
+    name.textContent = text;
+    if (onClick) { name.addEventListener("click", onClick); }
+    li.appendChild(name);
+
+    if (count != null) {
+      var total = document.createElement("span");
+      total.className = "mini-count";
+      total.textContent = String(count);
+      li.appendChild(total);
+    }
+    return li;
+  }
+
+  /* Everything here is derived from the events table plus the account rows — no extra
+     endpoints, and it is the owner's tool only. */
+  function renderAnalytics() {
+    var box = document.getElementById("admin-analytics");
+    if (!box) { return; }
+
+    var owner = actingRole() === "owner";
+    box.hidden = !owner;
+    if (!owner) { return; }
+
+    var now = Date.now();
+    var weekAgo = now - 7 * 86400000;
+
+    var week = activity.filter(function (event) {
+      if (!event.created_at) { return false; }
+      var at = new Date(event.created_at).getTime();
+      return !isNaN(at) && at >= weekAgo;
+    });
+
+    function countKind(kind) {
+      return week.filter(function (event) { return event.kind === kind; }).length;
+    }
+
+    var people = {};
+    week.forEach(function (event) { if (event.user_id) { people[event.user_id] = true; } });
+
+    setText("kpi-decodes", String(countKind("decode")));
+    setText("kpi-exports", String(countKind("export")));
+    setText("kpi-signins", String(countKind("sign_in")));
+    setText("kpi-people", String(Object.keys(people).length));
+
+    /* fourteen day bars */
+    var spark = document.getElementById("spark");
+    if (spark) {
+      spark.innerHTML = "";
+
+      var labels = [];
+      var counts = [];
+      for (var i = 13; i >= 0; i -= 1) {
+        labels.push(new Date(now - i * 86400000).toISOString().slice(0, 10));
+        counts.push(0);
+      }
+
+      var index = {};
+      labels.forEach(function (key, at) { index[key] = at; });
+
+      activity.forEach(function (event) {
+        if (!event.created_at) { return; }
+        var key = String(event.created_at).slice(0, 10);
+        if (index[key] !== undefined) { counts[index[key]] += 1; }
+      });
+
+      var max = 1;
+      counts.forEach(function (n) { if (n > max) { max = n; } });
+
+      var total = 0;
+      counts.forEach(function (n, at) {
+        total += n;
+        var bar = document.createElement("div");
+        bar.className = "spark-bar" + (at === counts.length - 1 ? " is-today" : "");
+        bar.style.height = Math.max(3, Math.round((n / max) * 100)) + "%";
+        bar.title = labels[at] + " · " + n + (n === 1 ? " event" : " events");
+        spark.appendChild(bar);
+      });
+
+      setText("spark-caption", total + " events in the last 14 days · today is the bright bar");
+    }
+
+    /* most active accounts */
+    var topEl = document.getElementById("top-accounts");
+    if (topEl) {
+      topEl.innerHTML = "";
+
+      var perUser = {};
+      activity.forEach(function (event) {
+        if (!event.user_id) { return; }
+        perUser[event.user_id] = (perUser[event.user_id] || 0) + 1;
+      });
+
+      var names = {};
+      rows.forEach(function (row) { names[row.id] = label(row); });
+
+      var top = Object.keys(perUser).map(function (id) {
+        return { id: id, count: perUser[id], name: names[id] || id.slice(0, 8) };
+      }).sort(function (a, b) { return b.count - a.count; }).slice(0, 6);
+
+      if (!top.length) {
+        topEl.appendChild(miniRow("No activity recorded yet.", null, null));
+      } else {
+        top.forEach(function (entry) {
+          topEl.appendChild(miniRow(entry.name, entry.count, function () {
+            loadUserActivity(entry.id, entry.name);
+          }));
+        });
+      }
+    }
+
+    /* blocked, with the reason the account was shown */
+    var blockedEl = document.getElementById("blocked-list");
+    if (blockedEl) {
+      blockedEl.innerHTML = "";
+      var blocked = rows.filter(isBlocked);
+
+      if (!blocked.length) {
+        blockedEl.appendChild(miniRow("No blocked accounts.", null, null));
+      } else {
+        blocked.slice(0, 8).forEach(function (row) {
+          blockedEl.appendChild(miniRow(
+            label(row) + (row.blocked_reason ? " · " + row.blocked_reason : ""),
+            null,
+            function () { loadUserActivity(row.id, label(row)); }
+          ));
+        });
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ one account's activity */
+
+  async function loadUserActivity(id, who) {
+    var panel = document.getElementById("admin-user-activity");
+    var list = document.getElementById("user-activity-list");
+    if (!panel || !list) { return; }
+
+    panel.hidden = false;
+    setText("user-activity-title", "Activity · " + who);
+    setText("user-activity-meta", "last 25 events");
+    list.innerHTML = "<li>Loading…</li>";
+
+    var events;
+    try {
+      events = await auth.call(
+        "/rest/v1/events?select=kind,detail,created_at&user_id=eq." +
+          encodeURIComponent(id) + "&order=created_at.desc&limit=25",
+        { token: auth.state.session.access_token });
+    } catch (err) {
+      list.innerHTML = "<li>Could not read this account's activity.</li>";
+      return;
+    }
+
+    list.innerHTML = "";
+    if (!events || !events.length) {
+      list.innerHTML = "<li>Nothing recorded for this account yet.</li>";
+      return;
+    }
+
+    events.forEach(function (event) {
+      var li = document.createElement("li");
+
+      var kind = document.createElement("span");
+      kind.className = "act-kind";
+      kind.textContent = event.kind || "event";
+      li.appendChild(kind);
+
+      var detail = document.createElement("span");
+      detail.className = "act-who";
+      detail.textContent = event.detail && event.detail.vin
+        ? event.detail.vin
+        : (event.detail && event.detail.format ? "." + event.detail.format : "");
+      li.appendChild(detail);
+
+      var at = document.createElement("span");
+      at.className = "act-when";
+      at.textContent = stamp(event.created_at);
+      li.appendChild(at);
+
+      list.appendChild(li);
+    });
+
+    if (panel.scrollIntoView) {
+      try { panel.scrollIntoView({ block: "nearest" }); } catch (err) { /* old browsers */ }
+    }
   }
 
   /* ------------------------------------------------------------------ table */
@@ -314,6 +520,17 @@
         actions.appendChild(block);
       }
 
+      if (actingRole() === "owner" && !row.demo) {
+        var history = document.createElement("button");
+        history.type = "button";
+        history.className = "btn btn--ghost btn--sm";
+        history.style.marginLeft = "6px";
+        history.textContent = "Activity";
+        history.title = "Open this account's recent activity";
+        history.addEventListener("click", function () { loadUserActivity(row.id, label(row)); });
+        actions.appendChild(history);
+      }
+
       if (actingRole() === "owner" && !row.demo && row.id !== (auth.state.profile && auth.state.profile.id)) {
         var view = document.createElement("button");
         view.type = "button";
@@ -417,6 +634,24 @@
     location.href = "index.html";
   }
 
+  /* The console's own switcher. It stores the view and leaves the app in it, so the next
+     page the owner opens shows exactly what that role or plan sees. */
+  function applyView(role, plan) {
+    if (!role) { auth.clearViewAs(); }
+    else { auth.setViewAs(role, plan); }
+  }
+
+  function viewSummary(role, plan) {
+    var text = !role
+      ? "Owner view — every control is live."
+      : "Viewing as " + auth.roleLabel(role) +
+        (role === "user" ? " · " + auth.planLabel(plan) : "") +
+        " — read-only. Open the app in this view to walk its pages.";
+    var el = document.getElementById("view-summary");
+    if (el) { el.textContent = text; }
+    return text;
+  }
+
   /* ------------------------------------------------------------------ load */
 
   async function loadAccounts() {
@@ -439,21 +674,59 @@
       });
     }
 
+    /* A view stored by an earlier visit is picked up here, so the console always shows the
+       role the app was last left in. */
+    var savedView = auth.viewAsProfile();
+    if (savedView && savedView.role && savedView.role !== "owner") {
+      previewRole = savedView.role;
+      previewPlan = savedView.plan || "free";
+    }
+
     renderStats();
     renderRows();
-    loadActivity();
+    loadEvents();
 
-    var previewEl = document.getElementById("preview-role");
-    if (previewEl && auth.isOwner()) {
-      document.getElementById("admin-preview").hidden = false;
-      previewEl.value = previewRole;
-      previewEl.addEventListener("change", function () {
-        previewRole = previewEl.value;
-        renderRows();
-        status(previewRole
-          ? "Previewing the " + auth.roleLabel(previewRole) + " view — read-only."
-          : "Back to the owner view.", previewRole ? "" : "ok");
+    var previewEl = document.getElementById("view-role");
+    var planEl = document.getElementById("view-plan");
+    var closeActivity = document.getElementById("user-activity-close");
+
+    if (closeActivity && !closeActivity.getAttribute("data-bound")) {
+      closeActivity.setAttribute("data-bound", "yes");
+      closeActivity.addEventListener("click", function () {
+        var panel = document.getElementById("admin-user-activity");
+        if (panel) { panel.hidden = true; }
       });
+    }
+
+    if (previewEl && auth.isOwner()) {
+      var box = document.getElementById("admin-preview");
+      if (box) { box.hidden = false; }
+      previewEl.value = previewRole || "owner";
+      if (planEl) {
+        planEl.hidden = previewRole !== "user";
+        planEl.value = previewPlan;
+      }
+
+      status(viewSummary(previewRole, previewPlan), previewRole ? "" : "ok");
+
+      previewEl.addEventListener("change", function () {
+        previewRole = previewEl.value === "owner" ? "" : previewEl.value;
+        if (planEl) { planEl.hidden = previewRole !== "user"; }
+        applyView(previewRole, previewPlan);
+        renderRows();
+        renderAnalytics();
+        status(viewSummary(previewRole, previewPlan), previewRole ? "" : "ok");
+      });
+
+      if (planEl) {
+        planEl.addEventListener("change", function () {
+          previewPlan = planEl.value;
+          applyView(previewRole, previewPlan);
+          renderRows();
+          renderAnalytics();
+          status(viewSummary(previewRole, previewPlan), "");
+        });
+      }
     }
   }
 

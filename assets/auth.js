@@ -262,13 +262,12 @@
 
   /* ------------------------------------------------------------------ helpers */
 
-  /* The plan catalogue. Database values are stable; only the labels change as the
-     commercial names settle. Tier 1/2/3 are deliberate placeholders. */
+  /* Plan names must read exactly as the Pricing page lists them. */
   var PLANS = [
     { id: "free", label: "Free" },
-    { id: "pro", label: "Tier 1" },
-    { id: "workshop", label: "Tier 2" },
-    { id: "business", label: "Tier 3" }
+    { id: "pro", label: "Pro" },
+    { id: "workshop", label: "Workshop" },
+    { id: "business", label: "Business" }
   ];
 
   function planLabel(plan) {
@@ -294,10 +293,34 @@
     return Boolean(state.profile && (state.profile.role === "owner" || state.profile.role === "admin"));
   }
 
+  /* ------------------------------------------------------------------ plan limits
+     These numbers are the pricing page's, nothing invented — keep the two in step.
+     vehicles: 0 means unlimited. exports lists the formats the garage offers. */
+  var PLAN_LIMITS = {
+    free:     { vehicles: 1,  eu: 3,   exports: ["md"],                       seats: 1, bulk: false, api: false },
+    pro:      { vehicles: 5,  eu: 10,  exports: ["md", "csv", "pdf"],         seats: 1, bulk: false, api: false },
+    workshop: { vehicles: 25, eu: 40,  exports: ["md", "csv", "pdf", "xlsx"], seats: 3, bulk: true,  api: true },
+    business: { vehicles: 0,  eu: 450, exports: ["md", "csv", "pdf", "xlsx"], seats: 0, bulk: true,  api: true }
+  };
+
+  function limits(plan) {
+    return PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+  }
+
+  /* The cheapest plan that includes an export format. */
+  function planNeededFor(format) {
+    var order = ["free", "pro", "workshop", "business"];
+    for (var i = 0; i < order.length; i += 1) {
+      if (PLAN_LIMITS[order[i]].exports.indexOf(format) !== -1) { return order[i]; }
+    }
+    return "business";
+  }
+
   /* ------------------------------------------------------------------ support view
-     An owner can open the app "as" another account to see the same pages and controls that
-     role sees. This is a read-only preview inside the owner's own session — it is not a
-     session for that user, and it writes nothing on their behalf. */
+     An owner can open the app as an admin, or as a user on any plan, and can also open it
+     "as" one real account to see what that person sees. Either way it is a read-only view
+     inside the owner's own session — it is not a session for that user, and it writes
+     nothing on their behalf. */
 
   function viewAsProfile() {
     if (!isOwner()) { return null; }
@@ -309,38 +332,138 @@
     }
   }
 
+  /* What the app should show right now: the signed-in account, or the owner's preview. */
+  function effective(profile) {
+    var me = profile || state.profile;
+    var view = viewAsProfile();
+
+    if (!me) { return { role: "user", plan: "free", preview: false, email: "", id: "" }; }
+
+    if (view && view.role) {
+      return {
+        role: view.role,
+        plan: view.plan || "free",
+        preview: true,
+        email: view.email || me.email || "",
+        id: view.id || me.id || ""
+      };
+    }
+
+    return {
+      role: me.role || "user",
+      plan: me.plan || "free",
+      preview: false,
+      email: me.email || "",
+      id: me.id || ""
+    };
+  }
+
+  function effectiveRole() { return effective().role; }
+  function effectivePlan() { return effective().plan; }
+
+  /* null means no plan limits apply — staff are not on a plan. */
+  function limitsNow() {
+    var view = effective();
+    if (view.role !== "user") { return null; }
+    return limits(view.plan);
+  }
+
+  function canExport(format) {
+    var lim = limitsNow();
+    return !lim || lim.exports.indexOf(format) !== -1;
+  }
+
+  /* Stored by the owner console's "View as" switcher. Read-only by construction: no
+     token is minted, so nothing can be written as the account being previewed. */
+  function setViewAs(role, plan) {
+    if (!isOwner()) { return false; }
+    try {
+      window.sessionStorage.setItem("cardna.viewAs", JSON.stringify({
+        role: role || "user",
+        plan: plan || "free",
+        preview: true
+      }));
+    } catch (err) {
+      return false;
+    }
+    return true;
+  }
+
+  function clearViewAs() {
+    try { window.sessionStorage.removeItem("cardna.viewAs"); } catch (err) { /* ignore */ }
+  }
+
+  /* Hide the console from a view that does not have one. */
+  function applyNavGate() {
+    var view = effective();
+    var staff = view.role === "owner" || view.role === "admin";
+
+    document.querySelectorAll('a[href="admin.html"]').forEach(function (link) {
+      link.hidden = !staff;
+    });
+
+    document.body.classList.toggle("is-preview", view.preview);
+    document.body.setAttribute("data-view-role", view.role);
+    document.body.setAttribute("data-view-plan", view.plan);
+  }
+
   function renderSupportView(target) {
     if (!target || document.getElementById("support-banner")) { return; }
 
+    /* A real account has an id and an email; a role/plan preview has only the role. */
+    var account = Boolean(target.id && target.email);
     var bar = document.createElement("div");
     bar.id = "support-banner";
     bar.className = "support-banner";
 
     var text = document.createElement("span");
-    text.innerHTML = "<strong>Support view</strong> · " +
-      String(target.email || target.id || "account") + " · " +
-      roleLabel(target.role) + " · " + planLabel(target.plan) +
-      " — read-only, they are not notified and nothing is written as them.";
-    bar.appendChild(text);
+    var title = document.createElement("strong");
+    title.textContent = account ? "Support view" : "Preview";
+    text.appendChild(title);
+
+    var who = account
+      ? (target.email || target.id) + " · " + roleLabel(target.role)
+      : "the app as " + roleLabel(target.role);
+    if (target.role === "user") { who += " · " + planLabel(target.plan); }
+
+    text.appendChild(document.createTextNode(
+      " " + who + " — read-only, nothing is written as another account."));
+
+    var actions = document.createElement("span");
+    actions.className = "support-banner-actions";
+
+    if (account) {
+      var back = document.createElement("a");
+      back.className = "btn btn--ghost btn--sm";
+      back.href = "admin.html";
+      back.textContent = "Back to console";
+      actions.appendChild(back);
+    }
 
     var exit = document.createElement("button");
     exit.type = "button";
     exit.className = "btn btn--ghost btn--sm";
-    exit.textContent = "Exit support view";
+    exit.textContent = account ? "Exit support view" : "Exit preview";
     exit.addEventListener("click", function () {
-      try { window.sessionStorage.removeItem("cardna.viewAs"); } catch (err) { /* ignore */ }
+      clearViewAs();
       location.reload();
     });
-    bar.appendChild(exit);
+    actions.appendChild(exit);
 
+    bar.appendChild(text);
+    bar.appendChild(actions);
     document.body.insertBefore(bar, document.body.firstChild);
     document.body.classList.add("is-support-view");
 
-    document.querySelectorAll("form, #garage-download, #vault-app, #garage-clear").forEach(function (node) {
-      node.setAttribute("aria-disabled", "true");
-      node.style.pointerEvents = "none";
-      node.style.opacity = ".55";
-    });
+    /* An account view is someone else's garage, so keep forms out of reach. A role preview
+       is the owner's own session and own data, so it stays interactive. */
+    if (account) {
+      document.querySelectorAll("form, #garage-download, #vault-app, #garage-clear").forEach(function (node) {
+        node.setAttribute("aria-disabled", "true");
+        node.style.pointerEvents = "none";
+        node.style.opacity = ".55";
+      });
+    }
   }
 
   /* Fire-and-forget activity record. The row is owned by the signed-in user, so the insert
@@ -381,14 +504,22 @@
       who.textContent = state.profile.email || state.profile.display_name || "account";
       chip.appendChild(who);
 
+      var view = effective();
+
       var plan = document.createElement("span");
       plan.className = "account-chip-plan";
       /* Staff are shown by role, everyone else by plan, so "FREE ADMIN" never appears. */
-      plan.textContent = isOwner() ? "Owner"
-        : (state.profile.role === "admin" ? "Admin" : planLabel(state.profile.plan));
+      if (view.preview) {
+        plan.textContent = "As " + roleLabel(view.role) +
+          (view.role === "user" ? " · " + planLabel(view.plan) : "");
+        plan.classList.add("is-preview");
+      } else {
+        plan.textContent = view.role === "owner" ? "Owner"
+          : (view.role === "admin" ? "Admin" : planLabel(view.plan));
+      }
       chip.appendChild(plan);
 
-      if (isOwner()) {
+      if (view.role === "owner" || view.role === "admin") {
         var admin = document.createElement("a");
         admin.className = "account-chip-link";
         admin.href = "admin.html";
@@ -488,6 +619,7 @@
 
     gate();
     renderChip();
+    applyNavGate();
     if (state.session) {
       log("page_view", { path: location.pathname.split("/").pop() || "index.html" });
       renderSuspended();
@@ -516,6 +648,16 @@
     updateProfile: updateProfile,
     planLabel: planLabel,
     plans: function () { return PLANS.slice(); },
+    limits: limits,
+    limitsNow: limitsNow,
+    canExport: canExport,
+    planNeededFor: planNeededFor,
+    effective: effective,
+    effectiveRole: effectiveRole,
+    effectivePlan: effectivePlan,
+    setViewAs: setViewAs,
+    clearViewAs: clearViewAs,
+    applyNavGate: applyNavGate,
     roleLabel: roleLabel,
     isOwner: isOwner,
     isStaff: isStaff,

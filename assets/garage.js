@@ -33,6 +33,16 @@
     return window.CarDNAAuth && window.CarDNAAuth.state && window.CarDNAAuth.state.session;
   }
 
+  function limits() {
+    var a = window.CarDNAAuth;
+    return a && a.limitsNow ? a.limitsNow() : null;
+  }
+
+  function planName() {
+    var a = window.CarDNAAuth;
+    return a && a.effectivePlan ? a.effectivePlan() : "free";
+  }
+
   function serverReady() {
     var cfg = config();
     return Boolean(session() && cfg.url && cfg.key);
@@ -135,7 +145,23 @@
       return read().some(function (item) { return item.vin === vin; });
     },
     save: function (entry) {
-      var list = read().filter(function (item) { return item.vin !== entry.vin; });
+      var current = read();
+      var replacing = current.some(function (item) { return item.vin === entry.vin; });
+      var lim = limits();
+
+      /* The saved-vehicle count is the pricing page's, and it is a plan limit rather than a
+         storage limit, so it is checked before anything is written. */
+      if (lim && lim.vehicles && !replacing && current.length >= lim.vehicles) {
+        return {
+          ok: false,
+          count: current.length,
+          error: "The " + (window.CarDNAAuth ? window.CarDNAAuth.planLabel(planName()) : "current") +
+            " plan keeps " + lim.vehicles + (lim.vehicles === 1 ? " saved vehicle" : " saved vehicles") +
+            ". Remove one first, or move up a plan."
+        };
+      }
+
+      var list = current.filter(function (item) { return item.vin !== entry.vin; });
       var record = {
         vin: entry.vin,
         year: entry.year || "",
@@ -145,9 +171,10 @@
         savedAt: new Date().toISOString()
       };
       list.unshift(record);
-      write(list.slice(0, MAX));
+      var capped = list.slice(0, MAX);
+      write(capped);
       push(record);
-      return list.length;
+      return { ok: true, count: capped.length };
     },
     remove: function (vin) {
       var list = read().filter(function (item) { return item.vin !== vin; });
@@ -185,6 +212,17 @@
       statusEl.textContent = text || "";
       if (tone) { statusEl.setAttribute("data-tone", tone); }
       else { statusEl.removeAttribute("data-tone"); }
+    }
+
+    /* What this plan allows, next to what is actually saved. */
+    function renderLimit(count) {
+      var el = document.getElementById("garage-limit");
+      if (!el) { return; }
+      var a = window.CarDNAAuth;
+      var lim = limits();
+      if (!a || !lim) { el.textContent = ""; return; }
+      el.textContent = a.planLabel(planName()) + " plan · " + count + " of " +
+        (lim.vehicles ? lim.vehicles : "unlimited") + " saved vehicles";
     }
 
     function chosen() {
@@ -271,6 +309,8 @@
           : "empty";
       }
 
+      renderLimit(list.length);
+
       host.innerHTML = "";
       if (!list.length && serverReady() && !pulled) {
         var syncing = document.createElement("div");
@@ -296,9 +336,39 @@
 
     /* ------------------------------------------------------------------ export */
 
+    /* An export format the plan does not include stays visible but disabled, with the plan
+       that has it named on the row. */
+    function applyExportLimits() {
+      if (!menuEl) { return; }
+      var a = window.CarDNAAuth;
+      if (!a || !a.canExport) { return; }
+
+      menuEl.querySelectorAll("[data-download]").forEach(function (button) {
+        var format = button.getAttribute("data-download");
+        var allowed = a.canExport(format);
+        button.disabled = !allowed;
+        button.classList.toggle("is-locked", !allowed);
+        button.title = allowed ? "" : "Included from the " + a.planLabel(a.planNeededFor(format)) + " plan";
+
+        if (!allowed && !button.querySelector("em")) {
+          var tag = document.createElement("em");
+          tag.className = "export-tag";
+          tag.textContent = a.planLabel(a.planNeededFor(format)) + " plan";
+          button.appendChild(tag);
+        }
+      });
+    }
+
     async function runExport(format) {
       if (busy) { return; }
       if (!window.CarDNAExport) { status("The export module did not load.", "error"); return; }
+
+      var a = window.CarDNAAuth;
+      if (a && a.canExport && !a.canExport(format)) {
+        status(a.planLabel(a.planNeededFor(format)) + " adds " + format.toUpperCase() +
+          " export. Nothing was downloaded.", "error");
+        return;
+      }
 
       var vehicles = chosen();
       if (!vehicles.length) { status("Nothing saved to export yet.", "error"); return; }
@@ -415,6 +485,14 @@
       });
     } else {
       pulled = true;
+    }
+
+    /* The plan is known only once the session and profile have resolved. */
+    if (window.CarDNAAuth && window.CarDNAAuth.ready) {
+      window.CarDNAAuth.ready(function () {
+        renderLimit(items().length);
+        applyExportLimits();
+      });
     }
   });
 })();
