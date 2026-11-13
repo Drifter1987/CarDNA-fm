@@ -757,24 +757,6 @@
     location.href = "index.html";
   }
 
-  /* The console's own switcher. It stores the view and leaves the app in it, so the next
-     page the owner opens shows exactly what that role or plan sees. */
-  function applyView(role, plan) {
-    if (!role) { auth.clearViewAs(); }
-    else { auth.setViewAs(role, plan); }
-  }
-
-  function viewSummary(role, plan) {
-    var text = !role
-      ? "Owner view — every control is live."
-      : "Viewing as " + auth.roleLabel(role) +
-        (role === "user" ? " · " + auth.planLabel(plan) : "") +
-        " — read-only. Open the app in this view to walk its pages.";
-    var el = document.getElementById("view-summary");
-    if (el) { el.textContent = text; }
-    return text;
-  }
-
   /* ------------------------------------------------------------------ load */
 
   async function loadAccounts() {
@@ -809,8 +791,6 @@
     renderRows();
     loadEvents();
 
-    var previewEl = document.getElementById("view-role");
-    var planEl = document.getElementById("view-plan");
     var closeActivity = document.getElementById("user-activity-close");
 
     if (closeActivity && !closeActivity.getAttribute("data-bound")) {
@@ -819,37 +799,6 @@
         var panel = document.getElementById("admin-user-activity");
         if (panel) { panel.hidden = true; }
       });
-    }
-
-    if (previewEl && auth.isOwner()) {
-      var box = document.getElementById("admin-preview");
-      if (box) { box.hidden = false; }
-      previewEl.value = previewRole || "owner";
-      if (planEl) {
-        planEl.hidden = previewRole !== "user";
-        planEl.value = previewPlan;
-      }
-
-      status(viewSummary(previewRole, previewPlan), previewRole ? "" : "ok");
-
-      previewEl.addEventListener("change", function () {
-        previewRole = previewEl.value === "owner" ? "" : previewEl.value;
-        if (planEl) { planEl.hidden = previewRole !== "user"; }
-        applyView(previewRole, previewPlan);
-        renderRows();
-        renderAnalytics();
-        status(viewSummary(previewRole, previewPlan), previewRole ? "" : "ok");
-      });
-
-      if (planEl) {
-        planEl.addEventListener("change", function () {
-          previewPlan = planEl.value;
-          applyView(previewRole, previewPlan);
-          renderRows();
-          renderAnalytics();
-          status(viewSummary(previewRole, previewPlan), "");
-        });
-      }
     }
   }
 

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin — CarDNA</title>
 <meta name="description" content="Owner console: accounts, plans, access.">
-<link rel="stylesheet" href="assets/style.css?v=p8">
-<link rel="stylesheet" href="assets/motion.css?v=p8">
+<link rel="stylesheet" href="assets/style.css?v=p9">
+<link rel="stylesheet" href="assets/motion.css?v=p9">
 </head>
 <body data-require-auth>
 
@@ -37,7 +37,8 @@
       <h1>Accounts, plans and access.</h1>
       <p>
         Every account starts on Free. Grant a tier here, or suspend an account to cut off access
-        immediately — the gate is enforced by the database, not by this page.
+        immediately — the gate is enforced by the database, not by this page. The role and plan the
+        app is showing are chosen from the badge in the top-right corner, on every page.
       </p>
     </div>
   </section>
@@ -57,25 +58,6 @@
       </div>
 
       <div id="admin-app" hidden>
-        <div class="notice" id="admin-preview" hidden style="margin-bottom:22px">
-          <strong>View as:</strong>
-          <select id="view-role" class="role-select" style="margin-left:10px" aria-label="View the app as">
-            <option value="owner">Owner</option>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
-          </select>
-          <select id="view-plan" class="plan-select" style="margin-left:6px" aria-label="As which plan" hidden>
-            <option value="free">Free</option>
-            <option value="pro">Pro</option>
-            <option value="workshop">Workshop</option>
-            <option value="business">Business</option>
-          </select>
-          <a class="btn btn--ghost btn--sm" href="index.html" style="margin-left:10px">Open the app in this view</a>
-          <div class="mono-dim" style="margin-top:8px" id="view-summary">
-            Owner view — every control is live.
-          </div>
-        </div>
-
         <div class="stats" style="margin-bottom:18px">
           <div class="stat"><b id="stat-total">0</b><span>accounts</span></div>
           <div class="stat"><b id="stat-staff">0</b><span>staff</span></div>
@@ -169,9 +151,9 @@
   </div>
 </footer>
 
-<script src="assets/supabase-config.js?v=p8"></script>
-<script src="assets/auth.js?v=p8"></script>
-<script src="assets/motion.js?v=p8"></script>
-<script src="assets/admin.js?v=p8"></script>
+<script src="assets/supabase-config.js?v=p9"></script>
+<script src="assets/auth.js?v=p9"></script>
+<script src="assets/motion.js?v=p9"></script>
+<script src="assets/admin.js?v=p9"></script>
 </body>
 </html>

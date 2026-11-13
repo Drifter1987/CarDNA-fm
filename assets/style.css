@@ -1225,3 +1225,86 @@ body.is-app .site-header { flex: none; }
   text-transform: uppercase;
   color: var(--lime);
 }
+
+
+/* ---------------------------------------------------------------- header account chip */
+/* One chip, pinned to the header's top-right corner on every page. */
+.site-header > .account-chip {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  z-index: 7;
+  max-width: calc(100% - 150px);
+  background: rgba(10, 14, 21, .92);
+  box-shadow: 0 14px 34px -22px #000;
+}
+[data-theme="light"] .site-header > .account-chip { background: #fff; }
+body.is-app .site-header > .account-chip { background: var(--panel); }
+
+/* keep the nav and the menu button clear of it */
+.nav { padding-right: 184px; }
+@media (max-width: 900px) {
+  .nav { padding-right: 0; }
+  .nav-toggle { margin-right: 176px; }
+}
+
+/* the role button and its menu */
+.role-menu { position: relative; display: inline-flex; }
+.role-menu > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.role-menu > summary::-webkit-details-marker { display: none; }
+.role-menu > summary::after { content: "\25BE"; font-size: 9px; opacity: .65; }
+.role-menu[open] > summary { color: var(--text); }
+
+.role-menu-list {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 40;
+  min-width: 248px;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px -20px #000;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.role-menu-list button,
+.role-menu-list a {
+  display: grid;
+  gap: 3px;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 11px;
+  color: var(--text);
+  font: 600 .82rem/1.2 var(--sans);
+  cursor: pointer;
+  text-decoration: none;
+}
+.role-menu-list button span,
+.role-menu-list a span {
+  font: 500 9.5px/1.4 var(--mono);
+  letter-spacing: .04em;
+  color: var(--dim-2);
+}
+.role-menu-list button:hover,
+.role-menu-list a:hover { background: rgba(255, 255, 255, .07); text-decoration: none; }
+[data-theme="light"] .role-menu-list button:hover,
+[data-theme="light"] .role-menu-list a:hover { background: rgba(10, 16, 28, .06); }
+.role-menu-list .is-current { color: var(--lime); }
+
+@media (max-width: 560px) {
+  .site-header > .account-chip { right: 12px; top: 6px; max-width: calc(100% - 132px); }
+  .role-menu-list { right: auto; left: 0; }
+}

@@ -487,14 +487,110 @@
     location.replace("signin.html?next=" + encodeURIComponent(next));
   }
 
+  /* The chip lives in the header's top-right corner on every page — one place only. */
+  function chipHost() {
+    return document.querySelector(".site-header") || document.body;
+  }
+
+  /* Switching the view reloads: every gate, cap and table then reflects the new role. */
+  function switchView(role, plan) {
+    if (!isOwner()) { return false; }
+    if (!role || role === "owner") { clearViewAs(); }
+    else { setViewAs(role, plan); }
+    location.reload();
+    return true;
+  }
+
+  function closeRoleMenus(except) {
+    document.querySelectorAll(".role-menu[open]").forEach(function (menu) {
+      if (menu !== except) { menu.open = false; }
+    });
+  }
+
+  var menusBound = false;
+
+  function bindMenus() {
+    if (menusBound) { return; }
+    menusBound = true;
+
+    document.addEventListener("click", function (event) {
+      if (event.target.closest && event.target.closest(".role-menu")) { return; }
+      closeRoleMenus(null);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") { closeRoleMenus(null); }
+    });
+  }
+
+  function roleMenu(view) {
+    var menu = document.createElement("details");
+    menu.className = "role-menu";
+
+    var summary = document.createElement("summary");
+    summary.className = "account-chip-plan" + (view.preview ? " is-preview" : "");
+    summary.textContent = view.preview
+      ? roleLabel(view.role) + (view.role === "user" ? " · " + planLabel(view.plan) : "")
+      : (view.role === "owner" ? "Owner"
+        : (view.role === "admin" ? "Admin" : planLabel(view.plan)));
+    summary.setAttribute("aria-label", "View the app as — currently " + summary.textContent);
+    menu.appendChild(summary);
+
+    var list = document.createElement("div");
+    list.className = "role-menu-list";
+
+    function choice(role, plan, text, note) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.textContent = text;
+
+      var current = view.role === role &&
+        (role !== "user" || planLabel(view.plan) === planLabel(plan));
+      if (current) {
+        button.className = "is-current";
+        button.setAttribute("aria-current", "true");
+      }
+
+      if (note) {
+        var span = document.createElement("span");
+        span.textContent = (current ? "current · " : "") + note;
+        button.appendChild(span);
+      }
+
+      button.addEventListener("click", function () {
+        menu.open = false;
+        switchView(role, plan);
+      });
+      list.appendChild(button);
+    }
+
+    choice("owner", "", "Owner", "everything, Business included");
+    choice("admin", "", "Admin", "manage users, plans up to Workshop");
+    choice("user", "free", "User · Free", "1 saved vehicle, Markdown export");
+    choice("user", "pro", "User · Pro", "5 saved vehicles, CSV and PDF");
+    choice("user", "workshop", "User · Workshop", "25 saved vehicles, Excel");
+    choice("user", "business", "User · Business", "unlimited vehicles");
+
+    if (view.role === "owner" || view.role === "admin") {
+      var consoleLink = document.createElement("a");
+      consoleLink.href = "admin.html";
+      consoleLink.textContent = "Console";
+      list.appendChild(consoleLink);
+    }
+
+    menu.appendChild(list);
+
+    menu.addEventListener("toggle", function () {
+      if (menu.open) { closeRoleMenus(menu); }
+    });
+
+    return menu;
+  }
+
   function renderChip() {
-    var host = document.querySelector(".header-actions") || document.querySelector(".nav");
-    if (!host) { return; }
+    document.querySelectorAll("[data-account-chip]").forEach(function (node) { node.remove(); });
 
-    var existing = host.querySelector("[data-account-chip]");
-    if (existing) { existing.remove(); }
-
-    var chip = document.createElement("span");
+    var chip = document.createElement("div");
     chip.setAttribute("data-account-chip", "");
     chip.className = "account-chip";
 
@@ -506,25 +602,14 @@
 
       var view = effective();
 
-      var plan = document.createElement("span");
-      plan.className = "account-chip-plan";
-      /* Staff are shown by role, everyone else by plan, so "FREE ADMIN" never appears. */
-      if (view.preview) {
-        plan.textContent = "As " + roleLabel(view.role) +
-          (view.role === "user" ? " · " + planLabel(view.plan) : "");
-        plan.classList.add("is-preview");
+      /* Owners get the view switcher; everyone else gets the same pill as a plain badge. */
+      if (isOwner()) {
+        chip.appendChild(roleMenu(view));
       } else {
-        plan.textContent = view.role === "owner" ? "Owner"
-          : (view.role === "admin" ? "Admin" : planLabel(view.plan));
-      }
-      chip.appendChild(plan);
-
-      if (view.role === "owner" || view.role === "admin") {
-        var admin = document.createElement("a");
-        admin.className = "account-chip-link";
-        admin.href = "admin.html";
-        admin.textContent = "Admin";
-        chip.appendChild(admin);
+        var badge = document.createElement("span");
+        badge.className = "account-chip-plan";
+        badge.textContent = view.role === "admin" ? "Admin" : planLabel(view.plan);
+        chip.appendChild(badge);
       }
 
       var out = document.createElement("button");
@@ -543,7 +628,8 @@
       chip.appendChild(link);
     }
 
-    host.appendChild(chip);
+    chipHost().appendChild(chip);
+    bindMenus();
   }
 
   function renderSuspended() {
