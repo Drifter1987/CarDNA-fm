@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Admin — CarDNA</title>
-<meta name="description" content="Owner console: accounts, plans, access.">
-<link rel="stylesheet" href="assets/style.css?v=p11">
-<link rel="stylesheet" href="assets/motion.css?v=p11">
+<title>Staff console — CarDNA</title>
+<meta name="description" content="Staff console for CarDNA accounts, plans and access.">
+<link rel="stylesheet" href="assets/style.css?v=p13">
+<link rel="stylesheet" href="assets/motion.css?v=p13">
 </head>
 <body data-require-auth>
 
@@ -33,9 +33,9 @@
 <main>
   <section class="page-head">
     <div class="container">
-      <div class="kicker">Owner console</div>
+      <div class="kicker" id="admin-kicker">Staff console</div>
       <h1>Accounts, plans and access.</h1>
-      <p>
+      <p id="admin-intro">
         Every account starts on Free. Grant a tier here, or suspend an account to cut off access
         immediately — the gate is enforced by the database, not by this page. The role and plan the
         app is showing are chosen from the badge in the top-right corner, on every page.
@@ -60,7 +60,7 @@
       <div id="admin-noconsole" hidden>
         <div class="notice">
           <strong>This view has no console.</strong> You are looking at CarDNA as a user, and
-          the staff console is not part of that view. Pick Owner or Admin in the badge at the
+          the staff console is not part of that view. Pick Owner or Admin in the role badge at the
           top right, or <a href="index.html">open the app</a>.
         </div>
       </div>
@@ -154,14 +154,14 @@
   <div class="container">
     <div class="footer-bottom" style="border-top:0;margin-top:0">
       <span>© <span id="year">2026</span> GMOttomotive · CarDNA</span>
-      <span>Owner console · actions are written to <code>profiles</code></span>
+      <span id="admin-footer-label">Staff console · actions are written to <code>profiles</code></span>
     </div>
   </div>
 </footer>
 
-<script src="assets/supabase-config.js?v=p11"></script>
-<script src="assets/auth.js?v=p11"></script>
-<script src="assets/motion.js?v=p11"></script>
-<script src="assets/admin.js?v=p11"></script>
+<script src="assets/supabase-config.js?v=p13"></script>
+<script src="assets/auth.js?v=p13"></script>
+<script src="assets/motion.js?v=p13"></script>
+<script src="assets/admin.js?v=p13"></script>
 </body>
 </html>

@@ -631,17 +631,6 @@
         actions.appendChild(history);
       }
 
-      if (actingRole() === "owner" && !row.demo && row.id !== (auth.state.profile && auth.state.profile.id)) {
-        var view = document.createElement("button");
-        view.type = "button";
-        view.className = "btn btn--ghost btn--sm";
-        view.style.marginLeft = "6px";
-        view.textContent = "View as";
-        view.title = "Open the app with this role's view — read-only, no notification";
-        view.addEventListener("click", function () { openSupportView(row); });
-        actions.appendChild(view);
-      }
-
       if (!actions.children.length) {
         actions.innerHTML = '<span class="mono-dim">—</span>';
       }
@@ -743,20 +732,6 @@
     }
   }
 
-  /* ------------------------------------------------------------------ support view */
-
-  function openSupportView(row) {
-    try {
-      window.sessionStorage.setItem("cardna.viewAs", JSON.stringify({
-        id: row.id,
-        email: row.email || "",
-        role: roleOf(row),
-        plan: planOf(row)
-      }));
-    } catch (err) { /* storage blocked */ }
-    location.href = "index.html";
-  }
-
   /* ------------------------------------------------------------------ load */
 
   async function loadAccounts() {
@@ -809,6 +784,39 @@
     if (loadingEl) { loadingEl.hidden = true; }
 
     var noConsoleEl = document.getElementById("admin-noconsole");
+    var currentRole = auth.effectiveRole();
+    var kicker = document.getElementById("admin-kicker");
+    var footerLabel = document.getElementById("admin-footer-label");
+
+    if (kicker) {
+      kicker.textContent = currentRole === "owner" ? "Owner console"
+        : (currentRole === "admin" ? "Admin console" : "User view");
+    }
+    if (footerLabel) {
+      footerLabel.textContent = currentRole === "owner" ? "Owner console · actions are written to profiles"
+        : (currentRole === "admin" ? "Admin console · actions are written to profiles"
+          : "User view · no console access");
+    }
+
+    /* The page head promises controls, so it has to match the view that is actually showing. */
+    var introEl = document.getElementById("admin-intro");
+    if (introEl) {
+      if (currentRole === "owner") {
+        introEl.textContent = "Every account starts on Free. Grant a tier here, or suspend an " +
+          "account to cut off access immediately — the gate is enforced by the database, not by this " +
+          "page. The role and plan the app is showing are chosen from the badge in the top-right " +
+          "corner, on every page.";
+      } else if (currentRole === "admin") {
+        introEl.textContent = "Every account starts on Free. An admin grants any tier up to " +
+          "Workshop, and suspends an account to cut off access immediately — the gate is enforced by " +
+          "the database, not by this page. Roles are changed by the owner alone. The role and plan the " +
+          "app is showing are chosen from the badge in the top-right corner, on every page.";
+      } else {
+        introEl.textContent = "You are looking at CarDNA as an ordinary account sees it: no account " +
+          "list, no role control and no plan grants. Pick Owner or Admin in the role badge at the top " +
+          "right to come back to the console.";
+      }
+    }
 
     if (!profile || (profile.role !== "owner" && profile.role !== "admin")) {
       appEl.hidden = true;
@@ -817,7 +825,7 @@
     }
 
     /* A user view has no console; say so instead of showing a read-only one. */
-    if (auth.effectiveRole() === "user") {
+    if (currentRole === "user") {
       appEl.hidden = true;
       deniedEl.hidden = true;
       if (noConsoleEl) { noConsoleEl.hidden = false; }
@@ -826,9 +834,6 @@
 
     appEl.hidden = false;
     deniedEl.hidden = true;
-
-    var kicker = document.querySelector(".page-head .kicker");
-    if (kicker) { kicker.textContent = profile.role === "owner" ? "Owner console" : "Admin console"; }
 
     loadAccounts();
   });

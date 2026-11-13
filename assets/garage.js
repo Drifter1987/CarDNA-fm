@@ -249,8 +249,11 @@
       var a = window.CarDNAAuth;
       var lim = limits();
       if (!a || !lim) { el.textContent = ""; return; }
-      el.textContent = a.planLabel(planName()) + " plan · " + count + " of " +
-        (lim.vehicles ? lim.vehicles : "unlimited") + " saved vehicles";
+      var cap = lim.vehicles
+        ? lim.vehicles + (lim.vehicles === 1 ? " saved vehicle" : " saved vehicles")
+        : "unlimited saved vehicles";
+      el.textContent = a.planLabel(planName()) + " plan · " + count + " of " + cap +
+        (lim.vehicles && count > lim.vehicles ? " · over the limit, remove one to save another" : "");
     }
 
     /* Removing a car is one tap, so the last removal can be put back. */

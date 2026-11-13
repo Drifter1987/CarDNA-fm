@@ -280,6 +280,12 @@
     return { owner: "Owner", admin: "Admin", user: "User" }[role] || "User";
   }
 
+  function roleViewLabel(view) {
+    var label = roleLabel(view.role);
+    if (view.role === "user") { label += " · " + planLabel(view.plan); }
+    return "Role · " + label;
+  }
+
   function isBlocked() {
     return Boolean(state.profile &&
       (state.profile.status === "blocked" || state.profile.plan === "suspended"));
@@ -316,11 +322,9 @@
     return "business";
   }
 
-  /* ------------------------------------------------------------------ support view
-     An owner can open the app as an admin, or as a user on any plan, and can also open it
-     "as" one real account to see what that person sees. Either way it is a read-only view
-     inside the owner's own session — it is not a session for that user, and it writes
-     nothing on their behalf. */
+  /* ------------------------------------------------------------------ role preview
+     An owner can preview the app as an admin, or as a user on any plan. This stays within
+     the owner's own session and does not grant access to another account's data. */
 
   function viewAsProfile() {
     if (!isOwner()) { return null; }
@@ -337,24 +341,20 @@
     var me = profile || state.profile;
     var view = viewAsProfile();
 
-    if (!me) { return { role: "user", plan: "free", preview: false, email: "", id: "" }; }
+    if (!me) { return { role: "user", plan: "free", preview: false }; }
 
     if (view && view.role) {
       return {
         role: view.role,
         plan: view.plan || "free",
-        preview: true,
-        email: view.email || me.email || "",
-        id: view.id || me.id || ""
+        preview: true
       };
     }
 
     return {
       role: me.role || "user",
       plan: me.plan || "free",
-      preview: false,
-      email: me.email || "",
-      id: me.id || ""
+      preview: false
     };
   }
 
@@ -373,8 +373,8 @@
     return !lim || lim.exports.indexOf(format) !== -1;
   }
 
-  /* Stored by the owner console's "View as" switcher. Read-only by construction: no
-     token is minted, so nothing can be written as the account being previewed. */
+  /* Store only the selected role and plan. This is a local, read-only preview, not
+     impersonation and not a session for another account. */
   function setViewAs(role, plan) {
     if (!isOwner()) { return false; }
     try {
@@ -405,21 +405,6 @@
     document.body.classList.toggle("is-preview", view.preview);
     document.body.setAttribute("data-view-role", view.role);
     document.body.setAttribute("data-view-plan", view.plan);
-  }
-
-  /* The badge is the only place the current role and plan are shown, so there is no second
-     banner to collide with it. An account-level support view (the console's "View as") is
-     someone else's data, so the forms on that page are kept out of reach. */
-  function applySupportMode(target) {
-    if (!target || !(target.id && target.email)) { return; }
-
-    document.body.classList.add("is-support-view");
-
-    document.querySelectorAll("form, #garage-download, #vault-app, #garage-clear").forEach(function (node) {
-      node.setAttribute("aria-disabled", "true");
-      node.style.pointerEvents = "none";
-      node.style.opacity = ".55";
-    });
   }
 
   /* Fire-and-forget activity record. The row is owned by the signed-in user, so the insert
@@ -479,6 +464,11 @@
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") { closeRoleMenus(null); }
     });
+
+    /* An open menu is a panel over the page: scrolling closes it instead of dragging it along.
+       The listener captures, so a scroll inside the app shell counts as well as a page scroll. */
+    window.addEventListener("scroll", function () { closeRoleMenus(null); },
+      { passive: true, capture: true });
   }
 
   function roleMenu(view) {
@@ -487,11 +477,8 @@
 
     var summary = document.createElement("summary");
     summary.className = "account-chip-plan" + (view.preview ? " is-preview" : "");
-    summary.textContent = view.preview
-      ? roleLabel(view.role) + (view.role === "user" ? " · " + planLabel(view.plan) : "")
-      : (view.role === "owner" ? "Owner"
-        : (view.role === "admin" ? "Admin" : planLabel(view.plan)));
-    summary.setAttribute("aria-label", "View the app as — currently " + summary.textContent);
+    summary.textContent = roleViewLabel(view);
+    summary.setAttribute("aria-label", "Role menu — currently " + summary.textContent);
     menu.appendChild(summary);
 
     var list = document.createElement("div");
@@ -560,13 +547,13 @@
 
       var view = effective();
 
-      /* Owners get the view switcher; everyone else gets the same pill as a plain badge. */
+      /* Owners can choose a role preview; every account badge names its current role. */
       if (isOwner()) {
         chip.appendChild(roleMenu(view));
       } else {
         var badge = document.createElement("span");
         badge.className = "account-chip-plan";
-        badge.textContent = view.role === "admin" ? "Admin" : planLabel(view.plan);
+        badge.textContent = roleViewLabel(view);
         chip.appendChild(badge);
       }
 
@@ -713,7 +700,6 @@
     if (state.session) {
       log("page_view", { path: location.pathname.split("/").pop() || "index.html" });
       renderSuspended();
-      applySupportMode(viewAsProfile());
       startProfileWatch();
     }
   }
