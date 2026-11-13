@@ -407,63 +407,19 @@
     document.body.setAttribute("data-view-plan", view.plan);
   }
 
-  function renderSupportView(target) {
-    if (!target || document.getElementById("support-banner")) { return; }
+  /* The badge is the only place the current role and plan are shown, so there is no second
+     banner to collide with it. An account-level support view (the console's "View as") is
+     someone else's data, so the forms on that page are kept out of reach. */
+  function applySupportMode(target) {
+    if (!target || !(target.id && target.email)) { return; }
 
-    /* A real account has an id and an email; a role/plan preview has only the role. */
-    var account = Boolean(target.id && target.email);
-    var bar = document.createElement("div");
-    bar.id = "support-banner";
-    bar.className = "support-banner";
-
-    var text = document.createElement("span");
-    var title = document.createElement("strong");
-    title.textContent = account ? "Support view" : "Preview";
-    text.appendChild(title);
-
-    var who = account
-      ? (target.email || target.id) + " · " + roleLabel(target.role)
-      : "the app as " + roleLabel(target.role);
-    if (target.role === "user") { who += " · " + planLabel(target.plan); }
-
-    text.appendChild(document.createTextNode(
-      " " + who + " — read-only, nothing is written as another account."));
-
-    var actions = document.createElement("span");
-    actions.className = "support-banner-actions";
-
-    if (account) {
-      var back = document.createElement("a");
-      back.className = "btn btn--ghost btn--sm";
-      back.href = "admin.html";
-      back.textContent = "Back to console";
-      actions.appendChild(back);
-    }
-
-    var exit = document.createElement("button");
-    exit.type = "button";
-    exit.className = "btn btn--ghost btn--sm";
-    exit.textContent = account ? "Exit support view" : "Exit preview";
-    exit.addEventListener("click", function () {
-      clearViewAs();
-      location.reload();
-    });
-    actions.appendChild(exit);
-
-    bar.appendChild(text);
-    bar.appendChild(actions);
-    document.body.insertBefore(bar, document.body.firstChild);
     document.body.classList.add("is-support-view");
 
-    /* An account view is someone else's garage, so keep forms out of reach. A role preview
-       is the owner's own session and own data, so it stays interactive. */
-    if (account) {
-      document.querySelectorAll("form, #garage-download, #vault-app, #garage-clear").forEach(function (node) {
-        node.setAttribute("aria-disabled", "true");
-        node.style.pointerEvents = "none";
-        node.style.opacity = ".55";
-      });
-    }
+    document.querySelectorAll("form, #garage-download, #vault-app, #garage-clear").forEach(function (node) {
+      node.setAttribute("aria-disabled", "true");
+      node.style.pointerEvents = "none";
+      node.style.opacity = ".55";
+    });
   }
 
   /* Fire-and-forget activity record. The row is owned by the signed-in user, so the insert
@@ -487,9 +443,11 @@
     location.replace("signin.html?next=" + encodeURIComponent(next));
   }
 
-  /* The chip lives in the header's top-right corner on every page — one place only. */
+  /* The badge's home is the header's inner row, so it lands in the top-right corner. */
   function chipHost() {
-    return document.querySelector(".site-header") || document.body;
+    return document.querySelector(".header-inner") ||
+      document.querySelector(".site-header") ||
+      document.body;
   }
 
   /* Switching the view reloads: every gate, cap and table then reflects the new role. */
@@ -755,7 +713,7 @@
     if (state.session) {
       log("page_view", { path: location.pathname.split("/").pop() || "index.html" });
       renderSuspended();
-      renderSupportView(viewAsProfile());
+      applySupportMode(viewAsProfile());
       startProfileWatch();
     }
   }

@@ -983,6 +983,92 @@ body.is-app .site-header { flex: none; }
   .account-chip { padding: 6px 10px; }
 }
 
+/* ---------------------------------------------------------------- header badge */
+/* The badge is the last item of the header row: logo left, page buttons, badge right. */
+.header-inner > .header-actions { margin-left: auto; }
+.header-inner > .account-chip {
+  flex: 0 0 auto;
+  margin-left: 10px;
+}
+
+@media (max-width: 760px) {
+  /* One guaranteed row for logo + badge, the page buttons on their own line. */
+  .header-inner > .account-chip {
+    order: 1;
+    margin-left: auto;
+    margin-right: 0;
+  }
+  .header-inner > .header-actions {
+    order: 2;
+    flex-basis: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+}
+
+/* ---------------------------------------------------------------- role menu */
+.role-menu { position: relative; display: inline-flex; }
+
+.role-menu > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px;
+  border-radius: 7px;
+  color: var(--lime);
+  font: 500 10px/1 var(--mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.role-menu > summary::-webkit-details-marker { display: none; }
+.role-menu > summary::after { content: "▾"; font-size: 9px; opacity: .75; }
+.role-menu > summary:hover { background: rgba(255, 255, 255, .07); color: var(--text); }
+.role-menu[open] > summary { background: rgba(255, 255, 255, .09); color: var(--text); }
+.role-menu > summary.is-preview { color: var(--blue); }
+
+.role-menu-list {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 70;
+  min-width: 250px;
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px -20px #000;
+}
+.role-menu-list button,
+.role-menu-list a {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: var(--text);
+  font: 600 12px/1.3 var(--sans);
+  cursor: pointer;
+  text-decoration: none;
+}
+.role-menu-list button:hover,
+.role-menu-list a:hover { background: rgba(255, 255, 255, .07); }
+.role-menu-list button span { font: 500 10px/1.4 var(--mono); color: var(--dim-2); }
+.role-menu-list button.is-current { background: rgba(198, 242, 78, .14); }
+.role-menu-list button.is-current::before { content: "✓ "; color: var(--lime); }
+.role-menu-list a {
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 8px 8px;
+  color: var(--blue);
+}
+
 /* ---------------------------------------------------------------- garage toolbar */
 .garage-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
 .garage-selectall {
