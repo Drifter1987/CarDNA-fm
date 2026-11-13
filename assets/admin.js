@@ -808,9 +808,19 @@
     var loadingEl = document.getElementById("admin-loading");
     if (loadingEl) { loadingEl.hidden = true; }
 
+    var noConsoleEl = document.getElementById("admin-noconsole");
+
     if (!profile || (profile.role !== "owner" && profile.role !== "admin")) {
       appEl.hidden = true;
       deniedEl.hidden = false;
+      return;
+    }
+
+    /* A user view has no console; say so instead of showing a read-only one. */
+    if (auth.effectiveRole() === "user") {
+      appEl.hidden = true;
+      deniedEl.hidden = true;
+      if (noConsoleEl) { noConsoleEl.hidden = false; }
       return;
     }
 

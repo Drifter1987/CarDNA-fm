@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin — CarDNA</title>
 <meta name="description" content="Owner console: accounts, plans, access.">
-<link rel="stylesheet" href="assets/style.css?v=p10">
-<link rel="stylesheet" href="assets/motion.css?v=p10">
+<link rel="stylesheet" href="assets/style.css?v=p11">
+<link rel="stylesheet" href="assets/motion.css?v=p11">
 </head>
 <body data-require-auth>
 
@@ -54,6 +54,14 @@
           <code>role</code>, <code>status</code> and <code>email</code> to <code>profiles</code>),
           then:<br><br>
           <code>update public.profiles set role = 'owner' where email = 'you@example.com';</code>
+        </div>
+      </div>
+
+      <div id="admin-noconsole" hidden>
+        <div class="notice">
+          <strong>This view has no console.</strong> You are looking at CarDNA as a user, and
+          the staff console is not part of that view. Pick Owner or Admin in the badge at the
+          top right, or <a href="index.html">open the app</a>.
         </div>
       </div>
 
@@ -151,9 +159,9 @@
   </div>
 </footer>
 
-<script src="assets/supabase-config.js?v=p10"></script>
-<script src="assets/auth.js?v=p10"></script>
-<script src="assets/motion.js?v=p10"></script>
-<script src="assets/admin.js?v=p10"></script>
+<script src="assets/supabase-config.js?v=p11"></script>
+<script src="assets/auth.js?v=p11"></script>
+<script src="assets/motion.js?v=p11"></script>
+<script src="assets/admin.js?v=p11"></script>
 </body>
 </html>
