@@ -43,11 +43,7 @@
     applyTheme(currentTheme());
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", addToggle);
-  } else {
-    addToggle();
-  }
+  addToggle();
 
   /* mobile navigation */
   var toggle = document.querySelector(".nav-toggle");
@@ -97,6 +93,14 @@
 
   var tabs = Array.prototype.slice.call(tablist.querySelectorAll("[data-tab]"));
   var panels = Array.prototype.slice.call(document.querySelectorAll(".panel[role='tabpanel']"));
+  var tabbar = tablist.closest ? tablist.closest(".tabbar") : null;
+
+  function updateTabOverflowHint() {
+    if (!tabbar) { return; }
+    var hasMore = tablist.scrollWidth > tablist.clientWidth + 1 &&
+      tablist.scrollLeft + tablist.clientWidth < tablist.scrollWidth - 1;
+    tabbar.classList.toggle("has-more-tabs", hasMore);
+  }
 
   function activate(name, updateHash) {
     var found = false;
@@ -107,9 +111,17 @@
       tab.setAttribute("tabindex", selected ? "0" : "-1");
       if (selected) {
         found = true;
-        /* Keep the active tab inside the scroller instead of letting it sit off-screen. */
-        try { tab.scrollIntoView({ block: "nearest", inline: "nearest" }); }
-        catch (err) { /* older browsers */ }
+        /* Adjust only the horizontal tab scroller; scrollIntoView can move the page itself. */
+        var tabRect = tab.getBoundingClientRect();
+        var listRect = tablist.getBoundingClientRect();
+        var padding = window.getComputedStyle(tablist);
+        var leftEdge = listRect.left + (parseFloat(padding.paddingLeft) || 0);
+        var rightEdge = listRect.right - (parseFloat(padding.paddingRight) || 0);
+        if (tabRect.left < leftEdge) {
+          tablist.scrollLeft -= leftEdge - tabRect.left;
+        } else if (tabRect.right > rightEdge) {
+          tablist.scrollLeft += tabRect.right - rightEdge;
+        }
       }
     });
 
@@ -119,14 +131,27 @@
       panel.hidden = panel.id !== "panel-" + name;
     });
 
+    var navKey = name === "overview" ? "home" : name;
+    document.querySelectorAll(".site-header .nav [data-nav]").forEach(function (link) {
+      if (link.getAttribute("data-nav") === navKey) {
+        link.setAttribute("aria-current", "page");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+
     var scroller = document.querySelector(".app-scroll");
     if (scroller) { scroller.scrollTop = 0; }
 
     if (updateHash !== false && window.history.replaceState) {
       window.history.replaceState({}, "", "#" + name);
     }
+    updateTabOverflowHint();
     return true;
   }
+
+  tablist.addEventListener("scroll", updateTabOverflowHint, { passive: true });
+  window.addEventListener("resize", updateTabOverflowHint);
 
   tablist.addEventListener("click", function (event) {
     var tab = event.target.closest ? event.target.closest("[data-tab]") : null;

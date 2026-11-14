@@ -496,6 +496,21 @@
         setHint("");
         button.textContent = "Saved ✓";
         button.disabled = true;
+
+        /* Saved here at once; whether it reached the account is reported when the server has
+           answered, and again later if it had to wait. */
+        if (saved && saved.sync && saved.sync.then) {
+          saved.sync.then(function (sync) {
+            if (sync.state === "pending") {
+              button.textContent = "Saved here ✓";
+              setHint("Saved on this device. It will reach your account when the connection is back.", false);
+            } else if (sync.state === "rejected") {
+              button.textContent = "Saved here only";
+              setHint("Not saved to your account: " + (sync.message || "the server refused it") +
+                ". It stays in this browser; the garage page can try again.", true);
+            }
+          });
+        }
       });
     }
 

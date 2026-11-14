@@ -66,7 +66,10 @@
 
     if (!response.ok) {
       var text = await response.text();
-      throw new Error("Supabase " + response.status + ": " + (text || "request failed"));
+      var failure = new Error("Supabase " + response.status + ": " + (text || "request failed"));
+      failure.status = response.status;
+      failure.detail = text || "";
+      throw failure;
     }
     if (opts.raw) { return response; }
     var body = await response.text();
@@ -85,44 +88,255 @@
     };
   }
 
-  function push(entry) {
-    if (!serverReady()) { return Promise.resolve(); }
-
+  async function send(entry) {
     var url = "/rest/v1/vehicles?on_conflict=user_id,vin";
-    return api(url, {
-      method: "POST",
-      prefer: "resolution=merge-duplicates,return=minimal",
-      body: row(entry)
-    }).catch(function () {
-      /* The deleted_at column may not be in the database yet. */
-      var plain = row(entry);
-      delete plain.deleted_at;
-      return api(url, {
+    try {
+      await api(url, {
         method: "POST",
         prefer: "resolution=merge-duplicates,return=minimal",
-        body: plain
-      }).catch(function () { /* offline or blocked: the local copy remains */ });
-    });
+        body: row(entry)
+      });
+    } catch (err) {
+      /* The deleted_at column may not be in the database yet; anything else is a real answer. */
+      if (err.status === 400 && /deleted_at/i.test(err.detail || "")) {
+        var plain = row(entry);
+        delete plain.deleted_at;
+        await api(url, {
+          method: "POST",
+          prefer: "resolution=merge-duplicates,return=minimal",
+          body: plain
+        });
+      } else {
+        throw err;
+      }
+    }
   }
 
   /* A removal is a soft delete once the column exists, so the row — and its audit trail —
      survives. Without the column it falls back to the old hard delete. */
-  function drop(vin) {
-    if (!serverReady()) { return Promise.resolve(); }
-
+  async function dropRemote(vin) {
     var url = "/rest/v1/vehicles?vin=eq." + encodeURIComponent(vin);
-    return api(url, {
-      method: "PATCH",
-      body: { deleted_at: new Date().toISOString() }
-    }).catch(function () {
-      return api(url, { method: "DELETE" }).catch(function () { /* ignore */ });
+    try {
+      await api(url, {
+        method: "PATCH",
+        body: { deleted_at: new Date().toISOString() }
+      });
+    } catch (err) {
+      if (err.status === 400 && /deleted_at/i.test(err.detail || "")) {
+        await api(url, { method: "DELETE" });
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  async function clearRemote(uid) {
+    await api("/rest/v1/vehicles?user_id=eq." + encodeURIComponent(uid), { method: "DELETE" });
+  }
+
+  /* ------------------------------------------------------------------ sync queue
+     Every change to the server copy goes through a small queue in localStorage, so a save
+     made offline lands later and a refusal is reported instead of swallowed. An entry is
+     "pending" (will be retried, with backoff, when the browser is back online or the tab
+     is shown again) or "rejected" (the server answered no — only retried by hand). */
+
+  var QUEUE_KEY = "cardna.garage.queue";
+  var CLEAR = "*";
+  var seq = 0;
+  var flushing = null;
+  var retryTimer = null;
+  var retryDelay = 15000;
+
+  function queueRead() {
+    try {
+      var raw = window.localStorage.getItem(QUEUE_KEY);
+      var q = raw ? JSON.parse(raw) : {};
+      return q && typeof q === "object" && !Array.isArray(q) ? q : {};
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function queueWrite(q) {
+    try {
+      if (Object.keys(q).length) { window.localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); }
+      else { window.localStorage.removeItem(QUEUE_KEY); }
+    } catch (err) { /* ignore */ }
+    try { document.dispatchEvent(new CustomEvent("cardna:garage-sync")); } catch (err) { /* older browsers */ }
+  }
+
+  /* Only this account's entries: the queue lives per device, not per user. */
+  function mine() {
+    var s = session();
+    var q = queueRead();
+    var out = {};
+    if (!s) { return out; }
+    Object.keys(q).forEach(function (key) {
+      if (q[key] && q[key].uid === s.id) { out[key] = q[key]; }
     });
+    return out;
+  }
+
+  function enqueue(op, key, entry) {
+    var q = queueRead();
+    q[key] = {
+      op: op,
+      uid: session().id,
+      entry: entry || null,
+      at: Date.now() * 1000 + (seq++ % 1000),
+      state: "pending",
+      message: "",
+      tries: 0
+    };
+    queueWrite(q);
+  }
+
+  /* Offline, a server fault, an expired token or throttling: try again later. */
+  function transient(err) {
+    return !err.status || err.status >= 500 || err.status === 401 ||
+      err.status === 408 || err.status === 429;
+  }
+
+  function reason(err) {
+    var text = "";
+    try {
+      var body = JSON.parse(err.detail || "{}");
+      text = body.message || body.hint || "";
+    } catch (parseError) { text = ""; }
+    if (/row-level security/i.test(text) || /row-level security/i.test(err.detail || "")) {
+      return "Your account cannot save vehicles right now.";
+    }
+    return text || "The server did not accept it.";
+  }
+
+  function scheduleRetry() {
+    if (retryTimer) { return; }
+    retryTimer = window.setTimeout(function () {
+      retryTimer = null;
+      flush();
+    }, retryDelay);
+    retryDelay = Math.min(retryDelay * 2, 300000);
+  }
+
+  function summary() {
+    var q = mine();
+    var out = { pending: 0, rejected: 0, message: "" };
+    Object.keys(q).forEach(function (key) {
+      if (q[key].state === "rejected") {
+        out.rejected += 1;
+        if (!out.message) { out.message = q[key].message || ""; }
+      } else {
+        out.pending += 1;
+      }
+    });
+    return out;
+  }
+
+  /* What the server copy of one car is doing: synced, pending, rejected, or local when no
+     account is signed in. */
+  function statusInfo(vin) {
+    if (!serverReady()) { return { state: "local", message: "" }; }
+    var item = mine()[vin];
+    if (!item) { return { state: "synced", message: "" }; }
+    return { state: item.state, message: item.message || "" };
+  }
+
+  function flush() {
+    if (flushing) { return flushing; }
+    if (!serverReady()) { return Promise.resolve(summary()); }
+
+    flushing = (async function () {
+      var uid = session().id;
+      var stop = false;
+
+      while (!stop) {
+        var q = mine();
+        var keys = Object.keys(q).filter(function (key) { return q[key].state === "pending"; });
+        if (!keys.length) { break; }
+        keys.sort(function (a, b) { return q[a].at - q[b].at; });
+
+        for (var i = 0; i < keys.length && !stop; i += 1) {
+          var key = keys[i];
+          var item = q[key];
+
+          try {
+            if (item.op === "save") { await send(item.entry); }
+            else if (item.op === "drop") { await dropRemote(key); }
+            else { await clearRemote(uid); }
+
+            var done = queueRead();
+            if (done[key] && done[key].at === item.at) {
+              delete done[key];
+              queueWrite(done);
+            }
+          } catch (err) {
+            var now = queueRead();
+            /* A newer change to the same car replaced this one while it was in flight. */
+            if (now[key] && now[key].at === item.at) {
+              if (transient(err)) {
+                now[key].tries = (now[key].tries || 0) + 1;
+                stop = true;
+              } else {
+                now[key].state = "rejected";
+                now[key].message = reason(err);
+              }
+              queueWrite(now);
+            } else if (transient(err)) {
+              stop = true;
+            }
+          }
+        }
+      }
+
+      if (summary().pending) { scheduleRetry(); }
+      else { retryDelay = 15000; }
+      return summary();
+    })().then(function (result) {
+      flushing = null;
+      /* A change queued in the instant between the last pass and here would otherwise wait. */
+      if (result.pending && !retryTimer) { flush(); }
+      return result;
+    }, function (err) {
+      flushing = null;
+      throw err;
+    });
+
+    return flushing;
+  }
+
+  /* Queue a change and report how that car ended up. */
+  function submit(op, key, entry) {
+    if (!serverReady()) { return Promise.resolve({ state: "local", message: "" }); }
+    enqueue(op, key, entry);
+    return flush().then(function () { return statusInfo(key); });
+  }
+
+  /* Try again now: also gives refused changes another chance, for after a plan change. */
+  function retry() {
+    if (!serverReady()) { return Promise.resolve(summary()); }
+    var q = queueRead();
+    var uid = session().id;
+    Object.keys(q).forEach(function (key) {
+      if (q[key].uid === uid && q[key].state === "rejected") {
+        q[key].state = "pending";
+        q[key].message = "";
+      }
+    });
+    queueWrite(q);
+    retryDelay = 15000;
+    return flush();
   }
 
   /* Pull the account's rows, merge them over the local copy, and upload anything the
      server has never seen. Returns the merged list. */
   async function pull() {
     if (!serverReady()) { return read(); }
+
+    /* Settle what this device still owes the server first, so a car removed offline is not
+       read back as present. */
+    await flush();
+    var queued = mine();
+    if (queued[CLEAR]) { return read(); }
 
     var rows;
     try {
@@ -146,6 +360,9 @@
 
     (rows || []).forEach(function (remote) {
       seen[remote.vin] = true;
+      if (queued[remote.vin] && queued[remote.vin].op === "drop") { return; }
+      /* A change this device has not delivered yet is newer than the server's copy. */
+      if (queued[remote.vin] && queued[remote.vin].op === "save" && byVin[remote.vin]) { return; }
       byVin[remote.vin] = {
         vin: remote.vin,
         year: remote.model_year || "",
@@ -159,9 +376,16 @@
     var merged = Object.keys(byVin).map(function (vin) { return byVin[vin]; }).slice(0, MAX);
     write(merged);
 
+    /* A car the server has never seen is queued — unless the server already refused it, which
+       is shown to the user rather than asked again on every load. */
+    var added = false;
     local.forEach(function (item) {
-      if (!seen[item.vin]) { push(item); }
+      if (!seen[item.vin] && !queued[item.vin]) {
+        enqueue("save", item.vin, item);
+        added = true;
+      }
     });
+    if (added) { flush(); }
 
     return merged;
   }
@@ -200,24 +424,47 @@
       list.unshift(record);
       var capped = list.slice(0, MAX);
       write(capped);
-      push(record);
-      return { ok: true, count: capped.length };
+      /* sync resolves to { state, message } once the server has answered or the attempt is
+         parked for a retry: synced, pending, rejected, or local when signed out. */
+      var synced = submit("save", record.vin, record);
+      return { ok: true, count: capped.length, sync: synced };
     },
     remove: function (vin) {
       var list = read().filter(function (item) { return item.vin !== vin; });
       write(list);
-      drop(vin);
+      submit("drop", vin, null);
       return list.length;
     },
     clear: function () {
       write([]);
       if (!serverReady()) { return; }
-      api("/rest/v1/vehicles?user_id=eq." + encodeURIComponent(session().id),
-        { method: "DELETE" }).catch(function () { /* ignore */ });
+
+      /* Anything still queued for this account is moot once the whole garage is gone. */
+      var q = queueRead();
+      var uid = session().id;
+      Object.keys(q).forEach(function (key) {
+        if (q[key].uid === uid) { delete q[key]; }
+      });
+      queueWrite(q);
+      submit("clear", CLEAR, null);
     },
     pull: pull,
+    status: statusInfo,
+    syncSummary: summary,
+    retry: retry,
+    flush: flush,
     count: function () { return read().length; }
   };
+
+  /* Deliver whatever is waiting when the connection comes back, the tab is shown again, or
+     the session has resolved after a page load. */
+  window.addEventListener("online", function () { retryDelay = 15000; flush(); });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) { flush(); }
+  });
+  if (window.CarDNAAuth && window.CarDNAAuth.ready) {
+    window.CarDNAAuth.ready(function () { flush(); });
+  }
 
   /* ------------------------------------------------------------------ garage page */
 
@@ -309,6 +556,17 @@
       meta.textContent = item.vin;
       left.appendChild(meta);
 
+      /* Whether this car is on the account yet. Signed-out visitors see nothing here. */
+      var sync = window.CarDNAGarage.status(item.vin);
+      if (sync.state === "pending" || sync.state === "rejected") {
+        var flag = document.createElement("span");
+        flag.className = "sync-flag is-" + sync.state;
+        flag.textContent = sync.state === "pending"
+          ? "Saved on this device · waiting to reach your account"
+          : "Not saved to your account · " + (sync.message || "the server refused it");
+        left.appendChild(flag);
+      }
+
       var right = document.createElement("div");
       right.className = "garage-actions";
 
@@ -343,6 +601,30 @@
       selectAllEl.indeterminate = count > 0 && count < all.length;
     }
 
+    /* One line for the whole garage: everything is on the account, or what is not and why.
+       The retry button is the only way to re-ask for changes the server refused. */
+    function renderSync() {
+      var el = document.getElementById("garage-sync");
+      var text = document.getElementById("garage-sync-text");
+      if (!el || !text) { return; }
+
+      var s = serverReady() ? window.CarDNAGarage.syncSummary() : { pending: 0, rejected: 0 };
+      var waiting = s.pending + s.rejected;
+      el.hidden = !waiting;
+      if (!waiting) { return; }
+
+      var parts = [];
+      if (s.pending) {
+        parts.push(s.pending + (s.pending === 1 ? " change is" : " changes are") +
+          " saved on this device and waiting to reach your account");
+      }
+      if (s.rejected) {
+        parts.push(s.rejected + (s.rejected === 1 ? " change was" : " changes were") +
+          " refused by your account" + (s.message ? " (" + s.message + ")" : ""));
+      }
+      text.textContent = parts.join("; ") + ". ";
+    }
+
     function render() {
       var list = items();
       var countEl = document.getElementById("garage-count");
@@ -357,6 +639,7 @@
 
       renderLimit(list.length);
       renderUndo();
+      renderSync();
 
       host.innerHTML = "";
       if (!list.length && serverReady() && !pulled) {
@@ -482,6 +765,21 @@
     }
 
     render();
+
+    /* The queue changes in the background: redraw when it does. */
+    document.addEventListener("cardna:garage-sync", function () { render(); });
+
+    var syncRetry = document.getElementById("garage-sync-retry");
+    if (syncRetry) {
+      syncRetry.addEventListener("click", function () {
+        status("Trying again…", "");
+        window.CarDNAGarage.retry().then(function (s) {
+          render();
+          status(s.pending || s.rejected ? "Some changes are still not on your account." : "Your garage is up to date.",
+            s.pending || s.rejected ? "error" : "ok");
+        });
+      });
+    }
 
     var undoBtn = document.getElementById("garage-undo");
     if (undoBtn) {

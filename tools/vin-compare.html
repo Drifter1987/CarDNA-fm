@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>VIN decoder comparison — CarDNA tools</title>
 <meta name="description" content="Compare free, keyless VIN decoders on the same four vehicles, full field by field.">
-<link rel="stylesheet" href="../assets/style.css?v=p13">
+<link rel="stylesheet" href="../assets/style.css?v=p21">
 <style>
   .vin-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-top: 12px; }
   .vin-card > summary {
@@ -33,25 +33,8 @@
 </head>
 <body>
 
-<header class="site-header">
-  <div class="container header-inner">
-    <a class="logo" href="../index.html" aria-label="CarDNA home">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
-        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
-      </svg>
-      <span>
-        <span class="logo-word">CarDNA</span>
-        <span class="logo-sub">tools</span>
-      </span>
-    </a>
-    <div class="header-actions">
-      <a class="btn btn--ghost btn--sm" href="../index.html">Home</a>
-      <a class="btn btn--ghost btn--sm" href="parse-public-apis.html">API list</a>
-    </div>
-  </div>
-</header>
+<div data-site-header data-site-root="../"></div>
+<script src="../assets/site-shell.js?v=p21"></script>
 
 <main>
   <section class="page-head">
@@ -93,8 +76,9 @@
         <p>One row per provider, one column per VIN. Dashes mean no result yet, not “no vehicle”.</p>
       </div>
 
+      <p class="table-scroll-hint vin-matrix-scroll-hint">Scroll horizontally to see all four vehicles.</p>
       <div class="table-wrap">
-        <div class="table-scroll">
+        <div class="table-scroll" role="region" aria-label="Full VIN comparison matrix" tabindex="0">
           <table>
             <thead><tr id="matrix-head"><th>Provider</th></tr></thead>
             <tbody id="matrix-body"></tbody>
@@ -109,8 +93,9 @@
         <select class="search-input" id="field-vin" style="max-width:340px;margin-top:14px"></select>
       </div>
 
+      <p class="table-scroll-hint">Scroll horizontally to compare providers for this vehicle.</p>
       <div class="table-wrap">
-        <div class="table-scroll">
+        <div class="table-scroll" role="region" aria-label="VIN field comparison" tabindex="0">
           <table>
             <thead><tr id="field-head"><th>Field</th></tr></thead>
             <tbody id="field-body"></tbody>
@@ -124,16 +109,11 @@
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="container">
-    <div class="footer-bottom" style="border-top:0;margin-top:0">
-      <span>© <span id="year">2026</span> GMOttomotive · CarDNA</span>
-      <span>vPIC (public domain) · AI Kit Data (no key) · NHTSA recalls (public domain)</span>
-    </div>
-  </div>
-</footer>
+<div data-site-footer data-site-root="../"></div>
 
-<script src="../assets/app.js"></script>
+<script src="../assets/supabase-config.js"></script>
+<script src="../assets/auth.js?v=p21"></script>
+<script src="../assets/app.js?v=p21"></script>
 <script src="../assets/vin-schema.js"></script>
 <script>
   (function () {

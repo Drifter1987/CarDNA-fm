@@ -2,34 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Garage — CarDNA</title>
 <meta name="description" content="Your saved vehicles, with full decode export to Excel, Markdown, CSV or PDF.">
-<link rel="stylesheet" href="assets/style.css?v=p13">
-<link rel="stylesheet" href="assets/motion.css?v=p13">
+<link rel="stylesheet" href="assets/style.css?v=p21">
+<link rel="stylesheet" href="assets/motion.css?v=p21">
 </head>
 <body data-require-auth>
 
-<header class="site-header">
-  <div class="container header-inner">
-    <a class="logo" href="index.html" aria-label="CarDNA home">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
-        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
-      </svg>
-      <span>
-        <span class="logo-word">CarDNA</span>
-        <span class="logo-sub">by GMOttomotive</span>
-      </span>
-    </a>
-    <div class="header-actions">
-      <a class="btn btn--ghost btn--sm" href="decode.html">Decode</a>
-      <a class="btn btn--ghost btn--sm" href="makes.html">Brands</a>
-      <a class="btn btn--ghost btn--sm" href="vault.html">Vault</a>
-    </div>
-  </div>
-</header>
+<div data-site-header data-site-root=""></div>
+<script src="assets/site-shell.js?v=p21"></script>
 
 <main>
   <section class="page-head">
@@ -80,6 +62,11 @@
         <button class="link-button" type="button" id="garage-undo">Undo</button>
       </p>
 
+      <p class="vault-status" id="garage-sync" data-tone="error" hidden role="status">
+        <span id="garage-sync-text"></span>
+        <button class="link-button" type="button" id="garage-sync-retry">Try again</button>
+      </p>
+
       <div id="garage-list"></div>
 
       <p style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
@@ -121,22 +108,14 @@
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="container">
-    <div class="footer-bottom" style="border-top:0;margin-top:0">
-      <span>© <span id="year">2026</span> GMOttomotive · CarDNA</span>
-      <span>Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and
-        <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC</span>
-    </div>
-  </div>
-</footer>
+<div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p13"></script>
-<script src="assets/auth.js?v=p13"></script>
-<script src="assets/app.js?v=p13"></script>
-<script src="assets/garage.js?v=p13"></script>
-<script src="assets/vin-schema.js?v=p13"></script>
-<script src="assets/export.js?v=p13"></script>
-<script src="assets/motion.js?v=p13"></script>
+<script src="assets/supabase-config.js?v=p21"></script>
+<script src="assets/auth.js?v=p21"></script>
+<script src="assets/app.js?v=p21"></script>
+<script src="assets/garage.js?v=p21"></script>
+<script src="assets/vin-schema.js?v=p21"></script>
+<script src="assets/export.js?v=p21"></script>
+<script src="assets/motion.js?v=p21"></script>
 </body>
 </html>

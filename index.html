@@ -2,35 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CarDNA — read any vehicle in 17 characters | GMOttomotive</title>
 <meta name="description" content="CarDNA decodes a VIN into the exact vehicle, and browses 319 car brands with 5,600+ models, generations and engines. A GMOttomotive product.">
-<link rel="stylesheet" href="assets/style.css?v=p13">
-<link rel="stylesheet" href="assets/motion.css?v=p13">
+<link rel="stylesheet" href="assets/style.css?v=p21">
+<link rel="stylesheet" href="assets/motion.css?v=p21">
 </head>
 <body class="is-app" data-require-auth>
 
-<header class="site-header">
-  <div class="container header-inner">
-    <a class="logo" href="index.html" aria-label="CarDNA home">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M8 2c0 5 8 5 8 10s-8 5-8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M16 2c0 5-8 5-8 10s8 5 8 10" stroke="#c6f24e" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
-        <path d="M9.4 6.2h5.2M9.1 12h5.8M9.4 17.8h5.2" stroke="#c6f24e" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
-      </svg>
-      <span>
-        <span class="logo-word">CarDNA</span>
-        <span class="logo-sub">by GMOttomotive</span>
-      </span>
-    </a>
-
-    <div class="header-actions">
-      <a class="btn btn--ghost btn--sm" href="garage.html">Garage</a>
-      <a class="btn btn--ghost btn--sm" href="vault.html">Vault</a>
-      <a class="btn btn--ghost btn--sm" href="about.html">Company</a>
-    </div>
-  </div>
-</header>
+<div data-site-header data-site-root=""></div>
+<script src="assets/site-shell.js?v=p21"></script>
 
 <div class="tabbar">
   <div class="container tabbar-inner" role="tablist" aria-label="Sections">
@@ -342,22 +323,14 @@
 
 </main>
 
-<footer class="app-footer">
-  <div class="container" style="display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between">
-    <span>© <span id="year">2026</span> GMOttomotive · CarDNA · <a href="legal.html">Legal</a></span>
-    <span>
-      Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and
-      <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC
-    </span>
-  </div>
-</footer>
+<div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p13"></script>
-<script src="assets/auth.js?v=p13"></script>
-<script src="assets/app.js?v=p13"></script>
-<script src="assets/garage.js?v=p13"></script>
-<script src="assets/vin-schema.js?v=p13"></script>
-<script src="assets/vin.js?v=p13"></script>
+<script src="assets/supabase-config.js?v=p21"></script>
+<script src="assets/auth.js?v=p21"></script>
+<script src="assets/app.js?v=p21"></script>
+<script src="assets/garage.js?v=p21"></script>
+<script src="assets/vin-schema.js?v=p21"></script>
+<script src="assets/vin.js?v=p21"></script>
 <script>
   (function () {
     "use strict";
@@ -376,6 +349,6 @@
     });
   })();
 </script>
-<script src="assets/motion.js?v=p13"></script>
+<script src="assets/motion.js?v=p21"></script>
 </body>
 </html>

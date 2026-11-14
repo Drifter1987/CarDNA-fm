@@ -15,7 +15,7 @@ no build step, no third platform.
 To run it locally, any static file server works:
 
 ```bash
-cd CarDNA
+cd CarDNA-fm
 npx serve .
 # open the address it prints
 ```

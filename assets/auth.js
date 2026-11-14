@@ -16,7 +16,9 @@
     "legal.html": 1,
     "pricing.html": 1,
     "signin.html": 1,
-    "reset.html": 1
+    "reset.html": 1,
+    "vin-compare.html": 1,
+    "parse-public-apis.html": 1
   };
 
   var state = { session: null, profile: null, ready: false };
@@ -398,7 +400,7 @@
     var view = effective();
     var staff = view.role === "owner" || view.role === "admin";
 
-    document.querySelectorAll('a[href="admin.html"]').forEach(function (link) {
+    document.querySelectorAll("[data-admin-link]").forEach(function (link) {
       link.hidden = !staff;
     });
 
@@ -419,13 +421,18 @@
     }).catch(function () { /* activity is best-effort */ });
   }
 
+  function siteRoot() {
+    var header = document.querySelector(".site-header[data-site-root]");
+    return header ? header.getAttribute("data-site-root") || "" : "";
+  }
+
   function gate() {
     if (!configured()) { return; }                       /* not set up yet: stay public */
     if (state.session) { return; }
     if (PUBLIC_PAGES[location.pathname.split("/").pop() || "index.html"]) { return; }
 
     var next = location.pathname.split("/").pop() + location.search + location.hash;
-    location.replace("signin.html?next=" + encodeURIComponent(next));
+    location.replace(siteRoot() + "signin.html?next=" + encodeURIComponent(next));
   }
 
   /* The badge's home is the header's inner row, so it lands in the top-right corner. */
@@ -518,7 +525,7 @@
 
     if (view.role === "owner" || view.role === "admin") {
       var consoleLink = document.createElement("a");
-      consoleLink.href = "admin.html";
+      consoleLink.href = siteRoot() + "admin.html";
       consoleLink.textContent = "Console";
       list.appendChild(consoleLink);
     }
@@ -526,7 +533,23 @@
     menu.appendChild(list);
 
     menu.addEventListener("toggle", function () {
-      if (menu.open) { closeRoleMenus(menu); }
+      if (menu.open) {
+        closeRoleMenus(menu);
+        if (window.matchMedia && window.matchMedia("(max-width: 560px)").matches) {
+          var viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+          var width = Math.max(0, Math.min(250, viewportWidth - 24));
+          var summaryRect = summary.getBoundingClientRect();
+          var menuRect = menu.getBoundingClientRect();
+          var left = Math.max(12, Math.min(summaryRect.right - width, viewportWidth - width - 12));
+          list.style.left = (left - menuRect.left) + "px";
+          list.style.right = "auto";
+          list.style.minWidth = width + "px";
+        }
+      } else {
+        list.style.left = "";
+        list.style.right = "";
+        list.style.minWidth = "";
+      }
     });
 
     return menu;
@@ -562,13 +585,13 @@
       out.className = "account-chip-out";
       out.textContent = "Sign out";
       out.addEventListener("click", function () {
-        signOut().then(function () { location.href = "signin.html"; });
+        signOut().then(function () { location.href = siteRoot() + "signin.html"; });
       });
       chip.appendChild(out);
     } else if (configured()) {
       var link = document.createElement("a");
       link.className = "account-chip-link";
-      link.href = "signin.html";
+      link.href = siteRoot() + "signin.html";
       link.textContent = "Sign in";
       chip.appendChild(link);
     }

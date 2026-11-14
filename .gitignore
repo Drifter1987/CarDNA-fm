@@ -10,3 +10,6 @@ cardna-vins-*.txt
 .env
 .env.*
 .DS_Store
+
+# Agent skills kept on this device only — not part of the published site
+Skills/
