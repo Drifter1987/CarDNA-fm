@@ -126,7 +126,8 @@
       id: row.id || session.id,
       display_name: row.display_name || "",
       plan: row.plan || "free",
-      role: row.role || "user",
+      /* The database's default role is "member"; the app's is "user". */
+      role: row.role === "member" ? "user" : (row.role || "user"),
       created_at: row.created_at || "",
       email: session.email
     };
@@ -354,7 +355,7 @@
     }
 
     return {
-      role: me.role || "user",
+      role: (me.role === "member" ? "user" : me.role) || "user",
       plan: me.plan || "free",
       preview: false
     };
