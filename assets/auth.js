@@ -304,12 +304,14 @@
 
   /* ------------------------------------------------------------------ plan limits
      These numbers are the pricing page's, nothing invented — keep the two in step.
-     vehicles: 0 means unlimited. exports lists the formats the garage offers. */
+     vehicles: 0 means unlimited. decodes: VIN decodes in total, US or European, 0 means
+     unlimited (only Free is capped; the paid plans' European quota is `eu`, per month).
+     exports lists the formats the garage offers. */
   var PLAN_LIMITS = {
-    free:     { vehicles: 1,  eu: 3,   exports: ["md"],                       seats: 1, bulk: false, api: false },
-    pro:      { vehicles: 5,  eu: 10,  exports: ["md", "csv", "pdf"],         seats: 1, bulk: false, api: false },
-    workshop: { vehicles: 25, eu: 40,  exports: ["md", "csv", "pdf", "xlsx"], seats: 3, bulk: true,  api: true },
-    business: { vehicles: 0,  eu: 450, exports: ["md", "csv", "pdf", "xlsx"], seats: 0, bulk: true,  api: true }
+    free:     { vehicles: 1,  decodes: 3, eu: 3,   exports: ["md"],                       seats: 1, bulk: false, api: false },
+    pro:      { vehicles: 5,  decodes: 0, eu: 10,  exports: ["md", "csv", "pdf"],         seats: 1, bulk: false, api: false },
+    workshop: { vehicles: 25, decodes: 0, eu: 40,  exports: ["md", "csv", "pdf", "xlsx"], seats: 3, bulk: true,  api: true },
+    business: { vehicles: 0,  decodes: 0, eu: 450, exports: ["md", "csv", "pdf", "xlsx"], seats: 0, bulk: true,  api: true }
   };
 
   function limits(plan) {
@@ -374,6 +376,67 @@
   function canExport(format) {
     var lim = limitsNow();
     return !lim || lim.exports.indexOf(format) !== -1;
+  }
+
+  /* ------------------------------------------------------------------ decode allowance
+     A capped plan (Free: 3) keeps the list of VINs it has decoded, per account, on this
+     device; a VIN already on the list can be decoded again at no cost. This is a browser-level
+     limit, not a server one: clearing site data, or another browser, starts the count again.
+     An owner previewing a plan keeps the list in sessionStorage, so testing a plan never uses
+     up the real account's allowance. */
+  var DECODES_KEY = "cardna.decodes";
+
+  function decodeStore() {
+    return effective().preview ? window.sessionStorage : window.localStorage;
+  }
+
+  function decodedVins() {
+    if (!state.session) { return []; }
+    try {
+      var raw = decodeStore().getItem(DECODES_KEY);
+      var all = raw ? JSON.parse(raw) : {};
+      var list = all && all[state.session.id];
+      return Array.isArray(list) ? list : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function decodeUsage() {
+    var lim = limitsNow();
+    var cap = lim && lim.decodes ? lim.decodes : 0;
+    var used = decodedVins().length;
+    return {
+      limited: cap > 0,
+      limit: cap,
+      used: used,
+      left: cap ? Math.max(0, cap - used) : null
+    };
+  }
+
+  function canDecode(vin) {
+    var usage = decodeUsage();
+    return !usage.limited || usage.used < usage.limit || decodedVins().indexOf(vin) !== -1;
+  }
+
+  /* Called once a decode has succeeded. Nothing is kept for a plan with no cap. */
+  function recordDecode(vin) {
+    var usage = decodeUsage();
+    if (!usage.limited || !state.session) { return usage; }
+
+    var list = decodedVins();
+    if (list.indexOf(vin) === -1) {
+      list.push(vin);
+      try {
+        var store = decodeStore();
+        var raw = store.getItem(DECODES_KEY);
+        var all = raw ? JSON.parse(raw) : {};
+        if (!all || typeof all !== "object" || Array.isArray(all)) { all = {}; }
+        all[state.session.id] = list;
+        store.setItem(DECODES_KEY, JSON.stringify(all));
+      } catch (err) { /* storage blocked: the allowance cannot be kept on this device */ }
+    }
+    return decodeUsage();
   }
 
   /* Store only the selected role and plan. This is a local, read-only preview, not
@@ -752,6 +815,9 @@
     limits: limits,
     limitsNow: limitsNow,
     canExport: canExport,
+    decodeUsage: decodeUsage,
+    canDecode: canDecode,
+    recordDecode: recordDecode,
     planNeededFor: planNeededFor,
     effective: effective,
     effectiveRole: effectiveRole,

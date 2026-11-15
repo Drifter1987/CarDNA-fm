@@ -17,7 +17,7 @@ case, where the customer maxes the plan out.
 
 | Plan | Price / month | EU decodes | Net profit, typical month | Net profit, full quota | Margin typical / worst |
 |---|---:|---:|---:|---:|---:|
-| Free | €0 | 3, once | −€0.78 once | — | — |
+| Free | €0 | 3 decodes in total (US or EU), once | −€0.78 at most, once | — | — |
 | Pro | €9.90 | 10 | **€8.99** | **€7.30** | 91% / 74% |
 | Workshop | €39.00 | 40 | **€33.80** | **€28.60** | 87% / 73% |
 | Business | €249.00 | 450 | **€178.80** | **€132.00** | 72% / 53% |

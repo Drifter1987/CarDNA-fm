@@ -449,10 +449,39 @@
     var submit = form.querySelector('button[type="submit"]');
     var defaultHint = hint ? hint.textContent : "";
 
+    /* What is left of a capped plan's decodes, once the account has resolved. */
+    function quotaNote() {
+      var a = window.CarDNAAuth;
+      if (!a || !a.state || !a.state.ready || !a.decodeUsage) { return ""; }
+      var usage = a.decodeUsage();
+      if (!usage.limited) { return ""; }
+      return usage.left === 0
+        ? " · all " + usage.limit + " free decodes used"
+        : " · " + usage.left + " of " + usage.limit + " free decodes left";
+    }
+
     function setHint(message, isError) {
       if (!hint) { return; }
-      hint.textContent = message || defaultHint;
+      hint.textContent = message || (defaultHint + quotaNote());
       hint.classList.toggle("vin-hint--error", Boolean(isError));
+    }
+
+    /* The plan is known only once the session and profile have resolved. */
+    if (window.CarDNAAuth && window.CarDNAAuth.ready) {
+      window.CarDNAAuth.ready(function () {
+        if (hint && hint.textContent === defaultHint) { setHint("", false); }
+      });
+    }
+
+    function showQuotaWall() {
+      var usage = window.CarDNAAuth.decodeUsage();
+      var text = "The Free plan includes " + usage.limit + " VIN decodes, US or European, and all " +
+        usage.limit + " are used.";
+      setHint(text, true);
+      if (!result) { return; }
+      result.hidden = false;
+      result.innerHTML = '<div class="dna"><p class="dna-empty">' + escapeHtml(text) + "</p>" +
+        '<p class="dna-empty"><a class="btn btn--sm" href="pricing.html">Upgrade to keep decoding</a></p></div>';
     }
 
     function showError(message) {
@@ -485,11 +514,20 @@
         });
 
         /* A plan can cap how many vehicles the garage keeps; the garage says so, and the
-           button stays usable so the message can be read and the car saved after a removal. */
+           button stays usable so the message can be read and the car saved after a removal.
+           Free is the only plan capped at one car, so its refusal also offers the upgrade. */
         if (saved && saved.ok === false) {
           setHint(saved.error, true);
           button.title = saved.error;
           button.textContent = "Garage full";
+          if (window.CarDNAAuth && window.CarDNAAuth.effectivePlan() === "free") {
+            var upgrade = document.createElement("a");
+            upgrade.className = "btn btn--ghost btn--sm";
+            upgrade.href = "pricing.html";
+            upgrade.textContent = "Upgrade to save more vehicles";
+            upgrade.style.marginLeft = "10px";
+            button.after(upgrade);
+          }
           return;
         }
 
@@ -641,6 +679,17 @@
         return;
       }
 
+      /* A capped plan has a fixed number of decodes, and a VIN already decoded is not counted
+         twice. Wait for the account to resolve first, so a paid or staff user is never judged
+         as Free while the profile is still loading. */
+      if (window.CarDNAAuth && window.CarDNAAuth.ready) {
+        await new Promise(function (resolve) { window.CarDNAAuth.ready(resolve); });
+        if (!window.CarDNAAuth.canDecode(vin)) {
+          showQuotaWall();
+          return;
+        }
+      }
+
       setHint("Reading the vehicle record…", false);
       if (submit) { submit.disabled = true; }
       if (result) {
@@ -673,6 +722,7 @@
           .filter(Boolean).join(" ");
 
         addRecent(vin, label);
+        if (window.CarDNAAuth && window.CarDNAAuth.recordDecode) { window.CarDNAAuth.recordDecode(vin); }
         render(vin, fields, notes, structural);
 
         if (window.CarDNAAuth && window.CarDNAAuth.log) {
@@ -696,16 +746,17 @@
         var isPartial = !hasFault && !isNonUS &&
           (codes.indexOf("5") !== -1 || codes.indexOf("14") !== -1);
 
+        var note = quotaNote();
         if (hasFault) {
-          setHint("Decoded with warnings — vPIC reports an invalid VIN, structural data filled in.", true);
+          setHint("Decoded with warnings — vPIC reports an invalid VIN, structural data filled in." + note, true);
         } else if (isNonUS) {
-          setHint("Non-US vehicle — vPIC has no record; showing the structural decode.", false);
+          setHint("Non-US vehicle — vPIC has no record; showing the structural decode." + note, false);
         } else if (isPartial) {
-          setHint("Partial vPIC decode — some VIN positions could not be mapped.", false);
+          setHint("Partial vPIC decode — some VIN positions could not be mapped." + note, false);
         } else if (!fields["Model"] && structural.make) {
-          setHint("US register has no model data — showing the structural decode.", true);
+          setHint("US register has no model data — showing the structural decode." + note, true);
         } else {
-          setHint("Decoded from NHTSA vPIC + structural decode — full field set, free.", false);
+          setHint("Decoded from NHTSA vPIC + structural decode — full field set, free." + note, false);
         }
       } catch (err) {
         if (window.console && window.console.error) {
