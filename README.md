@@ -108,9 +108,11 @@ every feature whose service is missing:** each one is built, carries a small "Co
 live changes one flag and one function body — never a layout or a sentence.
 
 **Live and working:** US VIN decoding (NHTSA vPIC, 104 fields), the European structural decode used as a
-fallback, the whole static catalogue, accounts with roles and plans, the garage with server sync and a
-retry queue, the encrypted vault, Markdown / CSV / PDF / Excel export, the staff console, analytics for
-the owner, and the free plan's limits (3 decodes in total, 1 saved vehicle).
+fallback, the whole static catalogue, **recalls and complaints on any VIN** (vPIC for make, model and year,
+then NHTSA's public recall feed — the panel lists the campaigns; carrying them into the exports is next),
+accounts with roles and plans, the garage with server sync and a retry queue, the encrypted vault,
+Markdown / CSV / PDF / Excel export, the staff console, analytics for the owner, and the free plan's
+limits (3 decodes in total, 1 saved vehicle).
 
 **Finished, waiting for its service** — `cardna-fm-plan.md` §4.1 and §4.2 name the module and the exact
 wiring for each:
@@ -121,7 +123,6 @@ wiring for each:
 | Waitlist | `pricing.html` | the `waitlist` table |
 | European full specification | `decode.html` result | the vendor contract (`D-13`) |
 | Licensed parts catalogue | `index.html` Catalogue tab | the licence (`D-14`) |
-| Recalls and complaints | `decode.html` | the NHTSA lookup — free, and next |
 | Shareable report at `/r/<vin>` | `decode.html` | the report route and the VIN cache |
 | Bulk VIN upload | `garage.html` | the batch path into the garage |
 | API key | `garage.html` | `api_keys` and the gateway |

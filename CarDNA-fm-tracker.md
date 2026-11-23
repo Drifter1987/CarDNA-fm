@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 15 November 2026 — Chat 1, Turn 32
+> Last updated: 15 November 2026 — Chat 1, Turn 33
 
 ## How this file works
 
@@ -96,6 +96,11 @@ GitHub Pages serves it.
   354×593 (stacked, messages wrapping without clipping).
 - Touch devices now get 16 px text fields at every width (`pointer: coarse`), so focusing a field no
   longer zooms the iPad or a phone showing a desktop-width page.
+- **Recalls are live** (Turn 33, `?v=p33`): the decoder panel decodes the VIN at vPIC for make, model and
+  year, then asks NHTSA's recall feed, and lists up to eight campaigns with component, summary, remedy,
+  campaign number and date. Confirmed in the browser: 24 campaigns for a 2003 Honda Accord, 3 for a 2013
+  Ford F-150, an empty-state-safe message, and the VIN-format error for garbage input. Its badge hides
+  itself because its flag is now `true` — the first proof that the flag mechanism works.
 
 **Known broken or partial:**
 
@@ -113,7 +118,7 @@ GitHub Pages serves it.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 32 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 33 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -562,6 +567,36 @@ surviving record, not a transcript.
 - **Open**: P3's free wiring, above all recalls (one function body away) and the server-side decode count.
   Every feature now has its interface, so from here the phases are wiring, not layout.
 
+### Turn 33 — P3's first feature: recalls went live, and the badge hid itself
+
+- **Input**: "Update all documentation (tracker and others) for last turn and this turn. Commit, Deploy,
+  and continue by following the plan with the next steps."
+- **Output**: Committed and pushed the P2 batch (`a138141`, 26 files) — the surface runtime, nine preview
+  modules, the garage panels, the checkout buttons and waitlist, and the documents — and checked the Pages
+  build. Then took the plan's next step, P3's first free wiring: `assets/vehicle.js` is no longer a stub.
+  It decodes the VIN at vPIC's `DecodeVinValues` for make, model and year (a VIN has no recall query of its
+  own), then calls NHTSA's `recallsByVehicle` and maps each campaign to the contract's shape. It returns
+  up to eight campaigns as HTML — component, summary, remedy, campaign number and date — plus a
+  "Showing the first N of M" line; `assets/surfaces.js` gained a `[data-surface-output]` region so a rich
+  answer never replaces the sentence that explains it. Make names are title-cased ("HONDA" → "Honda").
+  `CarDNAPreview.flags.recalls` is now `true`, so the panel's "Coming soon" badge disappeared on its own —
+  the first demonstration that §4's flag contract works as written. Records corrected to match: F-16 is
+  **live (limited: the panel; the export is next)**, the instructions' API table says so, the README lists
+  recalls as working, and the plan's F-16 "done when" records the half that remains. `?v=p33`.
+- **Files**: `assets/vehicle.js`, `assets/surfaces.js`, `assets/style.css`, `decode.html`, `assets/preview.js`,
+  all 13 pages (version), `README.md`, `cardna-fm-plan.md`, `instructions.md`, this tracker.
+- **Verified**: Private preview, browser inspector, live network. `1HGCM82633A004352` → "24 campaigns on
+  record for this 2003 Honda Accord." with eight entries, the truncation note, and no overflow (the card
+  simply grows); `1FTFW1ET5DFC10312` → "3 campaigns on record for this 2013 Ford F-150." with no truncation
+  line; `123` → the VIN-format error, with the previous list cleared. The summary is title case, contrast is
+  legible, and the neighbouring share panel stays top-aligned. Not verified: a VIN with zero campaigns,
+  light theme, narrower widths, and the first attempt's message-only version (which the test caught as a
+  real gap between the panel's copy and its output).
+- **Commits**: `a138141` pushed; this turn's recalls work committed after the same turn.
+- **Open**: The export half of F-16 (the garage's Markdown/CSV/PDF/XLSX writers do not carry recalls yet);
+  summary and remedy need labels, and NHTSA's mixed date formats are passed through unlabelled. Next in
+  P3: the waitlist table, then the data export, then F-26/F-27.
+
 ## Approaches tried and rejected
 
 | Approach | Why it was rejected |
@@ -591,10 +626,13 @@ surviving record, not a transcript.
 
 Taken from the specification's requirement list; statuses reflect the current working tree and latest known checks. Do not resume project work until the user asks.
 
-1. **P3 — free wiring** (`cardna-fm-plan.md` §7). Nothing here costs money or needs a contract: recalls
-   through NHTSA's public API (the panel and its module already exist, so this is one function body), the
-   `waitlist` table, the data export, then the two invisible pieces — the server-side decode count
+1. **P3 continues — the free wiring left** (`cardna-fm-plan.md` §7). The `waitlist` table (one insert-only
+   table and one function body, and the waitlist panel starts working); carrying recalls into the exports
+   (the other half of F-16); the data export; then the two invisible pieces — the server-side decode count
    (`F-26`) and the VIN cache (`F-27`).
+2. **Polish found while testing recalls.** Summary and remedy render as one block with no label, so a
+   long campaign is hard to scan; NHTSA's dates arrive in mixed formats (`06/03/2019` next to
+   `27/06/2019`) and are passed through unlabelled. Neither is wrong, both are worth a pass.
 2. **Finish the P2 batch's loose ends.** The "Your data" confirm box still only says which action it
    belongs to by position; the surface grid's cards end ragged once one gains a message (by design, but
    worth a look); `assets/preview.js` hiding a badge on a live flag is still unproven.
@@ -678,7 +716,7 @@ Taken from the specification's requirement list; statuses reflect the current wo
 | 18 | Handover state and repository status | Read AGENT.md, tracker and handoff skill; checked git status and git log. No new build, publish or browser test. |
 | 19 | LAY-02 / LAY-04 / CON-01 on the private preview | Phone 390×844 (about, legal, index): header rows correct, sub-brand one line, chip flush right, tables contained with hints, tab-strip fade intact. Desktop 1280×800 (about, pricing): layout unchanged, hints hidden, nothing past the right edge. 320 px, dark theme, swipe and keyboard remain unverified. |
 | 20 | `docs/supabase-migration.sql` | Not run, not verifiable here; checked by reading against `garage.js`, `auth.js`, `admin.js`. Table definitions were not visible. |
-| 32 | Recalls and share surfaces on the private preview | decode.html 1280×800: both panels in one row, equal height at rest, badges above headings, no overflow. Messages verified verbatim: recalls names the VIN and says nothing was requested; share says nothing was copied and quotes `/r/<vin>`; `123` gives the format error. 354×593: stacked, wraps without clipping. Not verified: clipboard contents, Enter-in-field, Free-plan locked state. |
+| 33 | Recalls live, from the browser against NHTSA | Honda 1HGCM82633A004352 → "24 campaigns … 2003 Honda Accord", eight entries rendered with component/summary/remedy/campaign/date, truncation note, no overflow; Ford 1FTFW1ET5DFC10312 → "3 campaigns", no truncation line; `123` → format error with the list cleared. Title case correct. Not verified: zero-campaign VIN, light theme, narrow widths. |
 
 ## Memory pointers
 
@@ -727,3 +765,5 @@ Taken from the specification's requirement list; statuses reflect the current wo
 | 15 Nov 2026 | Turn 31: P1 committed and pushed (`67ea757`); P2 began — `assets/surfaces.js` runtime plus six preview modules, four account panels on the garage, checkout buttons and the waitlist panel on pricing, `?v=p29`; plan §4.2 records where each surface lives and what is left. |
 
 | 15 Nov 2026 | Turn 32: P2 finished — recalls and share panels on `decode.html` with `vehicle.js` and `report.js`; README status section rewritten with the full finished-but-unwired table; plan §4.2 extended, F-16/F-23 contracts corrected; iOS field zoom fixed for touch devices at any width; `?v=p31`; committed, pushed and deployed. |
+
+| 15 Nov 2026 | Turn 33: P3 began — recalls wired live through vPIC and NHTSA's recall feed, list rendering added to the surface runtime, badge removed by its own flag, F-16 marked live (limited), documents corrected, `?v=p33`. |

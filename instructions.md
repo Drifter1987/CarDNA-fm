@@ -134,7 +134,7 @@ by CSS, matching the rest of the mono micro-labels.
 | Integration | Purpose | Cost | State |
 |---|---|---|---|
 | NHTSA vPIC | US VIN decode | free, public domain | live |
-| NHTSA recalls | Open recalls per vehicle | free | available, not wired |
+| NHTSA recalls | Open recalls per vehicle | free | live (panel; export next) |
 | Static catalogue (`data/*.csv`) | Brands, models, engines | free, in the repository | live |
 | European full-spec vendor | European factory data | €0.22–€0.49 per lookup | not contracted |
 | Licensed parts catalogue | Diagrams, OEM numbers, fitment | licence, not signed | not contracted |

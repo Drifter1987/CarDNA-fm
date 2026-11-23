@@ -1651,3 +1651,38 @@ body.is-app .shared-footer .footer-bottom {
     font-size: 16px;
   }
 }
+
+
+/* The rich half of a surface's answer — a recall list today, exported records later. */
+.surface-output { margin-top: 12px; display: grid; gap: 10px; }
+.surface-output:empty { display: none; }
+.surface-output .recall {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  font-size: .88rem;
+}
+.surface-output .recall:first-child { border-top: 0; padding-top: 0; }
+.surface-output .recall b {
+  display: block;
+  margin-bottom: 4px;
+  font: 600 10px/1.5 var(--mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+.surface-output .recall span { display: block; color: var(--dim); }
+.surface-output .recall span + span { margin-top: 4px; }
+.surface-output .recall em {
+  display: block;
+  margin-top: 6px;
+  font: 500 10px/1.5 var(--mono);
+  font-style: normal;
+  letter-spacing: .06em;
+  color: var(--dim);
+}
+.surface-output .recall-more {
+  margin-top: 2px;
+  font: 500 10px/1.6 var(--mono);
+  letter-spacing: .06em;
+  color: var(--dim);
+}

@@ -49,6 +49,10 @@
     return section.querySelector("[data-surface-status]");
   }
 
+  function outputNode(section) {
+    return section.querySelector("[data-surface-output]");
+  }
+
   function say(section, tone, text) {
     var node = statusNode(section);
     if (!node) { return; }
@@ -84,6 +88,13 @@
   }
 
   function render(section, result) {
+    /* A rich answer (a recall list) goes in its own region; the status line keeps the
+       sentence, so a long result never replaces the explanation. */
+    var out = outputNode(section);
+    if (out) {
+      out.innerHTML = result && result.ok && result.html ? result.html : "";
+    }
+
     if (!result) {
       say(section, "error", "Nothing came back. Try again.");
       return;
@@ -115,6 +126,8 @@
 
     var trigger = section.querySelector("[data-surface-run]");
     if (trigger) { trigger.disabled = true; }
+    var previous = outputNode(section);
+    if (previous) { previous.innerHTML = ""; }
     say(section, "note", section.getAttribute("data-working-copy") || "Working…");
 
     function done(result) {

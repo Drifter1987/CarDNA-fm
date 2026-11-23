@@ -76,7 +76,7 @@ the wording is the same on every surface.
 | F-13 | European full-spec decode (vendor proxy) | `decode.html` | frontend-only | `euDecode` |
 | F-14 | Overage billing per extra EU decode | pricing, garage, decode | frontend-only | `overage` |
 | F-15 | Licensed parts catalogue: diagrams, OEM numbers, fitment | `index.html` Catalogue tab | frontend-only | `parts` |
-| F-16 | Recalls and complaints on a vehicle | `decode.html`, exports | frontend-only | `recalls` |
+| F-16 | Recalls and complaints on a vehicle | `decode.html` | live (limited: the panel; the export is next) | — |
 | F-17 | Bulk VIN upload (CSV) | `garage.html` | frontend-only | `bulkUpload` |
 | F-18 | Customer API key and API | `garage.html`, admin | frontend-only | `apiKeys` |
 | F-19 | Seats and team invitations | `garage.html`, admin | frontend-only | `seats` |
@@ -118,7 +118,7 @@ Built in Turn 31, each with its badge, its states and a module that already retu
 | `garage.html` | `gdpr` | Data export and account deletion with a typed confirmation | `assets/account.js` |
 | `pricing.html` | `waitlist` | The waitlist panel; the paid cards' buttons fill it in | `assets/waitlist.js` |
 | `pricing.html` | `payments` / `overage` / `invoices` | Checkout entry on each paid card, through the billing module | `assets/billing.js` |
-| `decode.html` | `recalls` | Recalls and complaints: a VIN field and the campaign list it will return | `assets/vehicle.js` |
+| `decode.html` | `recalls` | Recalls and complaints: a VIN field and the campaign list it returns — **now live**, so its badge is hidden | `assets/vehicle.js` |
 | `decode.html` | `shareReport` | The shareable report: a VIN field and the `/r/<vin>` link it will copy | `assets/report.js` |
 
 The runtime is `assets/surfaces.js`: one `<div class="surface" data-surface data-call data-needs>` per
@@ -127,7 +127,10 @@ working, not-connected, done, error) are decided in one place. A lower plan sees
 before pressing anything, from `data-needs`, which reads `PLAN_LIMITS` through `CarDNAAuth.limitsNow()`.
 
 **Every flag now has a surface** except `euDecode`, whose home is the European block inside the decode
-result and which therefore carries its badge on the Pro card until F-13's vendor exists.
+result and which therefore carries its badge on the Pro card until F-13's vendor exists. `recalls` is the
+first flag to be turned off: it went live in Turn 33 (vPIC decode for make/model/year, then NHTSA's recall
+query), and its badge disappeared because `CarDNAPreview.flags.recalls` is now `true` — the mechanism
+working exactly as §4 of `instructions.md` promises.
 
 ## 5. Wiring contracts
 
@@ -168,8 +171,9 @@ nothing else. Data shapes are final now; the view must not change when the real 
 - **Module:** `window.CarDNAVehicle.recalls({ vin })` → `{ ok, recalls:[{ campaign, component, summary, remedy, date }] }`.
 - **Placeholder behaviour:** validates the VIN, then answers `{ ok:false, error:"preview" }` with the reason.
 - **Cost:** none — NHTSA's public API, already used in `tools/vin-compare.html`.
-- **Done when:** a VIN with an open recall shows it, a VIN without shows the empty state, and the export
-  carries the same list.
+- **Done when:** a VIN with a recall shows it, a VIN without shows the empty state, and the export
+  carries the same list. The first two hold (Turn 33, live from the browser against both NHTSA services);
+  the export is the remaining half.
 
 ### F-15 · Licensed parts catalogue — `parts`
 

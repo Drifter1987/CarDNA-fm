@@ -17,7 +17,7 @@
     euDecode: false,    /* F-13 European full specification */
     overage: false,     /* F-14 per-lookup overage billing */
     parts: false,       /* F-15 licensed parts catalogue */
-    recalls: false,     /* F-16 recalls and complaints */
+    recalls: true,      /* F-16 — live: NHTSA public data, wired in Turn 33 */
     bulkUpload: false,  /* F-17 bulk VIN upload */
     apiKeys: false,     /* F-18 customer API key */
     seats: false,       /* F-19 seats and invitations */
