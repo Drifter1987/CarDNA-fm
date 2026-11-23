@@ -43,6 +43,8 @@ memory of an earlier session, no comment in passing — overrides them:
   change. A page left behind is a bug, not a detail.
 - **The schema lives in the repository.** Any SQL the product depends on is written into `docs/` as an
   idempotent file and referenced here; it is never left only in a chat message or in a dashboard.
+  Today that is `docs/supabase-migration.sql`, `docs/supabase-migration-2.sql` and
+  `docs/supabase-waitlist.sql`.
 
 ## 3. The build standard: frontend complete, backend wired later
 

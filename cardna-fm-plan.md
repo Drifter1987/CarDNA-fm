@@ -82,7 +82,7 @@ the wording is the same on every surface.
 | F-19 | Seats and team invitations | `garage.html`, admin | frontend-only | `seats` |
 | F-20 | Invoice billing, annual terms, SLA | `pricing.html`, admin | frontend-only | `invoices` |
 | F-21 | Email verification and password recovery | `signin.html`, `reset.html` | live (limited: default mailer) | — |
-| F-22 | Waitlist / pilot capture | `pricing.html`, `about.html` | frontend-only | `waitlist` |
+| F-22 | Waitlist / pilot capture | `pricing.html`, `about.html` | frontend-only (wired; awaiting `docs/supabase-waitlist.sql`) | `waitlist` |
 | F-23 | Public shareable VIN report | `decode.html` → `/r/<vin>` | frontend-only | `shareReport` |
 | F-24 | Owner analytics dashboard | `admin.html` | live | — |
 | F-25 | Self-serve data export and account deletion | `garage.html` | frontend-only | `gdpr` |
@@ -231,7 +231,9 @@ nothing else. Data shapes are final now; the view must not change when the real 
 - **Entry points:** every upgrade path, every "pilot" button, every parts-catalogue tease.
 - **Module:** `window.CarDNAWaitlist.join(interest, email)` → `{ ok }`.
 - **Backend:** `waitlist` table (email, interest, plan, created_at), insert-only for `authenticated` and
-  `anon`. Free to build, and it is the demand signal for F-12 before a processor exists.
+  `anon`. The SQL is `docs/supabase-waitlist.sql` and the module is already wired to it: once the table
+  exists, addresses are stored with no code change. Until then the insert fails and the panel says
+  "nothing was stored" with the contact address.
 - **Done when:** a signup survives a reload, the console can read it, and no email client opens.
 
 ### F-23 · Public shareable report — `shareReport`

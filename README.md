@@ -120,7 +120,7 @@ wiring for each:
 | Surface | Where | What is missing |
 |---|---|---|
 | Checkout, invoices, overage | `pricing.html` | a card processor (`D-12`) |
-| Waitlist | `pricing.html` | the `waitlist` table |
+| Waitlist | `pricing.html` | the table — run `docs/supabase-waitlist.sql` (the module is already wired) |
 | European full specification | `decode.html` result | the vendor contract (`D-13`) |
 | Licensed parts catalogue | `index.html` Catalogue tab | the licence (`D-14`) |
 | Shareable report at `/r/<vin>` | `decode.html` | the report route and the VIN cache |

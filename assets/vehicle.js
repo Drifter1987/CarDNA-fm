@@ -36,12 +36,13 @@
 
   function listHtml(recalls) {
     var html = recalls.slice(0, SHOWN).map(function (recall) {
-      var meta = [recall.campaign, recall.date].filter(Boolean).join(" \u00b7 ");
+      var meta = [recall.campaign, recall.date ? "filed " + recall.date : ""]
+        .filter(Boolean).join(" \u00b7 ");
       return '<div class="recall">' +
         "<b>" + esc(recall.component || "Campaign") + "</b>" +
         (recall.summary ? "<span>" + esc(recall.summary) + "</span>" : "") +
-        (recall.remedy ? "<span>" + esc(recall.remedy) + "</span>" : "") +
-        (meta ? "<em>" + esc(meta) + "</em>" : "") +
+        (recall.remedy ? "<span><em>Remedy</em> " + esc(recall.remedy) + "</span>" : "") +
+        (meta ? "<span class=\"recall-meta\">" + esc(meta) + "</span>" : "") +
         "</div>";
     }).join("");
 

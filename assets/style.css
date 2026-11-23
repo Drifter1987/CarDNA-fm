@@ -1686,3 +1686,21 @@ body.is-app .shared-footer .footer-bottom {
   letter-spacing: .06em;
   color: var(--dim);
 }
+
+
+/* The recall entry's inline "Remedy" label and its campaign/date line. */
+.surface-output .recall em {
+  display: inline;
+  margin: 0 5px 0 0;
+  font: 600 10px/1.5 var(--mono);
+  font-style: normal;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.surface-output .recall .recall-meta {
+  margin-top: 6px;
+  font: 500 10px/1.5 var(--mono);
+  letter-spacing: .06em;
+  color: var(--dim);
+}
