@@ -41,6 +41,7 @@ npx serve .
 |---|---|
 | `assets/style.css` | The whole design system: dark blueprint palette, acid-lime accent, mono labels |
 | `assets/app.js` | Mobile nav, current year, delegated copy-to-clipboard, and the tab controller (hash-routed, arrow-key navigable) |
+| `assets/preview.js` | The start icon: marks a feature that is built in the interface but not wired yet, and hides the marker the moment its flag turns true |
 | `assets/supabase-config.js` | Project URL and the publishable key. Only those two — never a secret key or a database password |
 | `assets/auth.js` | Accounts over the Supabase REST API: sign-in, sign-up, session refresh, profile (plan and role), the sign-in gate, the account chip, and activity logging |
 | `assets/admin.js` | Staff console: owner sees every account and can change roles; admins manage users; both grant plans, block accounts and read recent activity |
@@ -75,7 +76,8 @@ npx serve .
 
 Accounts live in Supabase. An account stores an email, a hashed password, a display name, a plan
 and a role; the vehicle data you decode is still sent straight from the browser to NHTSA. Recent
-lookups, the garage and the vault stay in `localStorage`.
+lookups and the vault stay in `localStorage`; the garage is mirrored to your account, so saved cars
+follow you between devices.
 
 ## Private vault
 
@@ -94,12 +96,48 @@ if the phrase is lost.
 Plain VIN lists never belong in this repository — `.gitignore` excludes `private/`, `*.cardna` and
 exported `cardna-vault-*` / `cardna-vins-*` files.
 
+## What is real today, and what is marked
+
+The product's target is a finished interface whose paid features are wired in later, without redesign.
+That target is set out in `instructions.md` and `cardna-fm-plan.md`. **The marking system exists:** the
+start icon (`assets/preview.js` plus the `.preview-flag` style) is loaded on every page, and a small
+"Coming soon" badge now marks the unwired features that already have a surface — pricing (checkout,
+European allowance, bulk upload, invoicing, overage, waitlist), the Catalogue tab, and the licensed-layer
+notice on the decoder. Most other planned surfaces are still to be built, so they carry no badge yet;
+`cardna-fm-plan.md` §4.1 lists both. This section is updated as each one lands.
+
+**Live and working:** US VIN decoding (NHTSA vPIC, 104 fields), the European structural decode used as a
+fallback, the whole static catalogue, accounts with roles and plans, the garage with server sync and a
+retry queue, the encrypted vault, Markdown / CSV / PDF / Excel export, the staff console, and the free
+plan's limits (3 decodes in total, 1 saved vehicle).
+
+**Planned, not yet built or wired** (the list is the feature registry, `cardna-fm-plan.md` §4):
+
+- checkout and plan purchase, invoices, team seats;
+- European factory specifications (the paid data layer is not contracted);
+- the licensed parts catalogue (assemblies, diagrams, OEM numbers, fitment);
+- recalls and complaints attached to a vehicle;
+- bulk VIN upload, customer API keys;
+- email verification and password recovery on a product domain;
+- the public shareable report, the owner analytics dashboard, self-serve data export and deletion;
+- a waitlist for everything above that is not yet for sale.
+
+## Documents
+
+| File | What it is |
+|---|---|
+| `instructions.md` | The working rules: authority, standards, the placeholder convention, constraints |
+| `cardna-fm-plan.md` | The plan and feature registry: status of every feature, its wiring contract, the build order |
+| `README.md` | This file: what the product is, publicly |
+| `CarDNA-fm-tracker.md` | The turn-by-turn record: decisions, what was verified, what is open |
+| `AGENT.md` | Superseded by `instructions.md`; kept for history |
+
 ## What is deliberately not here yet
 
 The catalogue (assemblies, diagrams, OEM numbers, fitment) is licensed data, not public data. It lands
-in the next phase — see `../docs/data-acquisition-plan.md`. The catalogue section on the home page is
-an honest explainer with an illustrative drawing, clearly labelled as such; there are no fake part
-numbers presented as real.
+in a later phase — see `../docs/data-acquisition-plan.md`. The catalogue section on the home page is an
+honest explainer with an illustrative drawing, clearly labelled as such; there are no fake part numbers
+presented as real.
 
 ## Placeholders to replace before launch
 
@@ -107,14 +145,18 @@ numbers presented as real.
 - Pricing figures on `index.html` and `pricing.html` — modelled in `docs/pricing-feasibility.md`;
   re-run that model when the European vendor contract and the catalogue licence are signed.
 - Planned product names on `about.html` (`Shopfloor`, `GMO Data API`, `Parts Index`) are working titles.
+- Every item in the planned list above — its status, in `cardna-fm-plan.md` §4.
 
 ## Roadmap
 
-1. Garage / saved vehicles (client-side first, then accounts).
-2. First catalogue licence → diagrams and OEM numbers behind Pro.
-3. Fitment and supersession graph.
-4. Retailer feeds for live prices.
-5. Workshop tools and a grounded repair assistant.
+0. Frontend complete, every planned feature behind its start icon (`cardna-fm-plan.md` §7, phases P0–P2).
+1. Free wiring: waitlist, analytics, recalls, data export, server-side limits.
+2. Payments, invoices, seats and email.
+3. First catalogue licence → diagrams and OEM numbers behind Pro.
+4. Fitment and supersession graph.
+5. Retailer feeds for live prices.
+6. Workshop tools and a grounded repair assistant.
+
 
 ## More data
 

@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>VIN decoder — CarDNA</title>
 <meta name="description" content="Decode any VIN into make, model, year, engine and plant with NHTSA vPIC. Free with a CarDNA account.">
-<link rel="stylesheet" href="assets/style.css?v=p24">
-<link rel="stylesheet" href="assets/motion.css?v=p24">
+<link rel="stylesheet" href="assets/style.css?v=p26">
+<link rel="stylesheet" href="assets/motion.css?v=p26">
 </head>
 <body data-require-auth>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p24"></script>
+<script src="assets/site-shell.js?v=p26"></script>
 
 <main>
 
@@ -88,7 +88,9 @@
             </li>
           </ul>
 
-          <div class="notice" style="margin-top:26px">
+          <span class="preview-flag" data-preview="parts"></span>
+
+          <div class="notice" style="margin-top:0">
             <strong>What we do not show.</strong> vPIC is the US federal record. Non-US vehicles,
             pre-1981 classics and factory option codes usually live in the OEM catalogue instead —
             that is the layer we license next, and the reason a VIN can decode to "no record".
@@ -135,12 +137,13 @@
 
 <div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p24"></script>
-<script src="assets/auth.js?v=p24"></script>
-<script src="assets/app.js?v=p24"></script>
-<script src="assets/garage.js?v=p24"></script>
-<script src="assets/vin-schema.js?v=p24"></script>
-<script src="assets/vin.js?v=p24"></script>
+<script src="assets/supabase-config.js?v=p26"></script>
+<script src="assets/auth.js?v=p26"></script>
+<script src="assets/app.js?v=p26"></script>
+<script src="assets/preview.js?v=p26"></script>
+<script src="assets/garage.js?v=p26"></script>
+<script src="assets/vin-schema.js?v=p26"></script>
+<script src="assets/vin.js?v=p26"></script>
 <script>
   (function () {
     "use strict";

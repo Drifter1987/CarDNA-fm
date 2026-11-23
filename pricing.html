@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pricing — CarDNA</title>
 <meta name="description" content="CarDNA pricing: identity is free forever. Pro and Workshop tiers cover the licensed catalogue, diagrams and fitment.">
-<link rel="stylesheet" href="assets/style.css?v=p24">
+<link rel="stylesheet" href="assets/style.css?v=p26">
 <link rel="stylesheet" href="assets/motion.css">
 </head>
 <body>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p24"></script>
+<script src="assets/site-shell.js?v=p26"></script>
 
 <main>
 
@@ -31,6 +31,8 @@
 
   <section class="section section--tight">
     <div class="container">
+      <span class="preview-flag" data-preview="payments"></span>
+
       <div class="tiers">
         <div class="tier">
           <h3>Free</h3>
@@ -50,6 +52,7 @@
           <h3>Pro</h3>
           <p class="price">€9.90<small>/month</small></p>
           <p class="tier-note">or €99 / year — two months free</p>
+          <span class="preview-flag" data-preview="euDecode"></span>
           <ul>
             <li>Unlimited US VIN decodes</li>
             <li>10 European decodes / month</li>
@@ -64,6 +67,7 @@
           <h3>Workshop</h3>
           <p class="price">€39<small>/mo</small></p>
           <p class="tier-note">or €390 / year · 3 seats</p>
+          <span class="preview-flag" data-preview="bulkUpload"></span>
           <ul>
             <li>Everything in Pro</li>
             <li>40 European decodes / month</li>
@@ -78,6 +82,7 @@
           <h3>Business</h3>
           <p class="price">from €249<small>/mo</small></p>
           <p class="tier-note">for resellers and platforms</p>
+          <span class="preview-flag" data-preview="invoices"></span>
           <ul>
             <li>Everything in Workshop</li>
             <li>450 European decodes / month</li>
@@ -89,6 +94,8 @@
           <a class="btn btn--ghost" href="about.html#contact">Request a quote</a>
         </div>
       </div>
+
+      <span class="preview-flag" data-preview="overage"></span>
 
       <p style="margin-top:18px;color:var(--dim-2);font-size:.82rem">
         Pilot pricing, locked for the first 100 accounts for 12 months. European decodes past a plan's
@@ -162,6 +169,8 @@
 
   <section class="section">
     <div class="container">
+      <span class="preview-flag" data-preview="waitlist"></span>
+
       <div class="cta-band">
         <div>
           <h2>Nothing is charged yet.</h2>
@@ -177,8 +186,9 @@
 <div data-site-footer data-site-root=""></div>
 
 <script src="assets/supabase-config.js"></script>
-<script src="assets/auth.js?v=p24"></script>
-<script src="assets/app.js?v=p24"></script>
+<script src="assets/auth.js?v=p26"></script>
+<script src="assets/app.js?v=p26"></script>
+<script src="assets/preview.js?v=p26"></script>
 <script src="assets/motion.js"></script>
 </body>
 </html>

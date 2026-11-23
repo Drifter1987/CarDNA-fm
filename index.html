@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CarDNA — read any vehicle in 17 characters | GMOttomotive</title>
 <meta name="description" content="CarDNA decodes a VIN into the exact vehicle, and browses 319 car brands with 5,600+ models, generations and engines. A GMOttomotive product.">
-<link rel="stylesheet" href="assets/style.css?v=p24">
-<link rel="stylesheet" href="assets/motion.css?v=p24">
+<link rel="stylesheet" href="assets/style.css?v=p26">
+<link rel="stylesheet" href="assets/motion.css?v=p26">
 </head>
 <body class="is-app" data-require-auth>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p24"></script>
+<script src="assets/site-shell.js?v=p26"></script>
 
 <div class="tabbar">
   <div class="container tabbar-inner" role="tablist" aria-label="Sections">
@@ -179,6 +179,8 @@
   <!-- =========================================================== catalogue -->
   <section class="panel" id="panel-catalogue" role="tabpanel" aria-labelledby="tab-catalogue" hidden>
     <div class="container">
+      <span class="preview-flag" data-preview="parts"></span>
+
       <div class="catalogue-grid">
         <div class="diagram-frame">
           <svg viewBox="0 0 560 380" role="img" aria-label="Illustrative exploded parts diagram with numbered callouts">
@@ -269,6 +271,8 @@
           carries a quota — and the quota is set so a plan stays healthy even if you use all of it.</p>
       </div>
 
+      <span class="preview-flag" data-preview="payments"></span>
+
       <div class="tiers">
         <div class="tier">
           <h3>Free</h3>
@@ -324,12 +328,13 @@
 
 <div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p24"></script>
-<script src="assets/auth.js?v=p24"></script>
-<script src="assets/app.js?v=p24"></script>
-<script src="assets/garage.js?v=p24"></script>
-<script src="assets/vin-schema.js?v=p24"></script>
-<script src="assets/vin.js?v=p24"></script>
+<script src="assets/supabase-config.js?v=p26"></script>
+<script src="assets/auth.js?v=p26"></script>
+<script src="assets/app.js?v=p26"></script>
+<script src="assets/preview.js?v=p26"></script>
+<script src="assets/garage.js?v=p26"></script>
+<script src="assets/vin-schema.js?v=p26"></script>
+<script src="assets/vin.js?v=p26"></script>
 <script>
   (function () {
     "use strict";
@@ -348,6 +353,6 @@
     });
   })();
 </script>
-<script src="assets/motion.js?v=p24"></script>
+<script src="assets/motion.js?v=p26"></script>
 </body>
 </html>

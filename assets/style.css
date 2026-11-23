@@ -268,7 +268,10 @@ img, svg { display: block; max-width: 100%; }
 .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,.2); border-top-color: var(--lime); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.recent { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 7px; }
+.recent { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+/* The label takes its own line, so the VIN chips wrap as chips on a narrow phone instead
+   of squeezing past it. */
+.recent .dna-key { flex: 0 0 100%; margin-bottom: 0; }
 .recent button {
   font: 500 11px/1 var(--mono); letter-spacing: .08em;
   background: rgba(255,255,255,.04); border: 1px solid var(--line);
@@ -486,7 +489,7 @@ table.compare { width: 100%; border-collapse: collapse; font-size: .9rem; min-wi
 .compare tbody tr:last-child td { border-bottom: 0; }
 .compare td:first-child { color: var(--dim); }
 .compare .yes { color: var(--lime); font-family: var(--mono); font-size: .8rem; }
-.compare .no { color: var(--dim-2); font-family: var(--mono); font-size: .8rem; }
+.compare .no { color: var(--dim); font-family: var(--mono); font-size: .8rem; }
 
 /* ---------------------------------------------------------------- timeline */
 .timeline { list-style: none; margin: 0; padding: 0; }
@@ -1575,3 +1578,20 @@ body.is-app .shared-footer .footer-bottom {
 @media (min-width: 809px) {
   .vin-matrix-scroll-hint { display: none; }
 }
+
+
+/* ---------------------------------------------------------------- start icon */
+/* The honesty marker for a feature that is built but not wired (instructions.md §4).
+   One class, one label, never animated. Turning the feature on hides it in place. */
+.preview-flag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 8px;
+  color: var(--dim);
+  font: 600 11px/1.2 var(--mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.preview-flag svg { width: 12px; height: 12px; flex: none; }
+.preview-flag[hidden] { display: none; }
