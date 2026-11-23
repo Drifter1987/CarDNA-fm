@@ -109,7 +109,7 @@ live changes one flag and one function body — never a layout or a sentence.
 
 **Live and working:** US VIN decoding (NHTSA vPIC, 104 fields), the European structural decode used as a
 fallback, the whole static catalogue, **recalls and complaints on any VIN** (vPIC for make, model and year,
-then NHTSA's public recall feed — the panel lists the campaigns; carrying them into the exports is next),
+then NHTSA's public recall feed — the panel lists the campaigns and every export carries them),
 accounts with roles and plans, the garage with server sync and a retry queue, the encrypted vault,
 Markdown / CSV / PDF / Excel export, the staff console, analytics for the owner, the **waitlist** (a real
 row in Supabase per address and interest, insert-only for visitors and staff-readable), and the free plan's
@@ -130,9 +130,10 @@ wiring for each:
 | Data export and account deletion | `garage.html` | a server-side function with a token |
 | Email verification and recovery | `signin.html`, `reset.html` | a product-domain sender (`D-4`) |
 
-**Not built at all yet:** the licensed parts layer and the European vendor proxy (both need a contract),
-and the two invisible pieces — the server-side entitlement count and the VIN cache (`F-26`, `F-27`) that
-would make the free decode limit a rule rather than a browser counter.
+**Waiting on the database, not on code:** the server-side decode count (`F-26`), the VIN cache (`F-27`) and
+self-serve account deletion (`F-25`) have their SQL written as
+`docs/supabase-decode-log-cache-delete.sql`; the browser wiring follows once that file has been run.
+The licensed parts layer and the European vendor proxy still need contracts.
 
 ## Documents
 

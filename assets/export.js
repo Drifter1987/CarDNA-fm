@@ -26,6 +26,22 @@
     return fields;
   }
 
+  /* Returns { ok, recalls } or { ok:false, reason } — a failed lookup is NOT "no campaigns",
+     and the file must not claim otherwise. */
+  async function fetchRecalls(vin) {
+    var vehicle = window.CarDNAVehicle;
+    if (!vehicle || typeof vehicle.recalls !== "function") {
+      return { ok: false, reason: "the recalls lookup is not loaded on this page" };
+    }
+    try {
+      var result = await vehicle.recalls({ vin: vin });
+      if (result && result.ok) { return { ok: true, recalls: result.recalls || [] }; }
+      return { ok: false, reason: (result && result.error) || "the lookup returned nothing" };
+    } catch (err) {
+      return { ok: false, reason: "the lookup failed" };
+    }
+  }
+
   /* Every schema field in order, as [label, key, section]. */
   function schemaFields() {
     var out = [];
@@ -51,7 +67,7 @@
 
   /* ------------------------------------------------------------------ formats */
 
-  function toCsv(vehicles, fieldsByVin) {
+  function toCsv(vehicles, fieldsByVin, recallsByVin) {
     var fields = schemaFields();
     var head = ["Section", "Field"].concat(vehicles.map(function (v) { return v.vin; }));
     var lines = [head.map(csvCell).join(",")];
@@ -62,6 +78,23 @@
       lines.push(row.map(csvCell).join(","));
     });
 
+    var count = ["Recalls", "Campaigns on record"].concat(vehicles.map(function (v) {
+      var entry = recallsByVin[v.vin] || {};
+      if (entry.ok === false) { return "not checked"; }
+      var list = entry.recalls || [];
+      return list.length ? String(list.length) : "none on record";
+    }));
+    lines.push(count.map(csvCell).join(","));
+
+    var detail = ["Recalls", "Campaign — component"].concat(vehicles.map(function (v) {
+      var entry = recallsByVin[v.vin] || {};
+      if (entry.ok === false) { return entry.reason || ""; }
+      return (entry.recalls || []).map(function (recall) {
+        return [recall.campaign, recall.component].filter(Boolean).join(" \u2014 ");
+      }).join("; ");
+    }));
+    lines.push(detail.map(csvCell).join(","));
+
     return "\uFEFF" + lines.join("\r\n");
   }
 
@@ -70,7 +103,7 @@
     return /[",\r\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
   }
 
-  function toMarkdown(vehicles, fieldsByVin) {
+  function toMarkdown(vehicles, fieldsByVin, recallsByVin) {
     var fields = schemaFields();
     var out = ["# CarDNA — saved vehicles", "", "Exported " + new Date().toISOString().slice(0, 10) +
       " · " + vehicles.length + (vehicles.length === 1 ? " vehicle" : " vehicles"), ""];
@@ -98,6 +131,24 @@
         }
         out.push("| " + mdCell(field.label) + " | " + mdCell(fields2[field.key] || "—") + " |");
       });
+      out.push("");
+
+      var recall = recallsByVin[v.vin] || {};
+      var list = recall.ok === false ? [] : (recall.recalls || []);
+      out.push("### Recalls");
+      out.push("");
+      if (recall.ok === false) {
+        out.push("Not checked — " + (recall.reason || "the lookup did not run") + ".");
+      } else if (!list.length) {
+        out.push("No campaigns on record.");
+      } else {
+        out.push("| Campaign | Component | Remedy | Filed |");
+        out.push("|---|---|---|---|");
+        list.forEach(function (recall) {
+          out.push("| " + mdCell(recall.campaign || "—") + " | " + mdCell(recall.component || "—") +
+            " | " + mdCell(recall.remedy || "—") + " | " + mdCell(recall.date || "—") + " |");
+        });
+      }
       out.push("");
     });
 
@@ -248,7 +299,7 @@
     return name;
   }
 
-  function toXlsx(vehicles, fieldsByVin) {
+  function toXlsx(vehicles, fieldsByVin, recallsByVin) {
     var fields = schemaFields();
     var encoder = new TextEncoder();
 
@@ -271,6 +322,23 @@
       fields.forEach(function (field) {
         rows.push([field.label, data[field.key] || ""]);
       });
+
+      rows.push(["", ""]);
+      rows.push(["Recalls", ""]);
+      var recall = recallsByVin[v.vin] || {};
+      var list = recall.ok === false ? [] : (recall.recalls || []);
+      if (recall.ok === false) {
+        rows.push(["Campaigns on record", "not checked — " + (recall.reason || "lookup did not run")]);
+      } else if (!list.length) {
+        rows.push(["Campaigns on record", "none"]);
+      } else {
+        list.forEach(function (recall) {
+          rows.push([
+            [recall.campaign, recall.component].filter(Boolean).join(" — "),
+            [recall.remedy, recall.date ? "filed " + recall.date : ""].filter(Boolean).join(" · ")
+          ]);
+        });
+      }
       sheets.push({ name: sheetName(shortName(v), used), rows: rows });
     });
 
@@ -353,7 +421,7 @@
   }
 
   /* PDF via the browser's print-to-PDF: one page per vehicle, no pop-up blocker involved. */
-  function printReport(vehicles, fieldsByVin) {
+  function printReport(vehicles, fieldsByVin, recallsByVin) {
     var fields = schemaFields();
     var frame = document.createElement("iframe");
     frame.style.position = "fixed";
@@ -396,6 +464,24 @@
         html.push("<tr><td>" + xmlEscape(field.label) + "</td><td>" + xmlEscape(value || "—") + "</td></tr>");
       });
       html.push("</table>");
+
+      var recall = recallsByVin[v.vin] || {};
+      var list = recall.ok === false ? [] : (recall.recalls || []);
+      html.push("<h2>Recalls — " + xmlEscape(carName(v)) + "</h2>");
+      if (recall.ok === false) {
+        html.push("<p class='meta'>Not checked — " +
+          xmlEscape(recall.reason || "the lookup did not run") + ".</p>");
+      } else if (!list.length) {
+        html.push("<p class='meta'>No campaigns on record.</p>");
+      } else {
+        html.push("<table><tr><th>Campaign</th><th>Component</th><th>Remedy</th><th>Filed</th></tr>");
+        list.forEach(function (recall) {
+          html.push("<tr><td>" + xmlEscape(recall.campaign || "—") + "</td><td>" +
+            xmlEscape(recall.component || "—") + "</td><td>" + xmlEscape(recall.remedy || "—") +
+            "</td><td>" + xmlEscape(recall.date || "—") + "</td></tr>");
+        });
+        html.push("</table>");
+      }
     });
 
     html.push("</body></html>");
@@ -411,9 +497,11 @@
 
   /* ------------------------------------------------------------------ api */
 
-  /* Decode every vehicle, reporting progress, then hand the fields to a formatter. */
+  /* Decode every vehicle and look up its recalls, reporting progress, then hand both to a
+     formatter. The answer keeps its old shape for the fields, with recalls beside them. */
   async function prepare(vehicles, onProgress) {
     var fieldsByVin = {};
+    var recallsByVin = {};
 
     for (var i = 0; i < vehicles.length; i += 1) {
       var vehicle = vehicles[i];
@@ -424,25 +512,30 @@
         fieldsByVin[vehicle.vin] = {};
         if (window.console && window.console.warn) { window.console.warn(err); }
       }
+      recallsByVin[vehicle.vin] = await fetchRecalls(vehicle.vin);
     }
 
     if (onProgress) { onProgress(vehicles.length, vehicles.length, null); }
-    return fieldsByVin;
+    return { fields: fieldsByVin, recalls: recallsByVin };
   }
 
-  function save(format, vehicles, fieldsByVin) {
+  function save(format, vehicles, prepared) {
     var name = "cardna-export-" + stamp();
     var count = vehicles.length;
 
+    /* Accept both shapes: the fields map alone, or { fields, recalls }. */
+    var fieldsByVin = prepared && prepared.fields ? prepared.fields : (prepared || {});
+    var recallsByVin = (prepared && prepared.recalls) || {};
+
     if (format === "md") {
-      download(toMarkdown(vehicles, fieldsByVin), "text/markdown", name + ".md");
+      download(toMarkdown(vehicles, fieldsByVin, recallsByVin), "text/markdown;charset=utf-8", name + ".md");
     } else if (format === "csv") {
-      download(toCsv(vehicles, fieldsByVin), "text/csv", name + ".csv");
+      download(toCsv(vehicles, fieldsByVin, recallsByVin), "text/csv;charset=utf-8", name + ".csv");
     } else if (format === "xlsx") {
-      download(toXlsx(vehicles, fieldsByVin),
+      download(toXlsx(vehicles, fieldsByVin, recallsByVin),
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", name + ".xlsx");
     } else if (format === "pdf") {
-      printReport(vehicles, fieldsByVin);
+      printReport(vehicles, fieldsByVin, recallsByVin);
     }
 
     return count;

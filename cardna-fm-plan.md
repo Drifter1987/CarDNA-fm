@@ -76,7 +76,7 @@ the wording is the same on every surface.
 | F-13 | European full-spec decode (vendor proxy) | `decode.html` | frontend-only | `euDecode` |
 | F-14 | Overage billing per extra EU decode | pricing, garage, decode | frontend-only | `overage` |
 | F-15 | Licensed parts catalogue: diagrams, OEM numbers, fitment | `index.html` Catalogue tab | frontend-only | `parts` |
-| F-16 | Recalls and complaints on a vehicle | `decode.html` | live (limited: the panel; the export is next) | — |
+| F-16 | Recalls and complaints on a vehicle | `decode.html`, exports | live | — |
 | F-17 | Bulk VIN upload (CSV) | `garage.html` | frontend-only | `bulkUpload` |
 | F-18 | Customer API key and API | `garage.html`, admin | frontend-only | `apiKeys` |
 | F-19 | Seats and team invitations | `garage.html`, admin | frontend-only | `seats` |
@@ -85,9 +85,9 @@ the wording is the same on every surface.
 | F-22 | Waitlist / pilot capture | `pricing.html`, `about.html` | live | — |
 | F-23 | Public shareable VIN report | `decode.html` → `/r/<vin>` | frontend-only | `shareReport` |
 | F-24 | Owner analytics dashboard | `admin.html` | live | — |
-| F-25 | Self-serve data export and account deletion | `garage.html` | frontend-only | `gdpr` |
-| F-26 | Server-side entitlement check (decode count) | invisible | not started | — |
-| F-27 | Server-side VIN cache (`decode_cache`) | invisible | not started | — |
+| F-25 | Self-serve data export and account deletion | `garage.html` | frontend-only (SQL ready: `docs/supabase-decode-log-cache-delete.sql`) | `gdpr` |
+| F-26 | Server-side entitlement check (decode count) | invisible | SQL ready (`docs/supabase-decode-log-cache-delete.sql`); client wiring next | — |
+| F-27 | Server-side VIN cache (`decode_cache`) | invisible | SQL ready (`docs/supabase-decode-log-cache-delete.sql`); client wiring next | — |
 
 ### 4.1 Where the icon stands today
 
@@ -172,8 +172,9 @@ nothing else. Data shapes are final now; the view must not change when the real 
 - **Placeholder behaviour:** validates the VIN, then answers `{ ok:false, error:"preview" }` with the reason.
 - **Cost:** none — NHTSA's public API, already used in `tools/vin-compare.html`.
 - **Done when:** a VIN with a recall shows it, a VIN without shows the empty state, and the export
-  carries the same list. The first two hold (Turn 33, live from the browser against both NHTSA services);
-  the export is the remaining half.
+  carries the same list. All three now hold: the panel is live (Turn 33) and every export — Markdown,
+  CSV, XLSX and the print-to-PDF view — carries a Recalls section, looked up during `prepare()` in
+  `assets/export.js` (Turn 36).
 
 ### F-15 · Licensed parts catalogue — `parts`
 

@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 15 November 2026 — Chat 1, Turn 35
+> Last updated: 15 November 2026 — Chat 1, Turn 36
 
 ## How this file works
 
@@ -104,10 +104,16 @@ GitHub Pages serves it.
 - **The waitlist is live** (Turn 35, `?v=p36`): the Boss ran `docs/supabase-waitlist.sql`, then the panel
   stored a real row and answered in the lime success tone — "You are on the list for Pro. We will write to
   …" — and a second submission with the same address came back as a sentence, "… is already on the list for
-  Pro.", not an error. Its badge is gone because `flags.waitlist` is `true`. Two test rows exist in the
-  table (`codex-test@example.com` for Pro); they are the owner's to delete.
+  Pro.", not an error. Its badge is gone because `flags.waitlist` is `true`. One test row now sits in the
+  table (`codex-test@example.com` for Pro) — the duplicate attempt was refused, so it did not add a second;
+  it is the owner's to delete.
 - The recall list now carries a small "REMEDY" label and a "filed <date>" line per campaign, confirmed in
   the browser, so a summary and its remedy no longer read as one block.
+- **F-16 is complete** (Turn 36, `?v=p38`): every export — Markdown, CSV, XLSX and print-to-PDF — carries
+  a Recalls section, looked up per VIN during `prepare()`. Confirmed in the browser on a four-vehicle
+  export: the Honda block ends with a 24-row recalls table, the Audis with "No campaigns on record."
+  A failed lookup now says "Not checked — <reason>" instead of pretending there are none, and the files
+  are served as UTF-8 (the browser was rendering em dashes as mojibake).
 
 **Known broken or partial:**
 
@@ -125,7 +131,7 @@ GitHub Pages serves it.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 35 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 36 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -656,8 +662,46 @@ surviving record, not a transcript.
   Not verified: the table's contents from the dashboard side (no dashboard read this turn), light theme, and
   the other interests in the dropdown.
 - **Commits**: committed and pushed; Pages build checked.
-- **Open**: Two test rows are in `public.waitlist` and are the owner's to delete. The next P3 work is the
+- **Open**: One test row is in `public.waitlist` and is the owner's to delete. The next P3 work is the
   recalls export, then the data export and F-26/F-27.
+
+### Turn 36 — F-16 finished (recalls in the exports); the database side of F-25/F-26/F-27 written
+
+- **Input**: "I couldn't find the codex-test@example.com to delete it so I ran the sql in editor but dunno
+  what changed. Check out the browser and tell me if something is still to be done by me in supabase.
+  Proceed with 1,3,4. Regarding 2, you can do but very carefully, don't delete the owner's account. Only
+  normal users and admins can be deleted."
+- **Output**: **Checked the dashboard read-only first.** `public.waitlist` is empty (the SQL worked and the
+  row is gone), Auth shows the same three accounts and no codex-test, RLS is on with the two intended
+  policies, and the project is Healthy with no banners. Two things need the owner: a saved SQL snippet
+  named "Reset password for owner" holds a **plaintext owner password** (`admin123321`) — it should be
+  deleted and that password rotated — and the Security Advisor flags `waitlist_insert` as an always-true
+  policy (by design for a public list, but worth narrowing later). Three unexplained Postgres errors in the
+  last hour were visible but unreadable.
+  **Then finished F-16.** `assets/export.js` looks up recalls per VIN in `prepare()` and every writer now
+  carries a Recalls section: Markdown gets a `### Recalls` table, CSV two rows (count, and campaign —
+  component), XLSX a block at the foot of each vehicle sheet, and the print-to-PDF view its own table.
+  `save()` accepts both the old fields map and the new `{ fields, recalls }` shape, so `garage.js` needed
+  no change beyond loading `assets/vehicle.js`. `?v=p37` published and tested: the Honda block ended with a
+  24-row recalls table and the Audis with "No campaigns on record."; that test then exposed two real bugs,
+  both fixed — a failed lookup was flattened into "no campaigns" (it now says "Not checked — <reason>"),
+  and the downloaded files were served without a charset so the browser rendered em dashes as mojibake
+  (`text/markdown;charset=utf-8`). `?v=p38` published.
+  **And wrote the database side of F-25/F-26/F-27** as `docs/supabase-decode-log-cache-delete.sql`:
+  `decode_cache` (public read, authenticated write), `decode_log` (one row per account per VIN),
+  `cardna_decode_usage()` / `cardna_record_decode()` — which refuses once a Free plan's three are spent —
+  and `cardna_delete_my_account(confirm)`, which deletes the caller's profile, vehicles, vault rows,
+  activity, decode log, waitlist rows and sign-in, and **refuses outright when the role is `owner`**.
+- **Files**: `assets/export.js`, `garage.html`, `docs/supabase-decode-log-cache-delete.sql` (new),
+  `instructions.md`, all 13 pages (version), `README.md`, `cardna-fm-plan.md`, this tracker.
+- **Verified**: Private preview, browser inspector. Garage 1280×800: 4 saved vehicles; "Download DNA →
+  Markdown" produced a file whose every vehicle section ends with `### Recalls`; the Honda's first row read
+  `19V182000 | AIR BAGS:FRONTAL:DRIVER SIDE:INFLATOR MODULE | Honda will notify owners… | 06/03/2019`, with
+  24 rows; the Audis read "No campaigns on record." Not verified: the charset and "Not checked" fixes
+  (they landed after the export run), CSV/XLSX/PDF output, and any of the SQL (not run).
+- **Commits**: committed and pushed; Pages build checked.
+- **Open**: Run the new SQL, then wire the client to it. Two Supabase actions for the owner: delete the
+  password snippet and rotate that password. Four smaller bugs found by the export test are recorded above.
 
 ## Approaches tried and rejected
 
@@ -688,15 +732,18 @@ surviving record, not a transcript.
 
 Taken from the specification's requirement list; statuses reflect the current working tree and latest known checks. Do not resume project work until the user asks.
 
-1. **Two test rows in `public.waitlist`** — `codex-test@example.com` for Pro, written by the browser test. The
-   owner's to delete (`delete from public.waitlist where email like 'codex-test%';`).
-2. **P3 continues — the free wiring left** (`cardna-fm-plan.md` §7): carrying recalls into the exports
-   (the other half of F-16), the data export, then the server-side decode count (`F-26`) and the VIN cache
-   (`F-27`).
-3. **Small refusal-readability gaps found while reading the recall list.** The `consequence` field is
-   fetched and dropped — the reader gets what happened and the fix, not why it matters; the summary and
-   remedy sit only about 4 px apart, so the "REMEDY" label carries the whole separation; and NHTSA's dates
-   arrive in mixed formats (day/month and month/day side by side), passed through unlabelled beyond "filed".
+1. **The Boss's step: run `docs/supabase-decode-log-cache-delete.sql`.** It creates `decode_log` and
+   `decode_cache`, the two functions that make the free decode limit a rule, and
+   `cardna_delete_my_account()` — which refuses to delete an owner, in the database. The browser modules
+   are wired to those names next; nothing is claimed as working until a real row is seen.
+2. **Wire the client to that SQL** — the decode count into `assets/auth.js` and `assets/vin.js`, the cache
+   into the decode path, and `assets/account.js` to the export (client-side JSON) and the deletion RPC.
+3. **F-23, the shareable report**, which needs the cache populated first.
+4. **Bugs found by the Turn 36 export test, none fixed yet:** the export decodes with vPIC only, so a
+   European VIN exports a page of "—" while the in-app decoder would have shown the structural fallback;
+   the garage's plan/limit line flashes Free limits for the owner before the profile resolves; the
+   "Download DNA" dropdown overlaps the row buttons under it; and per-row checkboxes look filled when
+   unchecked.
 2. **Finish the P2 batch's loose ends.** The "Your data" confirm box still only says which action it
    belongs to by position; the surface grid's cards end ragged once one gains a message (by design, but
    worth a look); `assets/preview.js` hiding a badge on a live flag is still unproven.
