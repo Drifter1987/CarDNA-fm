@@ -111,7 +111,8 @@ live changes one flag and one function body — never a layout or a sentence.
 fallback, the whole static catalogue, **recalls and complaints on any VIN** (vPIC for make, model and year,
 then NHTSA's public recall feed — the panel lists the campaigns; carrying them into the exports is next),
 accounts with roles and plans, the garage with server sync and a retry queue, the encrypted vault,
-Markdown / CSV / PDF / Excel export, the staff console, analytics for the owner, and the free plan's
+Markdown / CSV / PDF / Excel export, the staff console, analytics for the owner, the **waitlist** (a real
+row in Supabase per address and interest, insert-only for visitors and staff-readable), and the free plan's
 limits (3 decodes in total, 1 saved vehicle).
 
 **Finished, waiting for its service** — `cardna-fm-plan.md` §4.1 and §4.2 name the module and the exact
@@ -120,7 +121,6 @@ wiring for each:
 | Surface | Where | What is missing |
 |---|---|---|
 | Checkout, invoices, overage | `pricing.html` | a card processor (`D-12`) |
-| Waitlist | `pricing.html` | the table — run `docs/supabase-waitlist.sql` (the module is already wired) |
 | European full specification | `decode.html` result | the vendor contract (`D-13`) |
 | Licensed parts catalogue | `index.html` Catalogue tab | the licence (`D-14`) |
 | Shareable report at `/r/<vin>` | `decode.html` | the report route and the VIN cache |

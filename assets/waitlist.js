@@ -8,6 +8,19 @@
   var CONTACT = "hello@gmottomotive.com";
   var MAX = 180;
 
+  /* The select's values are machine words; the sentence should read like English. */
+  var LABELS = {
+    pro: "Pro",
+    workshop: "Workshop",
+    business: "Business",
+    european: "European factory data",
+    parts: "Parts catalogue"
+  };
+
+  function labelFor(value) {
+    return LABELS[value] || value;
+  }
+
   function config() {
     return window.CARDNA_SUPABASE || {};
   }
@@ -56,7 +69,7 @@
         if (response.ok) {
           return {
             ok: true,
-            message: "You are on the list for " + interest + ". We will write to " + body.email +
+            message: "You are on the list for " + labelFor(interest) + ". We will write to " + body.email +
               " when that part is switched on — once, and you can ask us to remove it any time."
           };
         }
@@ -64,7 +77,7 @@
         if (response.status === 409) {
           return {
             ok: true,
-            message: body.email + " is already on the list for " + interest + "."
+            message: body.email + " is already on the list for " + labelFor(interest) + "."
           };
         }
 

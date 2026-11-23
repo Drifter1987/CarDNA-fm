@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 15 November 2026 — Chat 1, Turn 34
+> Last updated: 15 November 2026 — Chat 1, Turn 35
 
 ## How this file works
 
@@ -101,12 +101,13 @@ GitHub Pages serves it.
   campaign number and date. Confirmed in the browser: 24 campaigns for a 2003 Honda Accord, 3 for a 2013
   Ford F-150, an empty-state-safe message, and the VIN-format error for garbage input. Its badge hides
   itself because its flag is now `true` — the first proof that the flag mechanism works.
-- **The waitlist is wired and waits on one SQL file** (Turn 34, `?v=p34`): `assets/waitlist.js` now posts to
-  Supabase's REST API and distinguishes "stored", "already on the list" and "the table does not exist yet";
-  `docs/supabase-waitlist.sql` creates the table with insert-only access for everyone and staff-only reads.
-  Run that file and the panel starts storing addresses with no code change. Until then the panel answers
-  "The list is not connected yet, so nothing was stored. Write to hello@gmottomotive.com…" and keeps its
-  badge — confirmed in the browser.
+- **The waitlist is live** (Turn 35, `?v=p36`): the Boss ran `docs/supabase-waitlist.sql`, then the panel
+  stored a real row and answered in the lime success tone — "You are on the list for Pro. We will write to
+  …" — and a second submission with the same address came back as a sentence, "… is already on the list for
+  Pro.", not an error. Its badge is gone because `flags.waitlist` is `true`. Two test rows exist in the
+  table (`codex-test@example.com` for Pro); they are the owner's to delete.
+- The recall list now carries a small "REMEDY" label and a "filed <date>" line per campaign, confirmed in
+  the browser, so a summary and its remedy no longer read as one block.
 
 **Known broken or partial:**
 
@@ -124,7 +125,7 @@ GitHub Pages serves it.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 34 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 35 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -633,6 +634,31 @@ surviving record, not a transcript.
   badge disappears when `flags.waitlist` is set to true — one flag, no code. Then the recalls export, the
   data export, and F-26/F-27.
 
+### Turn 35 — The waitlist stores real rows; its badge retires on the flag
+
+- **Input**: "Done" — the Boss ran `docs/supabase-waitlist.sql`.
+- **Output**: Flipped `CarDNAPreview.flags.waitlist` to `true` (the panel's badge then removed itself, no
+  markup or CSS touched), and fixed a wording slip the first live message exposed: the plan was echoed as
+  the select's raw value, so it read "on the list for pro". `assets/waitlist.js` now maps each value to its
+  label ("Pro", "Workshop", "Business", "European factory data", "Parts catalogue") for both the success and
+  the duplicate sentence. Statuses corrected to live: F-22 in the plan registry, its note in §4.2, and the
+  README — which also now lists the waitlist among what works and no longer carries it in the
+  finished-but-waiting table. `?v=p36`.
+- **Files**: `assets/preview.js`, `assets/waitlist.js`, all 13 pages (version), `README.md`,
+  `cardna-fm-plan.md`, this tracker.
+- **Verified**: Private preview, browser inspector. Pricing 1280×800: the badge above the waitlist heading is
+  gone while the ones on the tier cards and the overage note remain; a first submission with
+  codex-test@example.com answered in the lime success tone, "You are on the list for Pro. We will write to
+  codex-test@example.com when that part is switched on — once, and you can ask us to remove it any time.";
+  a repeat submission answered "codex-test@example.com is already on the list for Pro." — a sentence, not an
+  error, which also proves the first insert really created a row (a duplicate only happens on 409). The
+  recall list's new "REMEDY" label and "19V182000 · filed 06/03/2019" line were confirmed in the same run.
+  Not verified: the table's contents from the dashboard side (no dashboard read this turn), light theme, and
+  the other interests in the dropdown.
+- **Commits**: committed and pushed; Pages build checked.
+- **Open**: Two test rows are in `public.waitlist` and are the owner's to delete. The next P3 work is the
+  recalls export, then the data export and F-26/F-27.
+
 ## Approaches tried and rejected
 
 | Approach | Why it was rejected |
@@ -662,14 +688,15 @@ surviving record, not a transcript.
 
 Taken from the specification's requirement list; statuses reflect the current working tree and latest known checks. Do not resume project work until the user asks.
 
-1. **The Boss's step: run `docs/supabase-waitlist.sql`.** Until it runs, the waitlist stores nothing. It
-   is idempotent, holds no secrets, and the module is already wired to the table it creates.
+1. **Two test rows in `public.waitlist`** — `codex-test@example.com` for Pro, written by the browser test. The
+   owner's to delete (`delete from public.waitlist where email like 'codex-test%';`).
 2. **P3 continues — the free wiring left** (`cardna-fm-plan.md` §7): carrying recalls into the exports
-   (the other half of F-16), the data export, then the two invisible pieces — the server-side decode count
-   (`F-26`) and the VIN cache (`F-27`).
-3. **Unverified nick-nacks.** The recall list's new "REMEDY" label and "filed <date>" line were not
-   re-inspected (the first browser run was stopped and the retry covered only the waitlist); a
-   zero-campaign VIN, light theme and narrow widths on that panel are also still unproven.
+   (the other half of F-16), the data export, then the server-side decode count (`F-26`) and the VIN cache
+   (`F-27`).
+3. **Small refusal-readability gaps found while reading the recall list.** The `consequence` field is
+   fetched and dropped — the reader gets what happened and the fix, not why it matters; the summary and
+   remedy sit only about 4 px apart, so the "REMEDY" label carries the whole separation; and NHTSA's dates
+   arrive in mixed formats (day/month and month/day side by side), passed through unlabelled beyond "filed".
 2. **Finish the P2 batch's loose ends.** The "Your data" confirm box still only says which action it
    belongs to by position; the surface grid's cards end ragged once one gains a message (by design, but
    worth a look); `assets/preview.js` hiding a badge on a live flag is still unproven.
@@ -753,7 +780,7 @@ Taken from the specification's requirement list; statuses reflect the current wo
 | 18 | Handover state and repository status | Read AGENT.md, tracker and handoff skill; checked git status and git log. No new build, publish or browser test. |
 | 19 | LAY-02 / LAY-04 / CON-01 on the private preview | Phone 390×844 (about, legal, index): header rows correct, sub-brand one line, chip flush right, tables contained with hints, tab-strip fade intact. Desktop 1280×800 (about, pricing): layout unchanged, hints hidden, nothing past the right edge. 320 px, dark theme, swipe and keyboard remain unverified. |
 | 20 | `docs/supabase-migration.sql` | Not run, not verifiable here; checked by reading against `garage.js`, `auth.js`, `admin.js`. Table definitions were not visible. |
-| 34 | Waitlist wiring before its table exists | Pricing 1280×800: "Join the list" answers "The list is not connected yet, so nothing was stored. Write to hello@gmottomotive.com…" in the blue note tone; badge stays; no success state; fields unchanged. The stored and 409 branches are unproven until the table exists. Recall list labels not re-inspected (run stopped). |
+| 35 | Waitlist live, end to end | Pricing 1280×800: badge gone; "You are on the list for Pro…" in the lime success tone on first submit; "… is already on the list for Pro." on the duplicate (409), proving a real row. Capitalisation fixed. Recall list's REMEDY label and "filed <date>" line confirmed. Not verified: table contents from the dashboard, light theme, other interests. |
 
 ## Memory pointers
 
@@ -806,3 +833,5 @@ Taken from the specification's requirement list; statuses reflect the current wo
 | 15 Nov 2026 | Turn 33: P3 began — recalls wired live through vPIC and NHTSA's recall feed, list rendering added to the surface runtime, badge removed by its own flag, F-16 marked live (limited), documents corrected, `?v=p33`. |
 
 | 15 Nov 2026 | Turn 34: waitlist wired to Supabase with `docs/supabase-waitlist.sql` (insert-only, staff read), four honest outcomes in the module, recall list labelled (REMEDY, "filed <date>"), F-22 recorded as wired-awaiting-table, `?v=p34`. |
+
+| 15 Nov 2026 | Turn 35: waitlist live after the Boss ran the SQL — flag flipped, badge retired itself, duplicate handled as a sentence, plan labels capitalised, F-22 marked live in the plan and README, `?v=p36`. |

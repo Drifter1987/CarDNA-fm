@@ -82,7 +82,7 @@ the wording is the same on every surface.
 | F-19 | Seats and team invitations | `garage.html`, admin | frontend-only | `seats` |
 | F-20 | Invoice billing, annual terms, SLA | `pricing.html`, admin | frontend-only | `invoices` |
 | F-21 | Email verification and password recovery | `signin.html`, `reset.html` | live (limited: default mailer) | — |
-| F-22 | Waitlist / pilot capture | `pricing.html`, `about.html` | frontend-only (wired; awaiting `docs/supabase-waitlist.sql`) | `waitlist` |
+| F-22 | Waitlist / pilot capture | `pricing.html`, `about.html` | live | — |
 | F-23 | Public shareable VIN report | `decode.html` → `/r/<vin>` | frontend-only | `shareReport` |
 | F-24 | Owner analytics dashboard | `admin.html` | live | — |
 | F-25 | Self-serve data export and account deletion | `garage.html` | frontend-only | `gdpr` |
@@ -116,7 +116,7 @@ Built in Turn 31, each with its badge, its states and a module that already retu
 | `garage.html` | `apiKeys` | API key panel, Workshop and Business only | `assets/api.js` |
 | `garage.html` | `seats` | Team seats: invitation field, gated by `PLAN_LIMITS[plan].seats` | `assets/team.js` |
 | `garage.html` | `gdpr` | Data export and account deletion with a typed confirmation | `assets/account.js` |
-| `pricing.html` | `waitlist` | The waitlist panel; the paid cards' buttons fill it in | `assets/waitlist.js` |
+| `pricing.html` | `waitlist` | The waitlist panel; the paid cards' buttons fill it in — **now live**, so its badge is hidden | `assets/waitlist.js` |
 | `pricing.html` | `payments` / `overage` / `invoices` | Checkout entry on each paid card, through the billing module | `assets/billing.js` |
 | `decode.html` | `recalls` | Recalls and complaints: a VIN field and the campaign list it returns — **now live**, so its badge is hidden | `assets/vehicle.js` |
 | `decode.html` | `shareReport` | The shareable report: a VIN field and the `/r/<vin>` link it will copy | `assets/report.js` |
