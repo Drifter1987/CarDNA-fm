@@ -42,6 +42,9 @@ npx serve .
 | `assets/style.css` | The whole design system: dark blueprint palette, acid-lime accent, mono labels |
 | `assets/app.js` | Mobile nav, current year, delegated copy-to-clipboard, and the tab controller (hash-routed, arrow-key navigable) |
 | `assets/preview.js` | The start icon: marks a feature that is built in the interface but not wired yet, and hides the marker the moment its flag turns true |
+| `assets/surfaces.js` | The surface runtime: one panel per unwired feature, with locked, working, not-connected, done and error states decided in one place |
+| `assets/billing.js` | Checkout, the billing portal, invoices and overage — the shape a payment processor will return, without ever claiming a charge |
+| `assets/waitlist.js` · `assets/bulk.js` · `assets/api.js` · `assets/team.js` · `assets/account.js` · `assets/vehicle.js` · `assets/report.js` | The waitlist, bulk VIN upload (real CSV parsing), API key, team seats, data export/deletion, recalls and shareable-report modules behind the garage, pricing and decoder panels |
 | `assets/supabase-config.js` | Project URL and the publishable key. Only those two — never a secret key or a database password |
 | `assets/auth.js` | Accounts over the Supabase REST API: sign-in, sign-up, session refresh, profile (plan and role), the sign-in gate, the account chip, and activity logging |
 | `assets/admin.js` | Staff console: owner sees every account and can change roles; admins manage users; both grant plans, block accounts and read recent activity |
@@ -99,28 +102,36 @@ exported `cardna-vault-*` / `cardna-vins-*` files.
 ## What is real today, and what is marked
 
 The product's target is a finished interface whose paid features are wired in later, without redesign.
-That target is set out in `instructions.md` and `cardna-fm-plan.md`. **The marking system exists:** the
-start icon (`assets/preview.js` plus the `.preview-flag` style) is loaded on every page, and a small
-"Coming soon" badge now marks the unwired features that already have a surface — pricing (checkout,
-European allowance, bulk upload, invoicing, overage, waitlist), the Catalogue tab, and the licensed-layer
-notice on the decoder. Most other planned surfaces are still to be built, so they carry no badge yet;
-`cardna-fm-plan.md` §4.1 lists both. This section is updated as each one lands.
+That target is set out in `instructions.md` and `cardna-fm-plan.md`. **The interface is now complete for
+every feature whose service is missing:** each one is built, carries a small "Coming soon" marker
+(`assets/preview.js` plus the `.preview-flag` style), and answers honestly instead of pretending. Going
+live changes one flag and one function body — never a layout or a sentence.
 
 **Live and working:** US VIN decoding (NHTSA vPIC, 104 fields), the European structural decode used as a
 fallback, the whole static catalogue, accounts with roles and plans, the garage with server sync and a
-retry queue, the encrypted vault, Markdown / CSV / PDF / Excel export, the staff console, and the free
-plan's limits (3 decodes in total, 1 saved vehicle).
+retry queue, the encrypted vault, Markdown / CSV / PDF / Excel export, the staff console, analytics for
+the owner, and the free plan's limits (3 decodes in total, 1 saved vehicle).
 
-**Planned, not yet built or wired** (the list is the feature registry, `cardna-fm-plan.md` §4):
+**Finished, waiting for its service** — `cardna-fm-plan.md` §4.1 and §4.2 name the module and the exact
+wiring for each:
 
-- checkout and plan purchase, invoices, team seats;
-- European factory specifications (the paid data layer is not contracted);
-- the licensed parts catalogue (assemblies, diagrams, OEM numbers, fitment);
-- recalls and complaints attached to a vehicle;
-- bulk VIN upload, customer API keys;
-- email verification and password recovery on a product domain;
-- the public shareable report, the owner analytics dashboard, self-serve data export and deletion;
-- a waitlist for everything above that is not yet for sale.
+| Surface | Where | What is missing |
+|---|---|---|
+| Checkout, invoices, overage | `pricing.html` | a card processor (`D-12`) |
+| Waitlist | `pricing.html` | the `waitlist` table |
+| European full specification | `decode.html` result | the vendor contract (`D-13`) |
+| Licensed parts catalogue | `index.html` Catalogue tab | the licence (`D-14`) |
+| Recalls and complaints | `decode.html` | the NHTSA lookup — free, and next |
+| Shareable report at `/r/<vin>` | `decode.html` | the report route and the VIN cache |
+| Bulk VIN upload | `garage.html` | the batch path into the garage |
+| API key | `garage.html` | `api_keys` and the gateway |
+| Team seats | `garage.html` | the `seats` table and the invitation email |
+| Data export and account deletion | `garage.html` | a server-side function with a token |
+| Email verification and recovery | `signin.html`, `reset.html` | a product-domain sender (`D-4`) |
+
+**Not built at all yet:** the licensed parts layer and the European vendor proxy (both need a contract),
+and the two invisible pieces — the server-side entitlement count and the VIN cache (`F-26`, `F-27`) that
+would make the free decode limit a rule rather than a browser counter.
 
 ## Documents
 

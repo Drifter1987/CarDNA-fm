@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pricing — CarDNA</title>
 <meta name="description" content="CarDNA pricing: identity is free forever. Pro and Workshop tiers cover the licensed catalogue, diagrams and fitment.">
-<link rel="stylesheet" href="assets/style.css?v=p26">
+<link rel="stylesheet" href="assets/style.css?v=p31">
 <link rel="stylesheet" href="assets/motion.css">
 </head>
 <body>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p26"></script>
+<script src="assets/site-shell.js?v=p31"></script>
 
 <main>
 
@@ -60,7 +60,7 @@
             <li>PDF and CSV export of any record</li>
             <li>Recalls and complaints attached to each vehicle</li>
           </ul>
-          <a class="btn" href="about.html#contact">Join the pilot</a>
+          <button class="btn" type="button" data-checkout="pro" data-interval="month">Start Pro</button>
         </div>
 
         <div class="tier">
@@ -75,7 +75,7 @@
             <li>Bulk VIN upload (CSV)</li>
             <li>API key for your own tools</li>
           </ul>
-          <a class="btn btn--ghost" href="about.html#contact">Talk to us</a>
+          <button class="btn btn--ghost" type="button" data-checkout="workshop" data-interval="month">Start Workshop</button>
         </div>
 
         <div class="tier">
@@ -91,7 +91,7 @@
             <li>Invoice billing, annual terms</li>
             <li>Data-feed licensing on request</li>
           </ul>
-          <a class="btn btn--ghost" href="about.html#contact">Request a quote</a>
+          <button class="btn btn--ghost" type="button" data-checkout="business" data-interval="month">Request a quote</button>
         </div>
       </div>
 
@@ -103,6 +103,37 @@
         blocked lookup, and a quiet one never means paying for nothing. Free stays genuinely free — the
         whole catalogue and the engine data never expire; only decoding a VIN is metered, at three.
       </p>
+
+      <p class="surface-status" id="checkout-status" style="margin-top:16px" aria-live="polite"></p>
+
+      <div class="surface" id="waitlist" data-surface="waitlist" data-call="CarDNAWaitlist.join"
+           data-preview-copy="The list is not connected yet — nothing was stored."
+           style="margin-top:16px">
+        <span class="preview-flag" data-preview="waitlist"></span>
+        <h3>Nothing is for sale yet — join the list</h3>
+        <p>
+          No card is taken today. Leave an address and say what you want; we write once, when that
+          part of the product is switched on, and you can leave the list at any time.
+        </p>
+        <div class="surface-controls">
+          <div class="vault-key" style="margin-top:0">
+            <input type="email" data-arg="email" placeholder="you@example.com" autocomplete="email"
+                   aria-label="Email address for the list">
+            <select class="plan-select" data-arg="interest" id="waitlist-plan"
+                    aria-label="What are you interested in">
+              <option value="pro">Pro</option>
+              <option value="workshop">Workshop</option>
+              <option value="business">Business</option>
+              <option value="european">European factory data</option>
+              <option value="parts">Parts catalogue</option>
+            </select>
+          </div>
+        </div>
+        <div class="vault-actions">
+          <button class="btn btn--sm" type="button" data-surface-run>Join the list</button>
+        </div>
+        <p class="surface-status" data-surface-status aria-live="polite"></p>
+      </div>
     </div>
   </section>
 
@@ -169,8 +200,6 @@
 
   <section class="section">
     <div class="container">
-      <span class="preview-flag" data-preview="waitlist"></span>
-
       <div class="cta-band">
         <div>
           <h2>Nothing is charged yet.</h2>
@@ -186,9 +215,12 @@
 <div data-site-footer data-site-root=""></div>
 
 <script src="assets/supabase-config.js"></script>
-<script src="assets/auth.js?v=p26"></script>
-<script src="assets/app.js?v=p26"></script>
-<script src="assets/preview.js?v=p26"></script>
+<script src="assets/auth.js?v=p31"></script>
+<script src="assets/app.js?v=p31"></script>
+<script src="assets/preview.js?v=p31"></script>
+<script src="assets/surfaces.js?v=p31"></script>
+<script src="assets/billing.js?v=p31"></script>
+<script src="assets/waitlist.js?v=p31"></script>
 <script src="assets/motion.js"></script>
 </body>
 </html>

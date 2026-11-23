@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Garage — CarDNA</title>
 <meta name="description" content="Your saved vehicles, with full decode export to Excel, Markdown, CSV or PDF.">
-<link rel="stylesheet" href="assets/style.css?v=p26">
-<link rel="stylesheet" href="assets/motion.css?v=p26">
+<link rel="stylesheet" href="assets/style.css?v=p31">
+<link rel="stylesheet" href="assets/motion.css?v=p31">
 </head>
 <body data-require-auth>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p26"></script>
+<script src="assets/site-shell.js?v=p31"></script>
 
 <main>
   <section class="page-head">
@@ -84,6 +84,94 @@
 
   <section class="section section--tight">
     <div class="container">
+      <div class="section-head">
+        <div class="kicker">Your account</div>
+        <h2>Everything else your plan carries.</h2>
+        <p>
+          Each panel below is finished — layout, states and the exact answer the service will return.
+          What is missing is the service itself, and the panel says so rather than pretending.
+        </p>
+      </div>
+
+      <div class="surface-grid">
+        <div class="surface" data-surface="bulk" data-call="CarDNABulk.upload" data-needs="bulk"
+             data-preview-copy="Uploading is not connected yet, so nothing was saved.">
+          <span class="preview-flag" data-preview="bulkUpload"></span>
+          <h3>Bulk VIN upload</h3>
+          <p>
+            One CSV, one VIN per line, up to 2 MB. Every row is checked against the same rule the
+            decoder uses, and the rejects are named before anything is saved.
+          </p>
+          <div class="surface-controls">
+            <div class="vault-key" style="margin-top:0">
+              <input type="file" accept=".csv,text/csv" data-arg="file" aria-label="CSV file of VINs">
+            </div>
+          </div>
+          <div class="vault-actions">
+            <button class="btn btn--sm" type="button" data-surface-run>Check a CSV</button>
+          </div>
+          <p class="surface-status" data-surface-status aria-live="polite"></p>
+        </div>
+
+        <div class="surface" data-surface="api" data-call="CarDNAApi.key" data-needs="api"
+             data-preview-copy="No key exists yet: the API is not switched on.">
+          <span class="preview-flag" data-preview="apiKeys"></span>
+          <h3>API key</h3>
+          <p>
+            The same 104-field decode over HTTPS for your own tools: decode one VIN, list your saved
+            vehicles, or send fifty at a time.
+          </p>
+          <div class="vault-actions" style="margin-top:14px">
+            <button class="btn btn--sm" type="button" data-surface-run>Show my API key</button>
+          </div>
+          <p class="surface-status" data-surface-status aria-live="polite"></p>
+        </div>
+
+        <div class="surface" data-surface="seats" data-call="CarDNATeam.invite" data-needs="seats"
+             data-preview-copy="Invitations are not connected yet.">
+          <span class="preview-flag" data-preview="seats"></span>
+          <h3>Team seats</h3>
+          <p>
+            Invite a technician to the same garage. Workshop includes three seats and Business has no
+            limit; every seat sees the same saved vehicles and the same exports.
+          </p>
+          <div class="surface-controls">
+            <div class="vault-key" style="margin-top:0">
+              <input type="email" data-arg="email" placeholder="technician@workshop.com"
+                     autocomplete="email" aria-label="Email address to invite">
+            </div>
+          </div>
+          <div class="vault-actions">
+            <button class="btn btn--sm" type="button" data-surface-run>Send an invitation</button>
+          </div>
+          <p class="surface-status" data-surface-status aria-live="polite"></p>
+        </div>
+
+        <div class="surface" data-surface="data">
+          <span class="preview-flag" data-preview="gdpr"></span>
+          <h3>Your data</h3>
+          <p>
+            Download everything this account holds — profile, saved vehicles with their full records,
+            your vault cipher text and your activity — or close the account. Both are yours by right.
+          </p>
+          <div class="vault-actions">
+            <button class="btn btn--sm btn--ghost" type="button" data-surface-run
+                    data-call="CarDNAAccount.exportAll">Download everything</button>
+          </div>
+          <div class="vault-key" style="margin-top:12px">
+            <input type="text" data-arg="confirm" placeholder="Type delete to confirm"
+                   autocomplete="off" aria-label="Type delete to confirm account deletion">
+            <button class="btn btn--sm btn--ghost" type="button" data-surface-run
+                    data-call="CarDNAAccount.deleteAccount">Delete my account</button>
+          </div>
+          <p class="surface-status" data-surface-status aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
       <div class="vault-panel" style="max-width:520px">
         <h3 style="font-size:1rem">Password</h3>
         <p style="color:var(--dim);font-size:.9rem;margin-top:6px">
@@ -110,13 +198,18 @@
 
 <div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p26"></script>
-<script src="assets/auth.js?v=p26"></script>
-<script src="assets/app.js?v=p26"></script>
-<script src="assets/preview.js?v=p26"></script>
-<script src="assets/garage.js?v=p26"></script>
-<script src="assets/vin-schema.js?v=p26"></script>
-<script src="assets/export.js?v=p26"></script>
-<script src="assets/motion.js?v=p26"></script>
+<script src="assets/supabase-config.js?v=p31"></script>
+<script src="assets/auth.js?v=p31"></script>
+<script src="assets/app.js?v=p31"></script>
+<script src="assets/preview.js?v=p31"></script>
+<script src="assets/garage.js?v=p31"></script>
+<script src="assets/vin-schema.js?v=p31"></script>
+<script src="assets/export.js?v=p31"></script>
+<script src="assets/surfaces.js?v=p31"></script>
+<script src="assets/bulk.js?v=p31"></script>
+<script src="assets/api.js?v=p31"></script>
+<script src="assets/team.js?v=p31"></script>
+<script src="assets/account.js?v=p31"></script>
+<script src="assets/motion.js?v=p31"></script>
 </body>
 </html>

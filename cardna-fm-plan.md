@@ -106,9 +106,28 @@ pages, so placing a badge is now one span and nothing else. P1 placed nine of th
 | `index.html` | `payments` | the Pricing tab |
 | `decode.html` | `parts` | the "What we do not show" notice |
 
-Still to place, because their surfaces arrive in P2: `recalls` (decode result panel), `shareReport`
-(the share control), `seats`, `apiKeys`, `bulkUpload` and `gdpr` on the garage, `waitlist` on about. No
-badge is placed before its surface exists — a marker with nothing under it is worse than no marker.
+### 4.2 Placed in P2 — the surfaces behind the flags
+
+Built in Turn 31, each with its badge, its states and a module that already returns the final shape:
+
+| Page | Flag | Surface | Module |
+|---|---|---|---|
+| `garage.html` | `bulkUpload` | Bulk VIN upload: a real CSV parse and per-row validation, then an honest "not connected" | `assets/bulk.js` |
+| `garage.html` | `apiKeys` | API key panel, Workshop and Business only | `assets/api.js` |
+| `garage.html` | `seats` | Team seats: invitation field, gated by `PLAN_LIMITS[plan].seats` | `assets/team.js` |
+| `garage.html` | `gdpr` | Data export and account deletion with a typed confirmation | `assets/account.js` |
+| `pricing.html` | `waitlist` | The waitlist panel; the paid cards' buttons fill it in | `assets/waitlist.js` |
+| `pricing.html` | `payments` / `overage` / `invoices` | Checkout entry on each paid card, through the billing module | `assets/billing.js` |
+| `decode.html` | `recalls` | Recalls and complaints: a VIN field and the campaign list it will return | `assets/vehicle.js` |
+| `decode.html` | `shareReport` | The shareable report: a VIN field and the `/r/<vin>` link it will copy | `assets/report.js` |
+
+The runtime is `assets/surfaces.js`: one `<div class="surface" data-surface data-call data-needs>` per
+panel, one `[data-arg]` per argument, one `[data-surface-run]` per action, and the states (locked,
+working, not-connected, done, error) are decided in one place. A lower plan sees the locked sentence
+before pressing anything, from `data-needs`, which reads `PLAN_LIMITS` through `CarDNAAuth.limitsNow()`.
+
+**Every flag now has a surface** except `euDecode`, whose home is the European block inside the decode
+result and which therefore carries its badge on the Pro card until F-13's vendor exists.
 
 ## 5. Wiring contracts
 
@@ -145,8 +164,9 @@ nothing else. Data shapes are final now; the view must not change when the real 
 
 ### F-16 · Recalls and complaints — `recalls`
 
-- **Entry point:** a panel above the 104-field result, and the exported record.
-- **Module:** `window.CarDNAVehicle.recalls(vin)` → `{ ok, recalls:[{ campaign, component, summary, remedy, date }] }`.
+- **Entry point:** a panel on `decode.html`, and the exported record.
+- **Module:** `window.CarDNAVehicle.recalls({ vin })` → `{ ok, recalls:[{ campaign, component, summary, remedy, date }] }`.
+- **Placeholder behaviour:** validates the VIN, then answers `{ ok:false, error:"preview" }` with the reason.
 - **Cost:** none — NHTSA's public API, already used in `tools/vin-compare.html`.
 - **Done when:** a VIN with an open recall shows it, a VIN without shows the empty state, and the export
   carries the same list.
@@ -212,8 +232,9 @@ nothing else. Data shapes are final now; the view must not change when the real 
 
 ### F-23 · Public shareable report — `shareReport`
 
-- **Entry point:** "Copy share link" on a decode result.
-- **Module:** `window.CarDNAReport.share(vin)` → `{ ok, url }`; URL `/r/<vin>`, rendered from the cache.
+- **Entry point:** a panel on `decode.html`.
+- **Module:** `window.CarDNAReport.share({ vin })` → `{ ok, url }`; URL `/r/<vin>`, rendered from the cache.
+- **Placeholder behaviour:** validates the VIN, then answers `{ ok:false, error:"preview" }` and copies nothing.
 - **Privacy:** share the filed fields only; never the note, the garage label or the account.
 - **Done when:** the link opens without signing in, a repeat view costs no decode, and the page is
   indexable for SEO.

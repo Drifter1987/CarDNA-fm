@@ -1595,3 +1595,59 @@ body.is-app .shared-footer .footer-bottom {
 }
 .preview-flag svg { width: 12px; height: 12px; flex: none; }
 .preview-flag[hidden] { display: none; }
+
+
+/* ---------------------------------------------------------------- surfaces */
+/* A panel finished in the interface whose service is not wired yet. The behaviour and the
+   states live in assets/surfaces.js; the marker is the .preview-flag above it. */
+.surface-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.surface {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+}
+.surface h3 { font-size: 1rem; }
+.surface > p { color: var(--dim); font-size: .9rem; margin-top: 6px; }
+.surface .preview-flag { margin-top: 0; }
+.surface-controls { margin-top: 14px; }
+.surface-controls input[type="file"] {
+  width: 100%;
+  font: 500 11px/1.6 var(--mono);
+  color: var(--dim);
+}
+.surface-controls input[type="file"]:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.surface-status {
+  min-height: 16px;
+  margin-top: 12px;
+  font: 500 11px/1.6 var(--mono);
+  letter-spacing: .03em;
+  color: var(--dim);
+}
+.surface-status[data-tone="note"] { color: var(--blue); }
+.surface-status[data-tone="ok"] { color: var(--lime); }
+.surface-status[data-tone="error"] { color: var(--red); }
+
+
+/* iOS zooms the whole page when a focused field is under 16 px, which leaves the right
+   edge cut off. Every text field is 16 px on a phone, regardless of its desktop size. */
+/* iOS and iPadOS zoom the whole page when a focused field is under 16 px, which leaves the
+   right edge cut off. Touch devices get 16 px at every width — a phone in portrait, a phone
+   showing a desktop-width page, an iPad in landscape. A mouse keeps the smaller type. */
+@media (max-width: 760px), (pointer: coarse) {
+  .vault-key input,
+  .surface-controls input[type="file"],
+  .vault-text,
+  .search-input,
+  .table-tools .input,
+  .plan-select,
+  .role-select,
+  .role-menu-list input {
+    font-size: 16px;
+  }
+}

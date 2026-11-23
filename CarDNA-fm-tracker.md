@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 14 November 2026 — Chat 1, Turn 30
+> Last updated: 15 November 2026 — Chat 1, Turn 32
 
 ## How this file works
 
@@ -84,6 +84,18 @@ GitHub Pages serves it.
 - Plan limits as shipped: Free = 3 decodes in total (browser counter) and 1 saved vehicle (app plus the
   database cap trigger); Pro / Workshop / Business are staff-granted only, and their European allowances
   are sold but not yet deliverable (F-13 unbuilt).
+- Surfaces, P2 (Turn 31, `?v=p29`): the commerce entry and the four account panels are built and wired to
+  preview modules — paid-card checkout buttons that hand over to the waitlist, and bulk upload, API key,
+  team seats and data export/deletion on the garage. Each carries its badge, each returns the final data
+  shape, and each says plainly that its service is missing. Confirmed at 1280×800 (four panels in one row)
+  and 390×844 (stacked), with the not-connected messages and no data written.
+- P2 finished (Turn 32, `?v=p31`): the last two surfaces — recalls and the shareable report — are on
+  `decode.html` in a "Safety and sharing" section, each with its badge, its VIN validation and an honest
+  not-connected answer. Every flag in the registry now has a surface except `euDecode`, whose home is the
+  European block that arrives with the vendor. Confirmed at 1280×800 (one row, equal height at rest) and
+  354×593 (stacked, messages wrapping without clipping).
+- Touch devices now get 16 px text fields at every width (`pointer: coarse`), so focusing a field no
+  longer zooms the iPad or a phone showing a desktop-width page.
 
 **Known broken or partial:**
 
@@ -101,7 +113,7 @@ GitHub Pages serves it.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 30 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 32 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -480,6 +492,76 @@ surviving record, not a transcript.
   kicker rather than tight above the drawing (acceptable, recorded rather than fixed), and light theme
   still has very faint card borders on the explainer cards.
 
+### Turn 31 — Committed P1; P2 began with commerce and the account panels
+
+- **Input**: "Commit and push and move to p2."
+- **Output**: Committed the whole P1 batch as `67ea757` and pushed to `origin/main` — the start icon, the
+  nine badges, `instructions.md`, `cardna-fm-plan.md`, the tracker, `AGENT.md` as superseded, both
+  migrations, and the three inspection fixes. Then began P2 with the commerce and account half:
+  `assets/surfaces.js`, the runtime that gives every panel its locked / working / not-connected / done /
+  error states in one place (a panel declares `data-surface`, `data-call`, `data-needs`, `data-arg` and
+  `data-surface-run`; the plan gate reads `PLAN_LIMITS` through `CarDNAAuth.limitsNow()` and shows the
+  locked sentence before anything is pressed). Six modules that return the final data shape and refuse
+  honestly: `billing.js` (checkout, portal, invoice, overage price), `waitlist.js`, `bulk.js` (real CSV
+  parsing and per-row VIN validation, then "not connected"), `api.js`, `team.js`, `account.js`.
+  `garage.html` gained "Everything else your plan carries" — bulk upload, API key, team seats, and data
+  export/deletion with a typed confirmation. `pricing.html`: the three paid cards' links became buttons
+  that call `startCheckout`, print a plain "nothing can be charged yet" line and hand the visitor to a new
+  waitlist panel with their plan preselected; the waitlist stores nothing and says so, naming the contact
+  address. `?v=p29`.
+  Fixed during verification: the panels were 3-up then 2-up at 1280 px (grid minimum 320 px then 280 px,
+  now 250 px, so all four fit and each is the width of a pricing card); the delete-confirm field moved
+  beside its button so it no longer looks like it might apply to both actions; and every text field is
+  16 px on a phone, because the iOS focus zoom was cutting the right edge off the page.
+- **Files**: `assets/surfaces.js`, `assets/billing.js`, `assets/waitlist.js`, `assets/bulk.js`,
+  `assets/api.js`, `assets/team.js`, `assets/account.js` (all new), `garage.html`, `pricing.html`,
+  `assets/style.css`, plus the version bump in all 13 pages; `cardna-fm-plan.md` §4.2, `README.md`,
+  this tracker.
+- **Verified**: Private preview, browser inspector, no data written. Pricing 1280×800: the three buttons
+  match the old links in size; "Start Pro" prints the not-connected line, scrolls to the waitlist and sets
+  the dropdown to Pro (Workshop and Business likewise); joining with a test address answers "Nothing was
+  stored — the list is not connected yet. Write to hello@gmottomotive.com …" and no network call is made.
+  Garage 1280×800: four panels in one row with clean copy, badges above each heading, "Show my API key"
+  and "Download everything" answering with their not-connected messages and no download starting. Garage
+  390×844: panels stack, inputs and file picker fit, the enlarged fields read correctly. No overflow at
+  either width. **Not verified**: the locked state for a Free account on a Workshop panel (needs a plan
+  change), the CSV path with a real file (the inspector cannot choose one), light theme on these panels,
+  and a second inspector pass failed once with a service error before succeeding.
+- **Commits**: `67ea757` (the P1 batch) pushed. The P2 work is uncommitted.
+- **Open**: The remaining P2 surfaces — `recalls` and `shareReport` — then P3's free wiring. The "Your data"
+  panel's confirm box still does not say which action it belongs to in words, only by position.
+
+### Turn 32 — P2 finished: recalls and the shareable report, then documents, commit and deploy
+
+- **Input**: "Update all documentation (tracker and others) for last turn and this turn. Commit, Deploy,
+  and continue by following the plan with the next steps."
+- **Output**: Finished P2 with the last two surfaces, in a new "Safety and sharing" section on
+  `decode.html`: **Recalls and complaints** (`assets/vehicle.js`, flag `recalls`) and **Shareable report**
+  (`assets/report.js`, flag `shareReport`). Both are `.surface` panels on the shared runtime, each with its
+  badge, a VIN field and one action; both validate the VIN first ("A VIN is 17 characters and never
+  contains I, O or Q.") and then answer with the reason instead of a result — the recalls module names the
+  VIN and says nothing was requested, the report module says nothing was copied and shows the `/r/<vin>`
+  shape it will produce. Documented the whole P2 batch: the README's status section was rewritten (it
+  still described checkout, seats, bulk upload, API keys and export/deletion as "planned, not built"),
+  including a table of every finished-but-unwired surface with the decision each waits on; the plan gained
+  the two new rows in §4.2, a note that every flag now has a surface except `euDecode`, and its F-16/F-23
+  contracts were corrected to the real entry points and signatures; the README's asset table lists the two
+  new modules. Fixed the iOS/iPadOS field zoom properly: the 16 px rule now covers `(pointer: coarse)` at
+  any width, because a phone showing a desktop-width page was still zooming. `?v=p31`, published, then
+  committed and pushed.
+- **Files**: `assets/vehicle.js`, `assets/report.js` (new), `decode.html`, `assets/style.css`, all 13 pages
+  (version), `README.md`, `cardna-fm-plan.md`, this tracker.
+- **Verified**: Private preview, browser inspector. decode.html at 1280×800: both panels in one row of
+  equal height at rest, badges above each heading, no overflow; "Check recalls" with an empty field gives
+  "Enter the VIN you want to check.", with `1HGCM82633A004352` gives the not-connected sentence naming that
+  VIN; "Copy a share link" likewise, quoting `/r/1HGCM82633A004352`; `123` gives the VIN-format error, not
+  the coming-soon copy. At 354×593 both stack, fields and buttons fit, messages wrap without clipping.
+  Not verified: whether the clipboard really stayed empty (no clipboard access), Enter-in-field behaviour,
+  and the locked state for a Free account on the gated garage panels.
+- **Commits**: this turn's batch, pushed to `origin/main`; GitHub Pages build checked with `github_checks`.
+- **Open**: P3's free wiring, above all recalls (one function body away) and the server-side decode count.
+  Every feature now has its interface, so from here the phases are wiring, not layout.
+
 ## Approaches tried and rejected
 
 | Approach | Why it was rejected |
@@ -509,11 +591,14 @@ surviving record, not a transcript.
 
 Taken from the specification's requirement list; statuses reflect the current working tree and latest known checks. Do not resume project work until the user asks.
 
-1. **P2 — frontend completion for the unwired features** (`cardna-fm-plan.md` §7). Surfaces needed for
-   `recalls`, `shareReport`, `seats`, `apiKeys`, `gdpr`, garage bulk upload and the team panel, each with
-   its six states and its badge. This is the next build step and needs no money.
-2. **Commit the P1 batch.** 15 modified files plus the new module and the four documents; the Boss has not
-   asked for a commit.
+1. **P3 — free wiring** (`cardna-fm-plan.md` §7). Nothing here costs money or needs a contract: recalls
+   through NHTSA's public API (the panel and its module already exist, so this is one function body), the
+   `waitlist` table, the data export, then the two invisible pieces — the server-side decode count
+   (`F-26`) and the VIN cache (`F-27`).
+2. **Finish the P2 batch's loose ends.** The "Your data" confirm box still only says which action it
+   belongs to by position; the surface grid's cards end ragged once one gains a message (by design, but
+   worth a look); `assets/preview.js` hiding a badge on a live flag is still unproven.
+3. **Commit and push the P2 batch** — it is committed in Turn 32 together with the documents.
 3. **`LAY-02` / `LAY-03` residual checks.** 320 px and the intermediate widths, native swipe and keyboard
    traversal, active-link marking per route, and non-staff Admin visibility (needs a role change — not
    permitted). Colour and dark-theme contrast were re-checked for the badge only.
@@ -593,7 +678,7 @@ Taken from the specification's requirement list; statuses reflect the current wo
 | 18 | Handover state and repository status | Read AGENT.md, tracker and handoff skill; checked git status and git log. No new build, publish or browser test. |
 | 19 | LAY-02 / LAY-04 / CON-01 on the private preview | Phone 390×844 (about, legal, index): header rows correct, sub-brand one line, chip flush right, tables contained with hints, tab-strip fade intact. Desktop 1280×800 (about, pricing): layout unchanged, hints hidden, nothing past the right edge. 320 px, dark theme, swipe and keyboard remain unverified. |
 | 20 | `docs/supabase-migration.sql` | Not run, not verifiable here; checked by reading against `garage.js`, `auth.js`, `admin.js`. Table definitions were not visible. |
-| 30 | Start icon (P1) on the private preview | Pricing 1280×800: 6 badges in place, no overlap, table intact. Index: badges on the Catalogue and Pricing tabs, tabs still switch. decode.html: badge groups with its notice. Phone 354×593: 6 badges, one line each, nothing clipped. Light theme legible (~7:1 after the colour change). Not verified: a live flag hiding its badge, 320 px, a clean browser. |
+| 32 | Recalls and share surfaces on the private preview | decode.html 1280×800: both panels in one row, equal height at rest, badges above headings, no overflow. Messages verified verbatim: recalls names the VIN and says nothing was requested; share says nothing was copied and quotes `/r/<vin>`; `123` gives the format error. 354×593: stacked, wraps without clipping. Not verified: clipboard contents, Enter-in-field, Free-plan locked state. |
 
 ## Memory pointers
 
@@ -638,3 +723,7 @@ Taken from the specification's requirement list; statuses reflect the current wo
 | 14 Nov 2026 | Turn 29: start-icon badge text set to "Coming soon" (`instructions.md` §4, `cardna-fm-plan.md` §4, decision D-15); no code changed. |
 
 | 15 Nov 2026 | Turn 30: P1 built — `assets/preview.js` (12 flags, `scan`, `aria-describedby`), `.preview-flag` styles, nine badges placed across pricing, index and decode, script loaded on all 13 pages, `?v=p26`; F-21 and F-24 corrected to live, plan §4.1 added with every badge position; three inspection-found fixes (badge contrast and spacing, RECENT row wrap, table dash contrast). |
+
+| 15 Nov 2026 | Turn 31: P1 committed and pushed (`67ea757`); P2 began — `assets/surfaces.js` runtime plus six preview modules, four account panels on the garage, checkout buttons and the waitlist panel on pricing, `?v=p29`; plan §4.2 records where each surface lives and what is left. |
+
+| 15 Nov 2026 | Turn 32: P2 finished — recalls and share panels on `decode.html` with `vehicle.js` and `report.js`; README status section rewritten with the full finished-but-unwired table; plan §4.2 extended, F-16/F-23 contracts corrected; iOS field zoom fixed for touch devices at any width; `?v=p31`; committed, pushed and deployed. |
