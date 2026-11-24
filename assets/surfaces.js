@@ -111,7 +111,7 @@
     say(section, "error", result.message || result.error || "That did not work.");
   }
 
-  function run(section, callPath) {
+  function run(section, callPath, triggerNode) {
     var needs = section.getAttribute("data-needs");
     if (needs && !capability(needs)) {
       say(section, "note", lockedText(needs));
@@ -124,7 +124,7 @@
       return;
     }
 
-    var trigger = section.querySelector("[data-surface-run]");
+    var trigger = triggerNode || section.querySelector("[data-surface-run]");
     if (trigger) { trigger.disabled = true; }
     var previous = outputNode(section);
     if (previous) { previous.innerHTML = ""; }
@@ -177,11 +177,13 @@
   }
 
   function bindSurfaces() {
+    /* A panel may hold more than one action — "Your data" has an export and a deletion —
+       so every trigger is bound, and each carries its own data-call. */
     Array.prototype.slice.call(document.querySelectorAll("[data-surface]")).forEach(function (section) {
-      var trigger = section.querySelector("[data-surface-run]");
-      if (!trigger) { return; }
-      trigger.addEventListener("click", function () {
-        run(section, trigger.getAttribute("data-call"));
+      Array.prototype.slice.call(section.querySelectorAll("[data-surface-run]")).forEach(function (trigger) {
+        trigger.addEventListener("click", function () {
+          run(section, trigger.getAttribute("data-call"), trigger);
+        });
       });
     });
   }

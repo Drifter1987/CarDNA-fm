@@ -71,12 +71,18 @@
         },
         vehicles: vehicles,
         vaultCipherText: vault ? safeParse(vault) : null,
-        note: "Only what this browser and this account hold. Your activity rows are in Supabase " +
-          "and are readable by you; ask us for them if you need a copy."
+        note: "Everything this browser and this account hold. A vehicle listed here may still be " +
+          "one the account refused (this browser keeps it, the account did not). Your activity " +
+          "rows live in Supabase; ask us for a copy if you need them."
       };
 
       var name = "cardna-account-" + stamp() + ".json";
-      download(JSON.stringify(payload, null, 2), "application/json;charset=utf-8", name);
+
+      /* Paint the sentence first: some browsers replace the tab with the file, and the
+         confirmation must be on screen before that happens. */
+      window.setTimeout(function () {
+        download(JSON.stringify(payload, null, 2), "application/json;charset=utf-8", name);
+      }, 500);
 
       return {
         ok: true,

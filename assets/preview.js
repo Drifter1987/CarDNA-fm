@@ -24,7 +24,7 @@
     invoices: false,    /* F-20 invoice billing and SLA */
     waitlist: true,     /* F-22 — live: Supabase table, wired in Turn 34 */
     shareReport: false, /* F-23 public shareable report */
-    gdpr: false         /* F-25 self-serve export and deletion */
+    gdpr: true          /* F-25 — live: account export and deletion, wired in Turn 37 */
   };
 
   var STAR =

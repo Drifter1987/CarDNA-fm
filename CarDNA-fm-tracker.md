@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 15 November 2026 — Chat 1, Turn 37
+> Last updated: 15 November 2026 — Chat 1, Turn 38
 
 ## How this file works
 
@@ -113,10 +113,10 @@ GitHub Pages serves it.
   password field on screen beside the email field. It is now two states of one panel — sign-in (email and
   password) and recovery (email only, "Email me a reset link" and "Back to sign in") — confirmed at
   1280×800 and 390×844. Stale `?v=p38` assets would show the old behaviour; reload if it reappears.
-- **Account data export and deletion are wired** (Turn 37): "Download everything" now assembles a real JSON
-  file — profile, saved vehicles, vault cipher text — in the browser. "Delete my account" calls
-  `cardna_delete_my_account(confirm)`, which refuses the owner in the database. **Neither has been tested**:
-  the browser was signed out for that pass, and deleting an account is not something to try on the owner's.
+- **Account data export and deletion are wired and half-proven** (Turns 37–38, `?v=p40`): "Download
+  everything" builds a real JSON file (profile, saved vehicles, vault cipher text), and "Delete my account"
+  refuses a wrong confirmation in the browser and would refuse the owner in the database. **The deletion's
+  success path has never run** — destroying the only free test account is the Boss's call.
 
 **Known broken or partial:**
 
@@ -134,7 +134,7 @@ GitHub Pages serves it.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 37 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 38 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -732,6 +732,33 @@ surviving record, not a transcript.
 - **Open**: The Boss runs a deletion test as a normal user if they want that path proven (the owner can never
   be deleted — that refusal is in the database). Still unwired: the decode count (F-26) and the cache (F-27)
   now that their SQL exists, then the shareable report (F-23). Four smaller bugs from Turn 36 remain.
+
+### Turn 38 — Free-user test found four bugs; the dead delete button fixed and the guard proven
+
+- **Input**: "Logged in now as free user, if you need me to login back to the admin let me know."
+- **Output**: Tested as the free account and found four real bugs, three of them mine from Turn 37.
+  **The serious one:** "Delete my account" was dead. `assets/surfaces.js` bound only the *first*
+  `[data-surface-run]` per panel, and "Your data" holds two, so the deletion never had a listener. The
+  runtime now binds every trigger and passes the one that was pressed. **Also fixed:** the "Your data" panel
+  still carried a "COMING SOON" badge because `flags.gdpr` was never flipped (`gdpr: true` now); the export
+  now paints its sentence and defers the download by 500 ms, because some browsers replace the tab with the
+  file; the panel copy and the JSON note no longer promise "your activity", which the export does not
+  contain; and the note now says a listed vehicle may be one the account refused. `?v=p40`.
+- **Files**: `assets/surfaces.js`, `assets/preview.js`, `assets/account.js`, `garage.html`, all 13 pages
+  (version), this tracker.
+- **Verified**: Private preview, browser inspector, signed in as the free user. Garage 1280×800: "Your data"
+  now has **no badge** and still no locked sentence; the other three panels keep theirs and still say
+  "Included with Workshop; your plan is Free…". **The deletion refuses correctly:** typing `no` and pressing
+  "Delete my account" prints "Type delete in the box to confirm." in red and the account stays signed in
+  with all four vehicles. The export produced a real JSON with keys `product`, `exported`, `account`,
+  `vehicles`, `vaultCipherText`, `note` — four vehicles, `vaultCipherText: null`, the corrected note.
+  **Not verified**: the deletion's success path (that would destroy the only free test account — left to the
+  Boss), and whether the export's sentence is ever visible before the tab leaves for the file.
+- **Commits**: committed and pushed; Pages build checked.
+- **Open**: The export still replaces the tab with the raw JSON in this browser and shows no on-page
+  confirmation — the next fix is a real download rather than a blob navigation. The free account holds four
+  vehicles against a one-vehicle plan (three refused rows are the queue reporting honestly); that sample data
+  is the owner's to clean. Still unwired: the decode count (F-26) and the cache (F-27), then the report.
 
 ## Approaches tried and rejected
 
