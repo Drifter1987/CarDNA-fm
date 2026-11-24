@@ -16,14 +16,20 @@ begin;
 -- 1. F-27 — the VIN cache ----------------------------------------------------------------------
 -- Public NHTSA data, so it is readable by anyone; only a signed-in account may fill it in, and
 -- only with a real 17-character VIN.
+--
+-- Correction (Turn 40): this table already existed in the project with a `payload` column, and
+-- `create table if not exists` therefore changed nothing. The live shape — and the shape the
+-- browser modules read and write — is: vin, payload, source (default 'vincario'), fetched_at.
+-- There is no `fields` column and no `hits` column; the block below now states the shape that is
+-- actually in the database, so a fresh project and this one agree.
 
 create table if not exists public.decode_cache (
-  vin        text primary key,
-  fields     jsonb not null default '{}'::jsonb,
-  source     text not null default 'vpic',
+  vin        text not null,
+  payload    jsonb not null,
+  source     text not null default 'vincario',
   fetched_at timestamptz not null default now(),
-  hits       integer not null default 0,
-  constraint decode_cache_vin_len check (char_length(vin) = 17)
+  constraint decode_cache_pkey primary key (vin),
+  constraint decode_cache_vin_format check (vin ~ '^[A-HJ-NPR-Z0-9]{17}$')
 );
 
 alter table public.decode_cache enable row level security;

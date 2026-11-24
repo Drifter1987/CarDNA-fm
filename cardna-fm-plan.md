@@ -83,11 +83,11 @@ the wording is the same on every surface.
 | F-20 | Invoice billing, annual terms, SLA | `pricing.html`, admin | frontend-only | `invoices` |
 | F-21 | Email verification and password recovery | `signin.html`, `reset.html` | live (limited: default mailer) | — |
 | F-22 | Waitlist / pilot capture | `pricing.html`, `about.html` | live | — |
-| F-23 | Public shareable VIN report | `decode.html` → `/r/<vin>` | frontend-only | `shareReport` |
+| F-23 | Public shareable VIN report | `decode.html` → `report.html?vin=<vin>` | live (limited) | — |
 | F-24 | Owner analytics dashboard | `admin.html` | live | — |
 | F-25 | Self-serve data export and account deletion | `garage.html` | live (limited: deletion untested, owner refused in SQL) | — |
 | F-26 | Server-side entitlement check (decode count) | invisible | SQL ready (`docs/supabase-decode-log-cache-delete.sql`); client wiring next | — |
-| F-27 | Server-side VIN cache (`decode_cache`) | invisible | SQL ready (`docs/supabase-decode-log-cache-delete.sql`); client wiring next | — |
+| F-27 | Server-side VIN cache (`decode_cache`) | invisible | live (limited): vPIC answers are read from and written to `decode_cache.payload` by `assets/vin.js` for signed-in decodes; the report reads it. Repeat-decode proof still pending. | — |
 
 ### 4.1 Where the icon stands today
 
@@ -119,7 +119,7 @@ Built in Turn 31, each with its badge, its states and a module that already retu
 | `pricing.html` | `waitlist` | The waitlist panel; the paid cards' buttons fill it in — **now live**, so its badge is hidden | `assets/waitlist.js` |
 | `pricing.html` | `payments` / `overage` / `invoices` | Checkout entry on each paid card, through the billing module | `assets/billing.js` |
 | `decode.html` | `recalls` | Recalls and complaints: a VIN field and the campaign list it returns — **now live**, so its badge is hidden | `assets/vehicle.js` |
-| `decode.html` | `shareReport` | The shareable report: a VIN field and the `/r/<vin>` link it will copy | `assets/report.js` |
+| `decode.html` | `shareReport` | The shareable report: a link to `report.html?vin=…`, built by `assets/report.js`, rendered by `assets/report-view.js` from `decode_cache` |
 
 The runtime is `assets/surfaces.js`: one `<div class="surface" data-surface data-call data-needs>` per
 panel, one `[data-arg]` per argument, one `[data-surface-run]` per action, and the states (locked,
@@ -239,12 +239,17 @@ nothing else. Data shapes are final now; the view must not change when the real 
 
 ### F-23 · Public shareable report — `shareReport`
 
-- **Entry point:** a panel on `decode.html`.
-- **Module:** `window.CarDNAReport.share({ vin })` → `{ ok, url }`; URL `/r/<vin>`, rendered from the cache.
-- **Placeholder behaviour:** validates the VIN, then answers `{ ok:false, error:"preview" }` and copies nothing.
-- **Privacy:** share the filed fields only; never the note, the garage label or the account.
-- **Done when:** the link opens without signing in, a repeat view costs no decode, and the page is
-  indexable for SEO.
+- **Entry point:** the shareable-report panel on `decode.html`.
+- **Module:** `window.CarDNAReport.share({ vin })` → `{ ok, url, message, html }`. The URL is
+  `report.html?vin=<vin>`. GitHub Pages cannot serve `/r/<vin>`, so the report is a page with a query,
+  not a path. `assets/report-view.js` renders it.
+- **Wiring as built (Turn 40):** the link is built and shown; the report page reads
+  `public.decode_cache` (`select=payload`) anonymously and shows the filed fields only. A VIN nobody
+  has decoded while signed in shows an honest "no report yet" state with a link to the decoder.
+- **Privacy:** the filed record only. The link carries nothing but the VIN; never the note, the garage
+  label or the account.
+- **Still open:** the populated render (needs a cached row), the copy-to-clipboard behaviour (the link is
+  shown, not copied), and the SEO/indexing claim, which is untested.
 
 ### F-24 · Owner analytics — `analytics`
 

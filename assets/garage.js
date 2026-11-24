@@ -197,16 +197,26 @@
       err.status === 408 || err.status === 429;
   }
 
+  /* What the user reads when the server refuses a change. Constraint and column names are for
+     logs, never the screen: each known case becomes a plain sentence. */
   function reason(err) {
     var text = "";
     try {
       var body = JSON.parse(err.detail || "{}");
       text = body.message || body.hint || "";
     } catch (parseError) { text = ""; }
-    if (/row-level security/i.test(text) || /row-level security/i.test(err.detail || "")) {
+    var raw = text + " " + (err.detail || "");
+
+    if (/row-level security/i.test(raw)) {
       return "Your account cannot save vehicles right now.";
     }
-    return text || "The server did not accept it.";
+    if (/foreign key|violates|not-null|null value/i.test(raw) || err.status === 409 || err.status === 422) {
+      return "This account no longer holds a garage here. Sign in again to continue.";
+    }
+    if (err.status === 401 || err.status === 403) {
+      return "Your sign-in has expired. Sign in again to save.";
+    }
+    return "The server did not accept this change. It stays in this browser.";
   }
 
   function scheduleRetry() {

@@ -23,7 +23,7 @@
     seats: false,       /* F-19 seats and invitations */
     invoices: false,    /* F-20 invoice billing and SLA */
     waitlist: true,     /* F-22 — live: Supabase table, wired in Turn 34 */
-    shareReport: false, /* F-23 public shareable report */
+    shareReport: true,  /* F-23 — live: report.html?vin=…, rendered from decode_cache, wired in Turn 40 */
     gdpr: true          /* F-25 — live: account export and deletion, wired in Turn 37 */
   };
 

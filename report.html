@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vehicle report — CarDNA</title>
+<meta name="description" content="The filed record for one VIN, from NHTSA vPIC. Shared from CarDNA; no account needed to read it.">
+<meta name="robots" content="index,follow">
+<link rel="stylesheet" href="assets/style.css?v=p42">
+<link rel="stylesheet" href="assets/motion.css?v=p42">
+</head>
+<body>
+
+<div data-site-header data-site-root=""></div>
+<script src="assets/site-shell.js?v=p42"></script>
+
+<main>
+
+  <section class="page-head">
+    <div class="container">
+      <div class="kicker">Vehicle report</div>
+      <h1 id="report-title">Read a VIN.</h1>
+      <p id="report-lede">
+        The filed record for one vehicle, from NHTSA's vPIC register. This page shows only what the
+        register filed for the VIN. It carries no owner, no note and no account.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <form id="report-form" class="decode-form" novalidate>
+        <label class="vin-label" for="report-vin">Vehicle identification number</label>
+        <div class="vin-row">
+          <input class="vin-input" id="report-vin" name="vin" maxlength="17" placeholder="1HGCM82633A004352"
+                 autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button class="btn" type="submit">Open report</button>
+        </div>
+        <p class="vin-hint" id="report-hint" aria-live="polite">17 characters · never contains I, O or Q</p>
+      </form>
+
+      <div id="report-result" hidden></div>
+    </div>
+  </section>
+
+</main>
+
+<div data-site-footer data-site-root=""></div>
+
+<script src="assets/supabase-config.js?v=p42"></script>
+<script src="assets/auth.js?v=p42"></script>
+<script src="assets/report-view.js?v=p42"></script>
+
+</body>
+</html>

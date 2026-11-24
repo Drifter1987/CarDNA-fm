@@ -133,7 +133,15 @@
 
         return response.json().then(function (result) {
           if (result && result.ok) {
-            /* The sign-in is gone with the account; leave the app rather than show a dead session. */
+            /* The account and its sign-in are gone on the server. Drop this browser's copy of the
+               session and profile too, so the header chip and the garage stop speaking for a user
+               who no longer exists. Then leave for the sign-in screen. */
+            var auth = window.CarDNAAuth;
+            if (auth && auth.clearLocalSession) { auth.clearLocalSession(); }
+            if (window.CarDNAGarage && window.CarDNAGarage.clear) {
+              try { window.localStorage.removeItem("cardna.garage"); } catch (err) { /* ignore */ }
+              try { window.localStorage.removeItem("cardna.garage.queue"); } catch (err) { /* ignore */ }
+            }
             window.setTimeout(function () { window.location.replace("signin.html"); }, 1600);
             return {
               ok: true,

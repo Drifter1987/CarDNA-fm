@@ -9,6 +9,53 @@
   var RECENT_KEY = "cardna.recent";
   var MAX_RECENT = 6;
 
+  /* ------------------------------------------------------------------ VIN cache (F-27)
+     public.decode_cache holds the raw vPIC answer per VIN in its `payload` column (the table
+     predates this module, so the column is `payload`, not `fields`). Anyone may read it; a
+     signed-in account may write it. Both calls are best effort: if the table is missing or the
+     network fails, the decode simply goes to NHTSA as it always did. */
+  function cacheConfig() {
+    var cfg = window.CARDNA_SUPABASE || {};
+    var auth = window.CarDNAAuth;
+    var session = auth && auth.state && auth.state.session;
+    return {
+      base: String(cfg.url || "").replace(/\/+$/, ""),
+      key: cfg.key || "",
+      token: session && session.access_token ? session.access_token : ""
+    };
+  }
+
+  function cachedPayload(vin) {
+    var cfg = cacheConfig();
+    if (!cfg.base || !cfg.key) { return Promise.resolve(null); }
+
+    return fetch(cfg.base + "/rest/v1/decode_cache?select=payload&vin=eq." + encodeURIComponent(vin) + "&limit=1", {
+      headers: { apikey: cfg.key, Accept: "application/json" }
+    }).then(function (response) {
+      if (!response.ok) { return null; }
+      return response.json();
+    }).then(function (rows) {
+      var row = rows && rows[0];
+      return row && row.payload ? row.payload : null;
+    }).catch(function () { return null; });
+  }
+
+  function storePayload(vin, payload) {
+    var cfg = cacheConfig();
+    if (!cfg.base || !cfg.key || !cfg.token || !payload) { return; }
+
+    fetch(cfg.base + "/rest/v1/decode_cache?on_conflict=vin", {
+      method: "POST",
+      headers: {
+        apikey: cfg.key,
+        Authorization: "Bearer " + cfg.token,
+        "Content-Type": "application/json",
+        Prefer: "resolution=merge-duplicates,return=minimal"
+      },
+      body: JSON.stringify({ vin: vin, payload: payload, source: "vpic" })
+    }).catch(function () { /* the cache is an optimisation; a failed write costs nothing */ });
+  }
+
   var SECTIONS = [
     {
       title: "Identity",
@@ -705,9 +752,18 @@
       }
 
       try {
-        var response = await fetch(ENDPOINT + encodeURIComponent(vin) + "?format=json");
-        if (!response.ok) { throw new Error("HTTP " + response.status); }
-        var payload = await response.json();
+        /* F-27: a VIN this database has already read is answered from decode_cache, so a repeat
+           decode costs no vPIC call. A miss, a refusal or a missing table falls through to NHTSA. */
+        var payload = await cachedPayload(vin);
+        if (!payload) {
+          var response = await fetch(ENDPOINT + encodeURIComponent(vin) + "?format=json");
+          if (!response.ok) { throw new Error("HTTP " + response.status); }
+          payload = await response.json();
+          /* Only a real answer is kept: an empty vPIC reply would otherwise stick for good. */
+          if (payload && payload.Results && payload.Results.length && payload.Results[0].ErrorCode !== undefined) {
+            storePayload(vin, payload);
+          }
+        }
         var parsed = extract(payload);
         var fields = parsed.fields;
         var notes = parsed.notes || {};

@@ -112,8 +112,10 @@ fallback, the whole static catalogue, **recalls and complaints on any VIN** (vPI
 then NHTSA's public recall feed — the panel lists the campaigns and every export carries them),
 accounts with roles and plans, the garage with server sync and a retry queue, the encrypted vault,
 Markdown / CSV / PDF / Excel export, the staff console, analytics for the owner, the **waitlist** (a real
-row in Supabase per address and interest, insert-only for visitors and staff-readable), and the free plan's
-limits (3 decodes in total, 1 saved vehicle).
+row in Supabase per address and interest, insert-only for visitors and staff-readable), the **shareable
+report** at `report.html?vin=…` (the filed record only, readable without an account, served from the VIN
+cache — and a VIN shows there once someone has decoded it while signed in), the free plan's limits
+(3 decodes in total, 1 saved vehicle), and self-serve account export and deletion.
 
 **Finished, waiting for its service** — `cardna-fm-plan.md` §4.1 and §4.2 name the module and the exact
 wiring for each:
@@ -123,16 +125,16 @@ wiring for each:
 | Checkout, invoices, overage | `pricing.html` | a card processor (`D-12`) |
 | European full specification | `decode.html` result | the vendor contract (`D-13`) |
 | Licensed parts catalogue | `index.html` Catalogue tab | the licence (`D-14`) |
-| Shareable report at `/r/<vin>` | `decode.html` | the report route and the VIN cache |
+| Licensed parts catalogue | `index.html` Catalogue tab | the licence (`D-14`) |
 | Bulk VIN upload | `garage.html` | the batch path into the garage |
 | API key | `garage.html` | `api_keys` and the gateway |
 | Team seats | `garage.html` | the `seats` table and the invitation email |
 | Email verification and recovery | `signin.html`, `reset.html` | a product-domain sender (`D-4`) |
 
-**Waiting on the database wiring, not on a decision:** the server-side decode count (`F-26`) and the VIN
-cache (`F-27`) have their SQL in `docs/supabase-decode-log-cache-delete.sql` and that file has been run;
-their browser wiring is the next step. Account deletion and the data export are wired to the same file.
-The licensed parts layer and the European vendor proxy still need contracts.
+**Waiting on the database, not on a decision:** the server-side decode count (`F-26`) and the VIN cache
+(`F-27`) are wired to `docs/supabase-decode-log-cache-delete.sql`, which has been run. One proof is
+still missing: a signed-in decode that fills the cache, then the same VIN decoded again from it. The
+report page reads that cache. The licensed parts layer and the European vendor proxy still need contracts.
 
 ## Documents
 

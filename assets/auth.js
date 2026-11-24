@@ -18,7 +18,8 @@
     "signin.html": 1,
     "reset.html": 1,
     "vin-compare.html": 1,
-    "parse-public-apis.html": 1
+    "parse-public-apis.html": 1,
+    "report.html": 1
   };
 
   var state = { session: null, profile: null, ready: false };
@@ -166,6 +167,15 @@
       try { await call("/auth/v1/logout", { method: "POST", token: session.access_token }); }
       catch (err) { /* token already dropped locally */ }
     }
+  }
+
+  /* Forget this browser's session and profile without a network call. Used once the server has
+     already removed the account, so there is nothing left to sign out of. */
+  function clearLocalSession() {
+    state.session = null;
+    state.profile = null;
+    writeSession(null);
+    try { window.localStorage.removeItem("cardna.decodes"); } catch (err) { /* ignore */ }
   }
 
   /* ------------------------------------------------------------------ recovery */
@@ -846,6 +856,7 @@
     signIn: signIn,
     signUp: signUp,
     signOut: signOut,
+    clearLocalSession: clearLocalSession,
     recoverPassword: recoverPassword,
     updatePassword: updatePassword,
     changePassword: changePassword,
