@@ -406,12 +406,48 @@
     var lim = limitsNow();
     var cap = lim && lim.decodes ? lim.decodes : 0;
     var used = decodedVins().length;
+
+    /* The server's count wins when it is higher: same rule, kept where it cannot be cleared by
+       clearing site data. A browser list can never make a spent plan look unspent (F-26). */
+    if (serverUsage && cap > 0) {
+      used = Math.max(used, Number(serverUsage.used) || 0);
+    }
+
     return {
       limited: cap > 0,
       limit: cap,
       used: used,
       left: cap ? Math.max(0, cap - used) : null
     };
+  }
+
+  /* The server's own answer about this account: { limited, limit, used, left }. */
+  var serverUsage = null;
+
+  function rpc(name, body) {
+    var s = state.session;
+    if (!s || !configured()) { return Promise.resolve(null); }
+
+    return fetch(String(BASE).replace(/\/+$/, "") + "/rest/v1/rpc/" + name, {
+      method: "POST",
+      headers: {
+        apikey: KEY,
+        Authorization: "Bearer " + s.access_token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body || {})
+    }).then(function (response) {
+      if (!response.ok) { return null; }
+      return response.json();
+    }).catch(function () { return null; });
+  }
+
+  /* Ask the database what it thinks. Silent when the function is not there yet. */
+  function refreshDecodeUsage() {
+    return rpc("cardna_decode_usage", {}).then(function (usage) {
+      if (usage && typeof usage === "object" && "used" in usage) { serverUsage = usage; }
+      return serverUsage;
+    });
   }
 
   function canDecode(vin) {
@@ -436,6 +472,13 @@
         store.setItem(DECODES_KEY, JSON.stringify(all));
       } catch (err) { /* storage blocked: the allowance cannot be kept on this device */ }
     }
+
+    /* Tell the database too, so the count survives clearing this browser. Fire and forget: the
+       browser list is still the immediate answer if the call fails. */
+    rpc("cardna_record_decode", { vin: vin }).then(function (answer) {
+      if (answer && answer.usage) { serverUsage = answer.usage; }
+    });
+
     return decodeUsage();
   }
 
@@ -818,6 +861,7 @@
     decodeUsage: decodeUsage,
     canDecode: canDecode,
     recordDecode: recordDecode,
+    refreshDecodeUsage: refreshDecodeUsage,
     planNeededFor: planNeededFor,
     effective: effective,
     effectiveRole: effectiveRole,

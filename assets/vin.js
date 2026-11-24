@@ -684,6 +684,12 @@
          as Free while the profile is still loading. */
       if (window.CarDNAAuth && window.CarDNAAuth.ready) {
         await new Promise(function (resolve) { window.CarDNAAuth.ready(resolve); });
+
+        /* Ask the database first, so the wall is the plan's real count and not this browser's. */
+        if (window.CarDNAAuth.refreshDecodeUsage) {
+          try { await window.CarDNAAuth.refreshDecodeUsage(); } catch (err) { /* keep the local count */ }
+        }
+
         if (!window.CarDNAAuth.canDecode(vin)) {
           showQuotaWall();
           return;

@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 15 November 2026 — Chat 1, Turn 38
+> Last updated: 15 November 2026 — Chat 1, Turn 39
 
 ## How this file works
 
@@ -113,10 +113,19 @@ GitHub Pages serves it.
   password field on screen beside the email field. It is now two states of one panel — sign-in (email and
   password) and recovery (email only, "Email me a reset link" and "Back to sign in") — confirmed at
   1280×800 and 390×844. Stale `?v=p38` assets would show the old behaviour; reload if it reappears.
-- **Account data export and deletion are wired and half-proven** (Turns 37–38, `?v=p40`): "Download
-  everything" builds a real JSON file (profile, saved vehicles, vault cipher text), and "Delete my account"
-  refuses a wrong confirmation in the browser and would refuse the owner in the database. **The deletion's
-  success path has never run** — destroying the only free test account is the Boss's call.
+- **Account deletion works end to end** (Turn 39, proven on a throwaway account): a confirmed test user was
+  created in the dashboard, signed in, and deleted from the app — the panel said "Account … deleted, with its
+  saved vehicles and vault rows. Signing out…", and the user is gone from Auth. Signing in again with the
+  same credentials gives "Invalid login credentials". The three real accounts were untouched, the owner
+  included. **Two bugs the same test found are still open:** the deleted account's chip survives (stale
+  session kept in the browser, through reloads), and its garage then retries against a profile that no
+  longer exists, printing a raw Postgres error ("violates foreign key constraint
+  vehicles_user_id_fkey") to the user.
+- **The decode count now asks the database** (Turn 39, `?v=p41`): `assets/auth.js` calls
+  `cardna_decode_usage()` on every decode and `cardna_record_decode(vin)` after one, and takes the server's
+  number when it is higher — a browser list can no longer make a spent plan look unspent. **Untested:** no
+  decode has been run since, so the RPC path, the wall it should produce and the staff bypass are all
+  reasoned, not seen.
 
 **Known broken or partial:**
 
@@ -134,7 +143,7 @@ GitHub Pages serves it.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 38 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 39 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -759,6 +768,37 @@ surviving record, not a transcript.
   confirmation — the next fix is a real download rather than a blob navigation. The free account holds four
   vehicles against a one-vehicle plan (three refused rows are the queue reporting honestly); that sample data
   is the owner's to clean. Still unwired: the decode count (F-26) and the cache (F-27), then the report.
+
+### Turn 39 — Deletion proven on a throwaway account; the decode count asks the database
+
+- **Input**: "We can create a new account to be deleted. I can use a temp mail generator or do it yourself
+  if you can. Move on to the next steps. Update the plan IF NEEDED and then continue."
+- **Output**: Created no inbox — the cleaner route was the dashboard's own "Create new user" with
+  **Auto confirm** ticked, which needs no email at all. Then ran the whole deletion: signed in as
+  `delete-me-test@example.com`, typed `delete`, pressed once — the panel answered "Account
+  delete-me-test@example.com deleted, with its saved vehicles and vault rows. Signing out…", the page left
+  for sign-in, and the dashboard showed **3 users** with the three real accounts untouched (same UIDs, the
+  owner included). Signing in again with the same credentials was refused: "Invalid login credentials". So
+  **F-25's deletion is proven**, and the owner guard remains in SQL for the owner's own account.
+  **Two bugs the same run found, not yet fixed:** the deleted account's chip survives in the header through
+  reloads (the JWT is kept after a successful deletion), and its garage then retries against a profile that
+  no longer exists — printing **"insert or update on table "vehicles" violates foreign key constraint
+  "vehicles_user_id_fkey""** to the user. **And wired F-26:** `assets/auth.js` gained `refreshDecodeUsage()`
+  (RPC `cardna_decode_usage`), `serverUsage`, and `recordDecode` now posts `cardna_record_decode`;
+  `decodeUsage()` takes the server's count when it is **higher**, so a browser list can never make a spent
+  plan look unspent. `assets/vin.js` awaits the refresh before the wall check. `?v=p41` published.
+  The plan needed no change beyond the statuses already recorded (F-25 live, F-26 SQL ready) — the export
+  file being a browser blob rather than a download is now the one cosmetic gap on that panel.
+- **Files**: `assets/auth.js`, `assets/vin.js`, all 13 pages (version), this tracker. Nothing in the
+  repository was created for the test account; it existed only in Supabase and is gone.
+- **Verified**: Browser, dashboard and app together. **Proven:** the deletion message, the redirect, the
+  account's disappearance from Auth, the three real accounts' survival, the refusal of a re-login.
+  **Not verified:** the new decode-count path (no decode has been run since `?v=p41`), the owner guard
+  (deliberately never exercised), and the "Confirmed" column view (the column picker will not open here).
+- **Commits**: committed and pushed; Pages build checked.
+- **Open**: Fix the stale session after deletion (clear the stored session, not just redirect) and map the
+  database's FK/RLS errors to a plain sentence instead of printing constraint names. Then the VIN cache
+  (`F-27`) and the shareable report (`F-23`), which needs it.
 
 ## Approaches tried and rejected
 
