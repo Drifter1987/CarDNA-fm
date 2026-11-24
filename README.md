@@ -125,7 +125,6 @@ wiring for each:
 | Checkout, invoices, overage | `pricing.html` | a card processor (`D-12`) |
 | European full specification | `decode.html` result | the vendor contract (`D-13`) |
 | Licensed parts catalogue | `index.html` Catalogue tab | the licence (`D-14`) |
-| Licensed parts catalogue | `index.html` Catalogue tab | the licence (`D-14`) |
 | Bulk VIN upload | `garage.html` | the batch path into the garage |
 | API key | `garage.html` | `api_keys` and the gateway |
 | Team seats | `garage.html` | the `seats` table and the invitation email |

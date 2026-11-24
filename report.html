@@ -6,13 +6,13 @@
 <title>Vehicle report — CarDNA</title>
 <meta name="description" content="The filed record for one VIN, from NHTSA vPIC. Shared from CarDNA; no account needed to read it.">
 <meta name="robots" content="index,follow">
-<link rel="stylesheet" href="assets/style.css?v=p42">
-<link rel="stylesheet" href="assets/motion.css?v=p42">
+<link rel="stylesheet" href="assets/style.css?v=p43">
+<link rel="stylesheet" href="assets/motion.css?v=p43">
 </head>
 <body>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p42"></script>
+<script src="assets/site-shell.js?v=p43"></script>
 
 <main>
 
@@ -29,10 +29,10 @@
 
   <section class="section section--tight">
     <div class="container">
-      <form id="report-form" class="decode-form" novalidate>
+      <form id="report-form" class="vin-form" novalidate>
         <label class="vin-label" for="report-vin">Vehicle identification number</label>
         <div class="vin-row">
-          <input class="vin-input" id="report-vin" name="vin" maxlength="17" placeholder="1HGCM82633A004352"
+          <input class="vin-input" id="report-vin" name="vin" maxlength="17" placeholder="VIN, 17 characters"
                  autocomplete="off" autocapitalize="characters" spellcheck="false">
           <button class="btn" type="submit">Open report</button>
         </div>
@@ -47,9 +47,10 @@
 
 <div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p42"></script>
-<script src="assets/auth.js?v=p42"></script>
-<script src="assets/report-view.js?v=p42"></script>
+<script src="assets/supabase-config.js?v=p43"></script>
+<script src="assets/auth.js?v=p43"></script>
+<script src="assets/app.js?v=p43"></script>
+<script src="assets/report-view.js?v=p43"></script>
 
 </body>
 </html>

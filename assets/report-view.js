@@ -67,7 +67,7 @@
         "</div>";
     }).join("");
 
-    show('<div class="dna"><header class="dna-head"><span class="vin-mono">' + esc(vin) + "</span>" +
+    show('<div class="dna"><header class="dna-head"><span class="dna-vin">' + esc(vin) + "</span>" +
       '<a class="btn btn--ghost btn--sm" href="decode.html?vin=' + encodeURIComponent(vin) + '">Decode this VIN</a>' +
       "</header>" +
       '<div class="dna-rows">' + rows + "</div>" +

@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 15 November 2026 — Chat 1, Turn 39
+> Last updated: 15 November 2026 — Chat 1, Turn 41
 
 ## How this file works
 
@@ -996,3 +996,20 @@ Taken from the specification's requirement list; statuses reflect the current wo
 - **Verified**: In the browser, signed out, on the preview at 1280×800: `report.html` shows the empty form; a VIN with no cache row shows "No report for <VIN> yet." with the "Decode it" link (the cache-miss branch, not the failure branch); `123` shows the 17-character hint and clears the previous result. Confirmed in Supabase by inspection: `decode_cache` is empty (0 records), so the populated-record path is not yet exercised. Not verified: the decoder's cache write and read end to end (needs a signed-in decode); the populated report render; a 17-character VIN containing I, O or Q; the share link's clipboard behaviour (the link is returned as text and shown, not copied). The inspector reported Supabase showing "We are investigating a technical issue" during this check, so reads may be affected by the provider, not the code.
 - **Commits**: none yet. Uncommitted: all files above.
 - **Open**: (1) Run a signed-in decode from the free test account to fill the cache, then check the report renders the 104-field record and the decoder's second decode of the same VIN is served from the cache (no vPIC call). (2) Confirm the server count still refuses the fourth VIN after a cache hit. (3) The `decode.html` share panel's status line, and the link shown, still need a look in the browser. (4) Recorded earlier, unchanged: the account export still replaces the tab (Turn 38); the file picker styling in bulk upload; light-theme card borders.
+
+
+### Turn 41 — Full-code review pass: five real bugs found and fixed
+
+- **Input**: "Review the full code, fix bugs on the fly, Commit, deploy. Continue with the next steps. Update docs."
+- **Output**: Reviewed the files this programme touched and the new page end to end. Five real bugs, all fixed in this turn:
+  1. **`report.html` loaded no `assets/app.js`**, so the theme toggle did not exist and the hamburger did nothing on mobile — the only page in the site missing it. Added.
+  2. **The report's VIN in its result header used `.vin-mono`**, a class that exists only inside `tools/vin-compare.html`'s own `<style>`, so it rendered as plain body text. Now uses `.dna-vin`, which is in the design system.
+  3. **The report's form used `class="decode-form"`**, which is not a style in `style.css`. Now `vin-form`, the real class.
+  4. **The README listed the licensed parts catalogue twice** in its waiting table (a leftover from the Turn 40 edit).
+  5. **The report's field placeholder was the VIN people actually type**, so an empty field looked pre-filled. Now "VIN, 17 characters", as on the decoder.
+  Confirmed as *not* broken, so left alone: `clearLocalSession` is defined and exported (`auth.js`); `garage.js`'s error object carries `status` and `detail`, so the new `reason()` mapping works; `decode_cache` is read as `payload` everywhere; `report.html` is public and no longer gated.
+  Version `?v=p43` on all 14 pages (the 13 plus `report.html`); published to the private preview.
+- **Files**: `report.html`, `assets/report-view.js`, `README.md`, all 14 HTML pages (version), this tracker.
+- **Verified**: Private preview, browser inspector, at 1280×800 and 390×844, signed in as the owner. The theme toggle now exists on `report.html` and switches the whole page between dark and light and back; the hamburger opens the nine-link menu and closes it; the form is styled (mono field, lime button); a VIN with no cache row shows "No report for … yet." with the "Decode it" link; no console errors, no unstyled element, no overflow at either width. Not verified: a populated report (the cache is still empty), the `?vin=` deep link (the preview's own sign-in hop strips the query), and the theme label semantics the inspector flagged — `LIGHT` in dark mode names what you would switch *to*, which is deliberate but can be misread.
+- **Commits**: committed and pushed; Pages build checked.
+- **Open**: The cache has still never stored or served a row — that needs one signed-in decode, which is the Boss's step. Then the remaining polish: the account export replaces the tab instead of downloading; the bulk-upload file picker is off-palette and clipped; light-theme card borders are faint; the 320 px and keyboard checks.
