@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sign in — CarDNA</title>
 <meta name="description" content="Sign in to CarDNA. Email and password only.">
-<link rel="stylesheet" href="assets/style.css?v=p38">
+<link rel="stylesheet" href="assets/style.css?v=p39">
 <link rel="stylesheet" href="assets/motion.css">
 </head>
 <body>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p38"></script>
+<script src="assets/site-shell.js?v=p39"></script>
 
 <main>
   <section class="section section--tight">
@@ -41,6 +41,17 @@
           </p>
         </form>
 
+        <form id="recover-form" novalidate hidden>
+          <div class="vault-key" style="margin-top:0">
+            <input type="email" id="recover-email" autocomplete="email" placeholder="you@example.com"
+                   aria-label="Email address for the reset link">
+          </div>
+          <div class="vault-actions">
+            <button class="btn" type="submit">Email me a reset link</button>
+            <button class="btn btn--ghost" type="button" id="recover-back">Back to sign in</button>
+          </div>
+        </form>
+
         <p class="vault-status" id="signin-status" aria-live="polite"></p>
       </div>
 
@@ -61,9 +72,9 @@
 <div data-site-footer data-site-root=""></div>
 
 <script src="assets/supabase-config.js"></script>
-<script src="assets/auth.js?v=p38"></script>
-<script src="assets/app.js?v=p38"></script>
-<script src="assets/preview.js?v=p38"></script>
+<script src="assets/auth.js?v=p39"></script>
+<script src="assets/app.js?v=p39"></script>
+<script src="assets/preview.js?v=p39"></script>
 <script src="assets/motion.js"></script>
 <script>
   (function () {
@@ -134,15 +145,43 @@
       button.addEventListener("click", function () { submit(button.getAttribute("data-mode")); });
     });
 
+    /* One panel, one question at a time: signing in asks for an email and a password, a reset
+       asks for the email only. Both forms are never on screen together. */
+    var recoverForm = document.getElementById("recover-form");
+    var recoverEmail = document.getElementById("recover-email");
+    var recoverBack = document.getElementById("recover-back");
+
+    function showRecover() {
+      var typed = (emailEl.value || "").trim();
+      form.hidden = true;
+      recoverForm.hidden = false;
+      if (typed) { recoverEmail.value = typed; }
+      status("The address on your account — we email a link that opens the reset page.", "");
+      /* Focus without scrolling the page, so the panel does not jump the heading off screen. */
+      try { recoverEmail.focus({ preventScroll: true }); } catch (err) { recoverEmail.focus(); }
+    }
+
+    function showSignin() {
+      recoverForm.hidden = true;
+      form.hidden = false;
+      status("", "");
+      emailEl.focus();
+    }
+
     var forgot = document.getElementById("forgot-password");
-    if (forgot) {
-      forgot.addEventListener("click", async function () {
-        var email = (emailEl.value || "").trim();
+    if (forgot) { forgot.addEventListener("click", showRecover); }
+    if (recoverBack) { recoverBack.addEventListener("click", showSignin); }
+
+    if (recoverForm) {
+      recoverForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        var email = (recoverEmail.value || "").trim();
         if (!email || email.indexOf("@") === -1) {
-          status("Type your email address above, then tap Forgot password.", "error");
-          emailEl.focus();
+          status("Enter the email address on the account.", "error");
+          recoverEmail.focus();
           return;
         }
+
         status("Sending the reset link…", "");
         try {
           await window.CarDNAAuth.recoverPassword(email);

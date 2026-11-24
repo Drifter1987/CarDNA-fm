@@ -127,12 +127,11 @@ wiring for each:
 | Bulk VIN upload | `garage.html` | the batch path into the garage |
 | API key | `garage.html` | `api_keys` and the gateway |
 | Team seats | `garage.html` | the `seats` table and the invitation email |
-| Data export and account deletion | `garage.html` | a server-side function with a token |
 | Email verification and recovery | `signin.html`, `reset.html` | a product-domain sender (`D-4`) |
 
-**Waiting on the database, not on code:** the server-side decode count (`F-26`), the VIN cache (`F-27`) and
-self-serve account deletion (`F-25`) have their SQL written as
-`docs/supabase-decode-log-cache-delete.sql`; the browser wiring follows once that file has been run.
+**Waiting on the database wiring, not on a decision:** the server-side decode count (`F-26`) and the VIN
+cache (`F-27`) have their SQL in `docs/supabase-decode-log-cache-delete.sql` and that file has been run;
+their browser wiring is the next step. Account deletion and the data export are wired to the same file.
 The licensed parts layer and the European vendor proxy still need contracts.
 
 ## Documents

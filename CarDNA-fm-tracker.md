@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 15 November 2026 — Chat 1, Turn 36
+> Last updated: 15 November 2026 — Chat 1, Turn 37
 
 ## How this file works
 
@@ -109,11 +109,14 @@ GitHub Pages serves it.
   it is the owner's to delete.
 - The recall list now carries a small "REMEDY" label and a "filed <date>" line per campaign, confirmed in
   the browser, so a summary and its remedy no longer read as one block.
-- **F-16 is complete** (Turn 36, `?v=p38`): every export — Markdown, CSV, XLSX and print-to-PDF — carries
-  a Recalls section, looked up per VIN during `prepare()`. Confirmed in the browser on a four-vehicle
-  export: the Honda block ends with a 24-row recalls table, the Audis with "No campaigns on record."
-  A failed lookup now says "Not checked — <reason>" instead of pretending there are none, and the files
-  are served as UTF-8 (the browser was rendering em dashes as mojibake).
+- **One question per panel** (Turn 37, `?v=p39`): pressing "Forgot password?" on `signin.html` used to leave the
+  password field on screen beside the email field. It is now two states of one panel — sign-in (email and
+  password) and recovery (email only, "Email me a reset link" and "Back to sign in") — confirmed at
+  1280×800 and 390×844. Stale `?v=p38` assets would show the old behaviour; reload if it reappears.
+- **Account data export and deletion are wired** (Turn 37): "Download everything" now assembles a real JSON
+  file — profile, saved vehicles, vault cipher text — in the browser. "Delete my account" calls
+  `cardna_delete_my_account(confirm)`, which refuses the owner in the database. **Neither has been tested**:
+  the browser was signed out for that pass, and deleting an account is not something to try on the owner's.
 
 **Known broken or partial:**
 
@@ -131,7 +134,7 @@ GitHub Pages serves it.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 36 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 37 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -702,6 +705,33 @@ surviving record, not a transcript.
 - **Commits**: committed and pushed; Pages build checked.
 - **Open**: Run the new SQL, then wire the client to it. Two Supabase actions for the owner: delete the
   password snippet and rotate that password. Four smaller bugs found by the export test are recorded above.
+
+### Turn 37 — Sign-in's two states; account export and deletion wired to the SQL the Boss ran
+
+- **Input**: "Sql ran successfully, move to the next steps. One note: I reset my password and deleted the
+  saved SQL snippet. But when I click forget my password I noticed that both email input and password input
+  fields are visible. We must see email input only."
+- **Output**: Found the cause: "Forgot password?" lived *inside* the sign-in form, so it sent the recovery
+  email but never swapped the password fields away. `signin.html` is now two states of one panel — a
+  sign-in form (email, password, Sign in, Create account) and a hidden recovery form (email only, "Email me
+  a reset link", "Back to sign in") — with the typed address carried across and focus moved without
+  scrolling the page (the first fix scrolled the heading off screen). Then wired F-25's client half in
+  `assets/account.js`: **"Download everything"** builds a real JSON export in the browser (profile,
+  saved vehicles, vault cipher text, with a note that Supabase activity rows are readable on request), and
+  **"Delete my account"** calls `cardna_delete_my_account(confirm)` by RPC, surfaces the database's own
+  refusal (including the owner guard) and leaves the app for the sign-in page when it succeeds. Both are
+  live: no badge, no "not connected" copy. `?v=p39`.
+- **Files**: `signin.html`, `assets/account.js`, all 13 pages (version), this tracker.
+- **Verified**: Private preview, browser inspector, read-only. Sign-in at 1280×800 and 390×844: two fields
+  before, and after "Forgot password?" **one email field and no password field**, with "Email me a reset
+  link" and "Back to sign in"; "Back to sign in" restores both fields and clears the status line. No
+  console errors, no layout damage. **Not verified**: the account export and the deletion — the inspector
+  was signed out, `garage.html` bounced it to sign-in, so neither ran; and the SQL's own behaviour
+  (decode count, cache, deletion, the owner guard) has not been exercised.
+- **Commits**: committed and pushed; Pages build checked.
+- **Open**: The Boss runs a deletion test as a normal user if they want that path proven (the owner can never
+  be deleted — that refusal is in the database). Still unwired: the decode count (F-26) and the cache (F-27)
+  now that their SQL exists, then the shareable report (F-23). Four smaller bugs from Turn 36 remain.
 
 ## Approaches tried and rejected
 

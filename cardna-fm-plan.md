@@ -85,7 +85,7 @@ the wording is the same on every surface.
 | F-22 | Waitlist / pilot capture | `pricing.html`, `about.html` | live | — |
 | F-23 | Public shareable VIN report | `decode.html` → `/r/<vin>` | frontend-only | `shareReport` |
 | F-24 | Owner analytics dashboard | `admin.html` | live | — |
-| F-25 | Self-serve data export and account deletion | `garage.html` | frontend-only (SQL ready: `docs/supabase-decode-log-cache-delete.sql`) | `gdpr` |
+| F-25 | Self-serve data export and account deletion | `garage.html` | live (limited: deletion untested, owner refused in SQL) | — |
 | F-26 | Server-side entitlement check (decode count) | invisible | SQL ready (`docs/supabase-decode-log-cache-delete.sql`); client wiring next | — |
 | F-27 | Server-side VIN cache (`decode_cache`) | invisible | SQL ready (`docs/supabase-decode-log-cache-delete.sql`); client wiring next | — |
 
