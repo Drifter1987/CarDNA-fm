@@ -1173,3 +1173,42 @@ Refreshed in Turn 43. Statuses reflect the working tree and the latest browser c
 
 
 | 26 Nov 2026 | Turn 46: the owner's read-only "log in as" view (`F-29`) — `docs/supabase-owner-act-as.sql` (RPC `cardna_act_as`, owner **and** drifter_87@live.com only, refuses self/missing/another owner, audited as `act_as` / `act_as_end`) and `assets/actas.js` (session-scoped view, profile swap for the chip and limits, sticky banner with a way back); the "Log in as" button in `assets/admin.js` for that address alone; writes refused while viewing (garage, cloud, vault, recents); `.actas-bar` style; `actas.js` on five pages; `?v=p50` everywhere; `F-29`, README and `legal.html` copy. Browser found the shared browser signed in as the free test account (its session expired, 3 refused saves) and **`cardna_cloud` live** — the Boss ran `supabase-user-cloud.sql`, so `F-28` is real; `admin.html` showed `USER VIEW` with no "Log in as" button, which is the owner-only rule from the other side. The button itself and the act-as view are unverified (owner not signed in; act-as SQL not run). Committed and pushed. |
+
+
+
+#### Turn 46 — verified after the Boss signed in and ran the SQL
+
+Signed in as the owner (`drifter_87@live.com`), with `docs/supabase-owner-act-as.sql` run. Five of my
+own bugs stood between "wired" and "works", all found in the browser and fixed:
+
+1. **The whole module died on a rename.** I renamed the refusal builder to `refused()` but left
+   `refused: refuseWrite` in the exported object, so `actas.js` threw `ReferenceError` at load —
+   `window.CarDNAActAs` was never set, and therefore no button, no banner and no write guard anywhere.
+2. **The owner check read a field `effective()` does not have.** `effective()` returns `{role, plan,
+   preview}`, so `effective().email` was always `""` and `ownerOnly()` was always false — the button
+   vanished for the owner too.
+3. **The banner was appended at the end of `body`**, so `position: sticky; top: 0` never pinned; the only
+   sign of the view was a chip that looked like the account. Now inserted as the first child.
+4. **"Garage cleared." claimed a success it had refused**, because `garage.js`'s `clear()` returned `0`
+   silently and the caller printed the success line regardless. The read-only refusal now shows instead.
+5. **The admin notice kept its migration body and SQL snippet**, because the notice is one block with no
+   `<p>`/`<pre>` to rewrite. Given an `id` (`#admin-denied-copy`) and replaced whole.
+
+**Verified, in the browser as the owner, desktop 1280×800, no console errors:**
+- The console's table shows **"Log in as" on the two non-owner rows only**, never on the owner's own.
+- "Log in as" on `sefipe7182@jcaton.com` lands on `garage.html` with the **banner at the very top**
+  (`VIEWING AS SEFIPE7182@JCATON.COM · Read-only, as the owner. Nothing you do here changes their
+  account.` + `Return to the owner console`), the chip reads `ROLE · USER · FREE`, the Admin nav item is
+  gone, and the garage shows **`1 vehicle · Free plan · 1 of 1 saved vehicle`** (the server row; the
+  4 locally held included 3 refused saves).
+- "Clear garage" in that view answers the exact refusal — *"You are looking at sefipe7182@jcaton.com as
+  the owner. Their data is read-only here; leave the view to change your own."* — and the car stays listed.
+- `admin.html` inside the view reads *"You are in sefipe7182@jcaton.com's view. Their data is read-only
+  here, and the console belongs to the owner. Use Return to the owner console in the bar at the top to come
+  back."* with **no SQL snippet**.
+- "Return to the owner console" restores `admin.html`, the `ROLE · OWNER` chip, "3 of 3 accounts" and both
+  buttons; the log records `ACT_AS` and `ACT_AS_END`.
+- **Owner-only:** the chip's Admin preview shows **no "Log in as" on any row**, and switching back to
+  Owner brings both back.
+- Still true, and now more visible: the free account's session expired, which is why its server rows are 1
+  while this browser holds 4.

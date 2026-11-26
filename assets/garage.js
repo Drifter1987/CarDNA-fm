@@ -773,6 +773,11 @@
     var clearBtn = document.getElementById("garage-clear");
     if (clearBtn) {
       clearBtn.addEventListener("click", function () {
+        /* A read-only view of another account must say so, not claim a success it refused. */
+        if (window.CarDNAActAs && window.CarDNAActAs.active()) {
+          status(window.CarDNAActAs.refused().error, "error");
+          return;
+        }
         if (window.confirm("Remove every saved vehicle from this browser and your account?")) {
           window.CarDNAGarage.clear();
           selected = Object.create(null);

@@ -29,12 +29,20 @@
     } catch (err) { /* ignore */ }
   }
 
-  function owner() {
+  /* The owner-only rule follows the view the console is showing, not the raw session: an owner
+     previewing Admin must not keep the button. The role comes from the effective view, the address
+     from the signed-in profile — `effective()` carries no email of its own. */
+  function ownerOnly() {
     var auth = window.CarDNAAuth;
-    var me = auth && auth.state && auth.state.profile;
+    if (!auth) { return false; }
+
+    var me = auth.state && auth.state.profile;
     if (!me) { return false; }
+
+    var role = auth.effectiveRole ? String(auth.effectiveRole() || "").toLowerCase()
+      : String(me.role || "").toLowerCase();
     var mail = String(me.email || "").toLowerCase();
-    var role = String(me.role || "").toLowerCase();
+
     return role === "owner" && mail === OWNER;
   }
 
@@ -57,17 +65,36 @@
   }
 
   function start(id) {
-    if (!active() && !owner()) {
+    if (active()) {
+      return Promise.resolve({ ok: false, error: "You are already looking at another account's view." });
+    }
+    if (!ownerOnly()) {
       return Promise.resolve({ ok: false, error: "Only the owner may open another account's view." });
     }
 
     return rpc("cardna_act_as", { target: id, ending: false }).then(function (result) {
-      if (!result || !result.ok) {
+      if (!result || !result.ok || !result.profile) {
         return { ok: false, error: (result && result.error) || "That view could not be opened." };
       }
-      state.target = result;
+
+      /* The function answers flat — profile, vehicles, recent, vault, decodes — so the view is
+         built here. Reading `result.id` was the bug that made the button leave the page without
+         ever applying the view. */
+      state.target = {
+        id: result.profile.id,
+        profile: result.profile,
+        vehicles: Array.isArray(result.vehicles) ? result.vehicles : [],
+        recent: result.recent || null,
+        vault: result.vault || null,
+        decodes: Number(result.decodes) || 0
+      };
       state.at = new Date().toISOString();
       writeState(state);
+
+      /* A role preview in the badge would otherwise win over the account being viewed. */
+      var auth = window.CarDNAAuth;
+      if (auth && auth.clearViewAs) { auth.clearViewAs(); }
+
       window.location.href = "garage.html";
       return { ok: true };
     }).catch(function (err) {
@@ -119,7 +146,9 @@
       '<button type="button" class="btn btn--sm btn--ghost">Return to the owner console</button>';
 
     bar.querySelector("button").addEventListener("click", function () { stop(); });
-    document.body.appendChild(bar);
+    /* First in the body, so `position: sticky; top: 0` can pin it: appended at the end it would
+       never stick, and the only sign of the view would be a chip that looks like the account. */
+    document.body.insertBefore(bar, document.body.firstChild);
     poster.node = bar;
   }
 
@@ -153,16 +182,18 @@
     if (typeof auth.applyNavGate === "function") { auth.applyNavGate(); }
   }
 
-  function refuseWrite() {
+  function refused() {
+    var who = state.target && state.target.profile ? (state.target.profile.email || "another account")
+      : "another account";
     return {
       ok: false,
-      error: "You are looking at " + (state.target.profile.email || "another account") +
-        " as the owner. Their data is read-only here; leave the view to change your own."
+      error: "You are looking at " + who + " as the owner. Their data is read-only here; " +
+        "leave the view to change your own."
     };
   }
 
   window.CarDNAActAs = {
-    ownerOnly: function () { return owner(); },
+    ownerOnly: ownerOnly,
     ownerEmail: OWNER,
     active: active,
     profile: function () { return state.target ? state.target.profile : null; },
@@ -170,7 +201,7 @@
     recent: function () { return state.target ? state.target.recent : null; },
     vault: function () { return state.target ? state.target.vault : null; },
     decodes: function () { return state.target ? (state.target.decodes || 0) : 0; },
-    refused: refuseWrite,
+    refused: refused,
     start: start,
     stop: stop
   };
@@ -184,11 +215,10 @@
 
   auth.ready(function () {
     /* Signed out, or no longer the owner: the view ends rather than lingering. */
-    if (!owner()) {
-      state.target = null;
-      writeState(null);
+    if (!ownerOnly() && !active()) {
       return;
     }
+    if (!active()) { return; }
     applyProfile();
     renderBanner();
   });

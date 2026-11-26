@@ -640,7 +640,7 @@
          anyone else (docs/supabase-owner-act-as.sql). It opens that account's view read-only, and
          every use is written to the activity log. */
       if (window.CarDNAActAs && window.CarDNAActAs.ownerOnly() &&
-          !window.CarDNAActAs.active() && row.id && !isSelf(row)) {
+          !window.CarDNAActAs.active() && row.id && !row.demo && !isSelf(row)) {
         var enter = document.createElement("button");
         enter.type = "button";
         enter.className = "btn btn--ghost btn--sm";
@@ -845,6 +845,19 @@
         introEl.textContent = "You are looking at CarDNA as an ordinary account sees it: no account " +
           "list, no role control and no plan grants. Pick Owner or Admin in the role badge at the top " +
           "right to come back to the console.";
+      }    }
+
+    /* An owner looking at another account must read as a read-only view, not as "you are not an
+       owner" with a migration snippet — the console belongs to the owner either way. The notice is
+       one block of markup with no inner paragraphs, so it is replaced whole. */
+    if (window.CarDNAActAs && window.CarDNAActAs.active()) {
+      var viewing = window.CarDNAActAs.profile();
+      var who = (viewing && viewing.email) || "another account";
+      var copy = document.getElementById("admin-denied-copy");
+      if (copy) {
+        copy.innerHTML = "<strong>You are in " + escapeHtml(who) + "\u2019s view.</strong> " +
+          "Their data is read-only here, and the console belongs to the owner. Use " +
+          "<em>Return to the owner console</em> in the bar at the top of the page to come back.";
       }
     }
 
