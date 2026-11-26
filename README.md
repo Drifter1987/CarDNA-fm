@@ -31,7 +31,7 @@ npx serve .
 | `about.html` | GMOttomotive, principles, data sources, roadmap, contact |
 | `garage.html` | Saved vehicles, select all or some, and export the full record as Excel, PDF, Markdown or CSV |
 | `signin.html` | Email and password sign-in; the app is behind it |
-| `admin.html` | Staff console: owner and admin views, role control, plan grants, blocking, activity |
+| `admin.html` | Staff console in four tabs: Overview (stats, plan mix, 7-day KPIs), Accounts (search and the table), Activity (a filterable table) and Charts (period/kind/account filters over the daily chart and the by-kind and by-account lists) |
 | `vault.html` | Private vault: a VIN list encrypted with a pass phrase in this browser, exportable as an encrypted file |
 | `legal.html` | Privacy, terms, data licences and independence notice |
 
@@ -47,7 +47,7 @@ npx serve .
 | `assets/waitlist.js` · `assets/bulk.js` · `assets/api.js` · `assets/team.js` · `assets/account.js` · `assets/vehicle.js` · `assets/report.js` | The waitlist, bulk VIN upload (real CSV parsing), API key, team seats, data export/deletion, recalls and shareable-report modules behind the garage, pricing and decoder panels |
 | `assets/supabase-config.js` | Project URL and the publishable key. Only those two — never a secret key or a database password |
 | `assets/auth.js` | Accounts over the Supabase REST API: sign-in, sign-up, session refresh, profile (plan and role), the sign-in gate, the account chip, and activity logging |
-| `assets/admin.js` | Staff console: owner sees every account and can change roles; admins manage users; both grant plans, block accounts and read recent activity |
+| `assets/admin.js` | Staff console: four tabs with the account table, a filterable activity table and the charts (period, kind and account filters), role and plan control, blocking, and the owner-only read-only "log in as" button — two steps in the page, never a native dialog |
 | `assets/export.js` | Full-record export: Markdown, CSV, a real .xlsx (merged sheet + one sheet per model, written without a library) and print-to-PDF |
 | `assets/motion.css` | Motion layer: entry reveals, panel and tab transitions, pointer spotlight, button sheen, the animated parts diagram and the VIN scan. Inert unless `motion.js` runs |
 | `assets/motion.js` | Scroll reveals with stagger, counting stats, tab transitions, a pointer-tracked card glow and the 17-slot VIN scan that runs while a decode is in flight. Returns immediately when the visitor prefers reduced motion |

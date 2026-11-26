@@ -1212,3 +1212,26 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
   Owner brings both back.
 - Still true, and now more visible: the free account's session expired, which is why its server rows are 1
   while this browser holds 4.
+
+
+
+### Turn 47 — Why "log in as" showed 4 cars; buttons tightened; the console rebuilt into tabs with filterable charts (`?v=p52`)
+
+- **Input**: (1) "why does the free user have 4 saved cars in their garage? This is what I saw when I clicked login as"; (2) "improve the implemented buttons and their logic"; (3) "organize the console into clean tabs, sections and tables. Add charts with dynamic filters that changes the rendered stats on the charts."
+- **1 — the four cars were mine, not theirs.** The account's rows in `public.vehicles` are **one** (`cardna_act_as` counts them, and the act-as garage says `1 vehicle · Free plan · 1 of 1 saved vehicle`). The four you saw came from the Turn 46 bug in which the button left the page without applying the view: you were looking at your own local garage, which holds four — the free account's own browser copy holds 1 real row plus 3 refused saves, which is where the "4 of 1 saved vehicle" line came from. No extra cars were ever written to that account. The banner now states the server count, so the two can never be confused again: *"1 saved vehicle on the server, free plan — this browser may hold a local copy of another."*
+- **2 — buttons and their logic.**
+  - **"Log in as" is two steps in the page, not a native dialog** (which this browser auto-accepts): the first press becomes **Confirm view** with the sentence *"Open … 's view, read-only? Press Confirm view. Nothing of theirs is changed."*, the second press shows **Opening…** and opens it. Six seconds without a second press reverts the label **and clears the prompt** to *"Nothing was opened."* — previously the prompt outlived its own arming.
+  - **Clear garage** in a read-only view refuses before any confirm, with the named sentence, and the car stays listed.
+- **3 — the console, reorganised.** `admin.html` is now four tabs (a roving-tabindex `tabbar`, hash-routed, arrow keys): **Overview** (stats, plan mix, the four 7-day KPI cells, most active, blocked, and links to the deeper tabs), **Accounts** (search and the account table), **Activity** (a real table: When · Kind · Account · Detail, with period and kind filters), **Charts** (period, kind and account filters over an SVG bar chart, plus "By kind" and "By account" bar lists). The Charts tab is the owner's alone.
+- **Two defects found in the first browser pass and fixed:**
+  1. **The Activity and Charts tabs disagreed** about the same window (500 vs 351). They used different windows: a rolling `now − N days` and a day-bucket window starting `N−1` days back. One `windowStart(days)` now feeds both, and both said **227** for `last 7 days` in the second pass.
+  2. **The Activity table silently capped at 200 rows under a "500 of 500 events" line.** The line now says *"500 of 500 events · last 14 days · showing the newest 200"*.
+- **Verified, in the browser as the owner, desktop 1280×800, no script errors on any tab:**
+  - Overview: 3 accounts / 2 staff / 0 paid / 0 blocked / 3 active / 0 new; `Plan mix. Free 3`; 10 decodes · 0 exports · 0 sign-ins · 2 accounts active · 7 days.
+  - Activity: `500 of 500 events · last 14 days · showing the newest 200`, 200 rows; kind `decode` → `25 of 500 events · decode · last 14 days`; period `last 7 days` → `227 of 500 events …`.
+  - Charts: default 14 days → `500 events in the last 14 days`, `By kind` page_view 316 / decode 24 / act_as 7 / act_as_end 4; period 7 → `227 events …`, `0 to 126 a day`; kind page_view → `198 events … page_view`, one By-kind row; account sefipe7182 → `… · sefipe7182@jcaton.com`, By account one row.
+  - The two-step button: first press → `Confirm view` plus the sentence, no navigation; ~7 s later → `Log in as` and *"Nothing was opened."*
+  - The act-as banner states the server count (1) and the plan, and "Return to the owner console" restores the owner session.
+- **Not verified:** the arrow-key move between tabs (this browser exposes no key send — the handler is code, not an observation); the inspector's one `JavaScript exception` when clicking the empty plot area came back as a tool-side error at one coordinate and not another, so it is unrecorded as a page fault; the console's own tab hash drops on a direct open, because the preview sign-in hop strips the fragment (the footer links still reach each tab).
+- **Files**: `admin.html` (four tabs, tables, filters, chart hosts), `assets/admin.js` (chart filter + render, tabs, the Activity table, one window for both, the two-step button), `assets/actas.js` (banner counts, `escapeHtml`), `assets/style.css` (`.apanel`, `.filters`, `.chart-*`, `.bar-*`, `.is-armed`).
+- **Commits**: committed and pushed this turn (`?v=p52` on `admin.html`; the other pages stay at `p50`, unchanged).

@@ -166,44 +166,78 @@
     });
   }
 
+  /* The Activity tab: a table, not a list, with its own period and kind filters. */
+  var activityFilter = { days: 14, kind: "" };
+
+  /* One window for both tabs: the last N calendar days, today included, so the Activity table and
+     the charts can never disagree about the same period again. */
+  function windowStart(days) {
+    var span = Math.max(1, Number(days) || 14);
+    var start = new Date();
+    start.setUTCHours(0, 0, 0, 0);
+    return start.getTime() - (span - 1) * 86400000;
+  }
+
+  function activityEvents() {
+    var days = Number(activityFilter.days);
+    var since = days > 0 ? windowStart(days) : 0;
+
+    return activity.filter(function (event) {
+      if (!event.created_at) { return false; }
+      if (since) {
+        var at = new Date(event.created_at).getTime();
+        if (isNaN(at) || at < since) { return false; }
+      }
+      if (activityFilter.kind && event.kind !== activityFilter.kind) { return false; }
+      return true;
+    });
+  }
+
   function renderActivity() {
     if (!activityEl) { return; }
+
     activityEl.innerHTML = "";
 
-    if (!activity.length) {
-      var empty = document.createElement("li");
-      empty.textContent = "No activity recorded yet.";
-      activityEl.appendChild(empty);
+    var list = activityEvents();
+    var shown = list.slice(0, 200);
+    var meta = document.getElementById("activity-meta");
+    if (meta) {
+      meta.textContent = list.length + " of " + activity.length + " events" +
+        (activityFilter.kind ? " · " + activityFilter.kind : "") +
+        (Number(activityFilter.days) > 0 ? " · last " + activityFilter.days + " days" : " · all recorded") +
+        (shown.length < list.length ? " · showing the newest 200" : "");
+    }
+
+    if (!shown.length) {
+      activityEl.innerHTML = '<tr><td colspan="4">No activity matches these filters.</td></tr>';
       return;
     }
 
     var byId = {};
     rows.forEach(function (row) { byId[row.id] = label(row); });
 
-    activity.slice(0, 40).forEach(function (event) {
-      var li = document.createElement("li");
+    shown.forEach(function (event) {
+      var tr = document.createElement("tr");
 
-      var kind = document.createElement("span");
-      kind.className = "act-kind";
-      kind.textContent = event.kind || "event";
-      li.appendChild(kind);
-
-      var who = document.createElement("span");
-      who.className = "act-who";
-      who.textContent = byId[event.user_id] || (event.user_id || "").slice(0, 8);
-      li.appendChild(who);
-
-      var detail = document.createElement("span");
-      detail.className = "act-when";
-      detail.textContent = eventDetail(event);
-      li.appendChild(detail);
-
-      var when = document.createElement("span");
-      when.className = "act-when";
+      var when = document.createElement("td");
+      when.className = "mono-dim";
       when.textContent = stamp(event.created_at);
-      li.appendChild(when);
+      tr.appendChild(when);
 
-      activityEl.appendChild(li);
+      var kind = document.createElement("td");
+      kind.textContent = event.kind || "event";
+      tr.appendChild(kind);
+
+      var who = document.createElement("td");
+      who.textContent = byId[event.user_id] || (event.user_id || "").slice(0, 8);
+      tr.appendChild(who);
+
+      var detail = document.createElement("td");
+      detail.className = "mono-dim";
+      detail.textContent = eventDetail(event) || "—";
+      tr.appendChild(detail);
+
+      activityEl.appendChild(tr);
     });
   }
 
@@ -221,6 +255,7 @@
     }
     renderActivity();
     renderAnalytics();
+    renderCharts();
   }
 
   /* ------------------------------------------------------------------ analytics */
@@ -285,42 +320,7 @@
     setText("kpi-signins", String(countKind("sign_in")));
     setText("kpi-people", String(Object.keys(people).length));
 
-    /* fourteen day bars */
-    var spark = document.getElementById("spark");
-    if (spark) {
-      spark.innerHTML = "";
-
-      var labels = [];
-      var counts = [];
-      for (var i = 13; i >= 0; i -= 1) {
-        labels.push(new Date(now - i * 86400000).toISOString().slice(0, 10));
-        counts.push(0);
-      }
-
-      var index = {};
-      labels.forEach(function (key, at) { index[key] = at; });
-
-      activity.forEach(function (event) {
-        if (!event.created_at) { return; }
-        var key = String(event.created_at).slice(0, 10);
-        if (index[key] !== undefined) { counts[index[key]] += 1; }
-      });
-
-      var max = 1;
-      counts.forEach(function (n) { if (n > max) { max = n; } });
-
-      var total = 0;
-      counts.forEach(function (n, at) {
-        total += n;
-        var bar = document.createElement("div");
-        bar.className = "spark-bar" + (at === counts.length - 1 ? " is-today" : "");
-        bar.style.height = Math.max(3, Math.round((n / max) * 100)) + "%";
-        bar.title = labels[at] + " · " + n + (n === 1 ? " event" : " events");
-        spark.appendChild(bar);
-      });
-
-      setText("spark-caption", total + " events in the last 14 days · today is the bright bar");
-    }
+    /* The daily bars live on the Charts tab now, where the filters change what is drawn. */
 
     /* most active accounts */
     var topEl = document.getElementById("top-accounts");
@@ -369,6 +369,228 @@
         });
       }
     }
+  }
+
+  /* ------------------------------------------------------------------ charts
+     Three filters — period, kind, account — decide what every chart draws, so the rendered
+     numbers are the ones the filters ask for rather than a fixed fortnight. */
+
+  var chartFilter = { days: 14, kind: "", account: "" };
+
+  function fillAccountFilter() {
+    var select = document.getElementById("f-chart-account");
+    if (!select || select.getAttribute("data-filled") === "yes") { return; }
+    select.setAttribute("data-filled", "yes");
+
+    rows.forEach(function (row) {
+      var option = document.createElement("option");
+      option.value = row.id;
+      option.textContent = label(row);
+      select.appendChild(option);
+    });
+  }
+
+  function chartEvents() {
+    var days = Number(chartFilter.days) || 14;
+    var since = windowStart(days);
+
+    return activity.filter(function (event) {
+      if (!event.created_at) { return false; }
+      var at = new Date(event.created_at).getTime();
+      if (isNaN(at) || at < since) { return false; }
+      if (chartFilter.kind && event.kind !== chartFilter.kind) { return false; }
+      if (chartFilter.account && event.user_id !== chartFilter.account) { return false; }
+      return true;
+    });
+  }
+
+  function drawDaily(labels, counts) {
+    var host = document.getElementById("chart-daily");
+    if (!host) { return 0; }
+
+    var max = Math.max.apply(null, counts.concat([1]));
+    var total = counts.reduce(function (sum, n) { return sum + n; }, 0);
+    var gap = labels.length > 21 ? 1.2 : 2.4;
+    var width = (100 - gap * (labels.length - 1)) / labels.length;
+
+    var svg = '<svg class="chart-svg" viewBox="0 0 100 48" preserveAspectRatio="none" ' +
+      'role="img" aria-label="Events per day">';
+
+    counts.forEach(function (count, at) {
+      var height = (count / max) * 42;
+      svg += '<rect x="' + (at * (width + gap)).toFixed(2) + '" y="' + (44 - height).toFixed(2) +
+        '" width="' + width.toFixed(2) + '" height="' + height.toFixed(2) + '" rx="0.6"' +
+        ' class="chart-bar' + (at === counts.length - 1 ? " is-today" : "") + '">' +
+        "<title>" + labels[at] + " · " + count + (count === 1 ? " event" : " events") + "</title></rect>";
+    });
+
+    svg += '<line x1="0" y1="44.4" x2="100" y2="44.4" class="chart-axis"/></svg>';
+
+    host.innerHTML = svg +
+      '<div class="chart-legend"><span>' + labels[0] + "</span><span>" +
+        labels[labels.length - 1] + "</span></div>" +
+      '<div class="chart-scale">0 to ' + max + " a day</div>";
+
+    return total;
+  }
+
+  function barList(hostId, pairs) {
+    var host = document.getElementById(hostId);
+    if (!host) { return; }
+
+    host.innerHTML = "";
+    if (!pairs.length) {
+      host.innerHTML = '<li class="mono-dim">No events match these filters.</li>';
+      return;
+    }
+
+    var top = pairs[0].count || 1;
+    pairs.forEach(function (pair) {
+      var li = document.createElement("li");
+      li.className = "bar-row";
+      li.innerHTML = '<span class="bar-name">' + escapeHtml(pair.name) + "</span>" +
+        '<span class="bar-track"><span class="bar-fill" style="width:' +
+        Math.max(2, Math.round((pair.count / top) * 100)) + '%"></span></span>' +
+        '<span class="bar-count">' + pair.count + "</span>";
+      host.appendChild(li);
+    });
+  }
+
+  function renderCharts() {
+    var host = document.getElementById("chart-daily");
+    if (!host) { return; }
+
+    if (actingRole() !== "owner") {
+      host.innerHTML = '<p class="mono-dim">The charts are the owner\u2019s view.</p>';
+      return;
+    }
+
+    fillAccountFilter();
+
+    var days = Number(chartFilter.days) || 14;
+    var labels = [];
+    var counts = [];
+    var index = {};
+
+    for (var i = days - 1; i >= 0; i -= 1) {
+      var key = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      index[key] = labels.length;
+      labels.push(key);
+      counts.push(0);
+    }
+
+    var picked = chartEvents();
+    picked.forEach(function (event) {
+      var key = String(event.created_at).slice(0, 10);
+      if (index[key] !== undefined) { counts[index[key]] += 1; }
+    });
+
+    var total = drawDaily(labels, counts);
+
+    var caption = document.getElementById("spark-caption");
+    if (caption) {
+      var who = chartFilter.account ? rowById(chartFilter.account) : null;
+      caption.textContent = total + " events in the last " + days + " days" +
+        (chartFilter.kind ? " · " + chartFilter.kind : "") +
+        (who ? " · " + label(who) : "") + " · today is the bright bar";
+    }
+
+    var byKind = {};
+    picked.forEach(function (event) {
+      var kind = event.kind || "event";
+      byKind[kind] = (byKind[kind] || 0) + 1;
+    });
+    barList("chart-kinds", Object.keys(byKind).map(function (kind) {
+      return { name: kind, count: byKind[kind] };
+    }).sort(function (a, b) { return b.count - a.count; }).slice(0, 8));
+
+    var names = {};
+    rows.forEach(function (row) { names[row.id] = label(row); });
+
+    var byAccount = {};
+    picked.forEach(function (event) {
+      if (!event.user_id) { return; }
+      byAccount[event.user_id] = (byAccount[event.user_id] || 0) + 1;
+    });
+    barList("chart-accounts", Object.keys(byAccount).map(function (id) {
+      return { name: names[id] || id.slice(0, 8), count: byAccount[id] };
+    }).sort(function (a, b) { return b.count - a.count; }).slice(0, 8));
+  }
+
+  /* ------------------------------------------------------------------ tabs */
+
+  var TABS = ["overview", "accounts", "activity", "charts"];
+
+  function showTab(name, quiet) {
+    if (TABS.indexOf(name) === -1) { name = "overview"; }
+
+    TABS.forEach(function (id) {
+      var button = document.getElementById("atab-" + id);
+      var panel = document.getElementById("apanel-" + id);
+      var on = id === name;
+
+      if (button) {
+        button.setAttribute("aria-selected", on ? "true" : "false");
+        button.tabIndex = on ? 0 : -1;
+      }
+      if (panel) { panel.hidden = !on; }
+    });
+
+    if (!quiet && window.history && window.history.replaceState) {
+      window.history.replaceState({}, "", location.pathname + location.search +
+        (name === "overview" ? "" : "#" + name));
+    }
+
+    if (name === "charts") { renderCharts(); }
+    if (name === "activity") { renderActivity(); }
+  }
+
+  function bindTabs() {
+    var bar = document.getElementById("admin-tabs");
+    if (!bar || bar.getAttribute("data-bound") === "yes") { return; }
+    bar.setAttribute("data-bound", "yes");
+
+    bar.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-admin-tab]") : null;
+      if (!button) { return; }
+      showTab(button.getAttribute("data-admin-tab"));
+    });
+
+    /* Arrow keys move between tabs, as the app's other tab strip already does. */
+    bar.addEventListener("keydown", function (event) {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") { return; }
+      var current = document.activeElement;
+      if (!current || !current.getAttribute("data-admin-tab")) { return; }
+      event.preventDefault();
+
+      var at = TABS.indexOf(current.getAttribute("data-admin-tab"));
+      var next = TABS[(at + (event.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
+      var button = document.getElementById("atab-" + next);
+      if (button) { button.focus(); showTab(next); }
+    });
+
+    document.querySelectorAll("[data-goto]").forEach(function (button) {
+      button.addEventListener("click", function () { showTab(button.getAttribute("data-goto")); });
+    });
+
+    var hash = String(location.hash || "").replace(/^#/, "");
+    showTab(TABS.indexOf(hash) === -1 ? "overview" : hash, true);
+  }
+
+  function bindCharts() {
+    function on(id, handler) {
+      var select = document.getElementById(id);
+      if (!select || select.getAttribute("data-bound") === "yes") { return; }
+      select.setAttribute("data-bound", "yes");
+      select.addEventListener("change", handler);
+    }
+
+    on("f-chart-days", function () { chartFilter.days = Number(document.getElementById("f-chart-days").value) || 14; renderCharts(); });
+    on("f-chart-kind", function () { chartFilter.kind = document.getElementById("f-chart-kind").value; renderCharts(); });
+    on("f-chart-account", function () { chartFilter.account = document.getElementById("f-chart-account").value; renderCharts(); });
+
+    on("f-activity-days", function () { activityFilter.days = Number(document.getElementById("f-activity-days").value); renderActivity(); });
+    on("f-activity-kind", function () { activityFilter.kind = document.getElementById("f-activity-kind").value; renderActivity(); });
   }
 
   /* ------------------------------------------------------------------ one account's activity */
@@ -647,14 +869,38 @@
         enter.style.marginLeft = "6px";
         enter.textContent = "Log in as";
         enter.title = "Open this account's view, read-only — owner only, and recorded";
+        /* Two steps, in the page: no native dialog (which a browser may accept silently), and
+           nothing is opened until the second press says so. */
+        var armed = false;
+        var calm = null;
+
         enter.addEventListener("click", function () {
-          if (!window.confirm("Open " + label(row) + "'s view as the owner? Their data is read-only " +
-            "here, and the use is recorded in the activity log.")) { return; }
+          if (!armed) {
+            armed = true;
+            enter.textContent = "Confirm view";
+            enter.classList.add("is-armed");
+            status("Open " + label(row) + "\u2019s view, read-only? Press Confirm view. " +
+              "Nothing of theirs is changed.", "");
+            calm = window.setTimeout(function () {
+              armed = false;
+              enter.textContent = "Log in as";
+              enter.classList.remove("is-armed");
+              /* The prompt goes with the arming: one that outlives it would ask for a press
+                 that no longer means anything. */
+              status("Nothing was opened.", "");
+            }, 6000);
+            return;
+          }
+
+          window.clearTimeout(calm);
           enter.disabled = true;
+          enter.textContent = "Opening\u2026";
           window.CarDNAActAs.start(row.id).then(function (result) {
             if (result && !result.ok) {
               status(result.error || "That view could not be opened.", "error");
               enter.disabled = false;
+              enter.textContent = "Log in as";
+              enter.classList.remove("is-armed");
             }
           });
         });
@@ -805,6 +1051,11 @@
         if (panel) { panel.hidden = true; }
       });
     }
+
+    bindTabs();
+    bindCharts();
+    renderCharts();
+    renderActivity();
   }
 
   /* ------------------------------------------------------------------ boot */

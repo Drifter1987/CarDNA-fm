@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Staff console — CarDNA</title>
 <meta name="description" content="Staff console for CarDNA accounts, plans and access.">
-<link rel="stylesheet" href="assets/style.css?v=p50">
-<link rel="stylesheet" href="assets/motion.css?v=p50">
+<link rel="stylesheet" href="assets/style.css?v=p52">
+<link rel="stylesheet" href="assets/motion.css?v=p52">
 </head>
 <body data-require-auth>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p50"></script>
+<script src="assets/site-shell.js?v=p52"></script>
 
 <main>
   <section class="page-head">
@@ -49,83 +49,185 @@
       </div>
 
       <div id="admin-app" hidden>
-        <div class="stats" style="margin-bottom:18px">
-          <div class="stat"><b id="stat-total">0</b><span>accounts</span></div>
-          <div class="stat"><b id="stat-staff">0</b><span>staff</span></div>
-          <div class="stat"><b id="stat-paid">0</b><span>paid plans</span></div>
-          <div class="stat"><b id="stat-blocked">0</b><span>blocked</span></div>
-          <div class="stat"><b id="stat-active">0</b><span>active</span></div>
-          <div class="stat"><b id="stat-week">0</b><span>new this week</span></div>
+        <div class="tabbar" role="tablist" aria-label="Console sections" id="admin-tabs">
+          <div class="tabbar-inner">
+            <button type="button" class="tab" role="tab" id="atab-overview"
+                    aria-controls="apanel-overview" aria-selected="true" data-admin-tab="overview">Overview</button>
+            <button type="button" class="tab" role="tab" id="atab-accounts" tabindex="-1"
+                    aria-controls="apanel-accounts" aria-selected="false" data-admin-tab="accounts">Accounts</button>
+            <button type="button" class="tab" role="tab" id="atab-activity" tabindex="-1"
+                    aria-controls="apanel-activity" aria-selected="false" data-admin-tab="activity">Activity</button>
+            <button type="button" class="tab" role="tab" id="atab-charts" tabindex="-1"
+                    aria-controls="apanel-charts" aria-selected="false" data-admin-tab="charts">Charts</button>
+          </div>
         </div>
 
-        <div class="notice" style="margin-bottom:22px">
-          <strong>Plan mix.</strong>
-          <span id="plan-mix" style="font-family:var(--mono);font-size:.85rem"></span>
-        </div>
-
-        <div id="admin-analytics" hidden>
-          <div class="kpi" style="margin-bottom:22px">
-            <div class="kpi-cell"><b id="kpi-decodes">0</b><span>decodes · 7 days</span></div>
-            <div class="kpi-cell"><b id="kpi-exports">0</b><span>exports · 7 days</span></div>
-            <div class="kpi-cell"><b id="kpi-signins">0</b><span>sign-ins · 7 days</span></div>
-            <div class="kpi-cell"><b id="kpi-people">0</b><span>accounts active · 7 days</span></div>
+        <!-- ------------------------------------------------------------ overview -->
+        <section class="apanel" id="apanel-overview" role="tabpanel" aria-labelledby="atab-overview">
+          <div class="stats" style="margin-bottom:18px">
+            <div class="stat"><b id="stat-total">0</b><span>accounts</span></div>
+            <div class="stat"><b id="stat-staff">0</b><span>staff</span></div>
+            <div class="stat"><b id="stat-paid">0</b><span>paid plans</span></div>
+            <div class="stat"><b id="stat-blocked">0</b><span>blocked</span></div>
+            <div class="stat"><b id="stat-active">0</b><span>active</span></div>
+            <div class="stat"><b id="stat-week">0</b><span>new this week</span></div>
           </div>
 
-          <div class="notice" style="margin-bottom:22px">
-            <strong>Activity, last 14 days.</strong>
-            <div class="spark" id="spark"></div>
-            <div class="spark-caption" id="spark-caption"></div>
+          <div class="notice" style="margin-bottom:18px">
+            <strong>Plan mix.</strong>
+            <span id="plan-mix" style="font-family:var(--mono);font-size:.85rem"></span>
           </div>
 
-          <div class="grid-2" style="margin-bottom:22px">
+          <div id="admin-analytics" hidden>
+            <div class="kpi" style="margin-bottom:18px">
+              <div class="kpi-cell"><b id="kpi-decodes">0</b><span>decodes · 7 days</span></div>
+              <div class="kpi-cell"><b id="kpi-exports">0</b><span>exports · 7 days</span></div>
+              <div class="kpi-cell"><b id="kpi-signins">0</b><span>sign-ins · 7 days</span></div>
+              <div class="kpi-cell"><b id="kpi-people">0</b><span>accounts active · 7 days</span></div>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:18px">
+              <div class="notice">
+                <strong>Most active accounts.</strong>
+                <ul class="mini-list" id="top-accounts"><li>Loading…</li></ul>
+              </div>
+              <div class="notice">
+                <strong>Blocked accounts.</strong>
+                <ul class="mini-list" id="blocked-list"><li>None.</li></ul>
+              </div>
+            </div>
+          </div>
+
+          <p class="mono-dim" style="font-size:.85rem">
+            Deeper numbers are on the <button class="link-button" type="button" data-goto="charts">Charts</button>
+            tab, and the per-account history on <button class="link-button" type="button" data-goto="activity">Activity</button>.
+          </p>
+        </section>
+
+        <!-- ------------------------------------------------------------ accounts -->
+        <section class="apanel" id="apanel-accounts" role="tabpanel" aria-labelledby="atab-accounts" hidden>
+          <div class="search-bar">
+            <input class="search-input" id="admin-search" placeholder="Search by email or name…" autocomplete="off">
+          </div>
+
+          <p class="results-meta" id="admin-meta">Loading…</p>
+          <p class="mono-dim compare-scroll-hint" style="margin:-6px 0 10px">On a phone, swipe the table sideways for status and actions.</p>
+
+          <div class="compare-wrap" role="region" aria-label="Accounts table" tabindex="0">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th scope="col">Account</th>
+                  <th scope="col">Role &amp; plan</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Joined</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ------------------------------------------------------------ activity -->
+        <section class="apanel" id="apanel-activity" role="tabpanel" aria-labelledby="atab-activity" hidden>
+          <div class="filters" role="group" aria-label="Activity filters">
+            <label class="filter">
+              <span>Period</span>
+              <select id="f-activity-days">
+                <option value="7">last 7 days</option>
+                <option value="14" selected>last 14 days</option>
+                <option value="30">last 30 days</option>
+                <option value="0">all recorded</option>
+              </select>
+            </label>
+            <label class="filter">
+              <span>Kind</span>
+              <select id="f-activity-kind">
+                <option value="" selected>every kind</option>
+                <option value="decode">decode</option>
+                <option value="export">export</option>
+                <option value="sign_in">sign-in</option>
+                <option value="page_view">page view</option>
+                <option value="act_as">act as</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="notice" id="admin-user-activity" hidden style="margin-bottom:18px">
+            <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+              <strong id="user-activity-title">Activity</strong>
+              <span class="mono-dim" id="user-activity-meta"></span>
+              <button type="button" class="btn btn--ghost btn--sm" id="user-activity-close"
+                      style="margin-left:auto">Close</button>
+            </div>
+            <p class="mono-dim" id="user-activity-facts" style="margin-top:8px"></p>
+            <ul class="activity-list" id="user-activity-list"></ul>
+          </div>
+
+          <p class="results-meta" id="activity-meta"></p>
+          <div class="compare-wrap" role="region" aria-label="Activity table" tabindex="0">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th scope="col">When</th>
+                  <th scope="col">Kind</th>
+                  <th scope="col">Account</th>
+                  <th scope="col">Detail</th>
+                </tr>
+              </thead>
+              <tbody id="admin-activity"><tr><td colspan="4">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ------------------------------------------------------------ charts -->
+        <section class="apanel" id="apanel-charts" role="tabpanel" aria-labelledby="atab-charts" hidden>
+          <div class="filters" role="group" aria-label="Chart filters">
+            <label class="filter">
+              <span>Period</span>
+              <select id="f-chart-days">
+                <option value="7">last 7 days</option>
+                <option value="14" selected>last 14 days</option>
+                <option value="30">last 30 days</option>
+              </select>
+            </label>
+            <label class="filter">
+              <span>Kind</span>
+              <select id="f-chart-kind">
+                <option value="" selected>every kind</option>
+                <option value="decode">decode</option>
+                <option value="export">export</option>
+                <option value="sign_in">sign-in</option>
+                <option value="page_view">page view</option>
+                <option value="act_as">act as</option>
+              </select>
+            </label>
+            <label class="filter">
+              <span>Account</span>
+              <select id="f-chart-account">
+                <option value="" selected>every account</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="notice" style="margin-bottom:18px">
+            <strong id="chart-daily-title">Events per day.</strong>
+            <div class="chart-host" id="chart-daily"></div>
+            <p class="spark-caption" id="spark-caption"></p>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:18px">
             <div class="notice">
-              <strong>Most active accounts.</strong>
-              <ul class="mini-list" id="top-accounts"><li>Loading…</li></ul>
+              <strong>By kind.</strong>
+              <ul class="bar-list" id="chart-kinds"></ul>
             </div>
             <div class="notice">
-              <strong>Blocked accounts.</strong>
-              <ul class="mini-list" id="blocked-list"><li>None.</li></ul>
+              <strong>By account.</strong>
+              <ul class="bar-list" id="chart-accounts"></ul>
             </div>
           </div>
-        </div>
-
-        <div class="notice" style="margin-bottom:22px">
-          <strong>Recent activity.</strong>
-          <ul class="activity-list" id="admin-activity"><li>Loading…</li></ul>
-        </div>
-
-        <div class="notice" id="admin-user-activity" hidden style="margin-bottom:22px">
-          <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
-            <strong id="user-activity-title">Activity</strong>
-            <span class="mono-dim" id="user-activity-meta"></span>
-            <button type="button" class="btn btn--ghost btn--sm" id="user-activity-close"
-                    style="margin-left:auto">Close</button>
-          </div>
-          <p class="mono-dim" id="user-activity-facts" style="margin-top:8px"></p>
-          <ul class="activity-list" id="user-activity-list"></ul>
-        </div>
-
-        <div class="search-bar">
-          <input class="search-input" id="admin-search" placeholder="Search by email or name…" autocomplete="off">
-        </div>
-
-        <p class="results-meta" id="admin-meta">Loading…</p>
-        <p class="mono-dim compare-scroll-hint" style="margin:-6px 0 10px">On a phone, swipe the table sideways for status and actions.</p>
-
-        <div class="compare-wrap" role="region" aria-label="Accounts table" tabindex="0">
-          <table class="compare">
-            <thead>
-              <tr>
-                <th scope="col">Account</th>
-                <th scope="col">Role &amp; plan</th>
-                <th scope="col">Status</th>
-                <th scope="col">Joined</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="admin-rows"></tbody>
-          </table>
-        </div>
+        </section>
 
         <p class="vault-status" id="admin-status" aria-live="polite"></p>
       </div>
@@ -135,12 +237,12 @@
 
 <div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p50"></script>
-<script src="assets/auth.js?v=p50"></script>
-<script src="assets/app.js?v=p50"></script>
-<script src="assets/actas.js?v=p50"></script>
-<script src="assets/preview.js?v=p50"></script>
-<script src="assets/motion.js?v=p50"></script>
-<script src="assets/admin.js?v=p50"></script>
+<script src="assets/supabase-config.js?v=p52"></script>
+<script src="assets/auth.js?v=p52"></script>
+<script src="assets/app.js?v=p52"></script>
+<script src="assets/actas.js?v=p52"></script>
+<script src="assets/preview.js?v=p52"></script>
+<script src="assets/motion.js?v=p52"></script>
+<script src="assets/admin.js?v=p52"></script>
 </body>
 </html>

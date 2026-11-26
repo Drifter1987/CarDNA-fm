@@ -48,6 +48,12 @@
 
   function active() { return Boolean(state.target && state.target.id); }
 
+  function escapeHtml(value) {
+    return String(value == null ? "" : value).replace(/[&<>"]/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[ch];
+    });
+  }
+
   function vehicles() {
     return state.target && Array.isArray(state.target.vehicles) ? state.target.vehicles : [];
   }
@@ -138,11 +144,16 @@
     poster.remove();
 
     var mail = state.target.profile.email || "that account";
+    var cars = Array.isArray(state.target.vehicles) ? state.target.vehicles.length : 0;
+    var plan = String(state.target.profile.plan || "free");
+
     var bar = document.createElement("div");
     bar.className = "actas-bar";
     bar.setAttribute("role", "status");
-    bar.innerHTML = '<strong>Viewing as ' + mail + "</strong>" +
-      "<span>Read-only, as the owner. Nothing you do here changes their account.</span>" +
+    bar.innerHTML = '<strong>Viewing as ' + escapeHtml(mail) + "</strong>" +
+      "<span>Read-only, as the owner. " + cars + " saved vehicle" + (cars === 1 ? "" : "s") +
+        " on the server, " + escapeHtml(plan) + " plan — this browser may hold a local copy of " +
+        "another. Nothing you do here changes their account.</span>" +
       '<button type="button" class="btn btn--sm btn--ghost">Return to the owner console</button>';
 
     bar.querySelector("button").addEventListener("click", function () { stop(); });
