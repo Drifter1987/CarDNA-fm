@@ -69,6 +69,11 @@
     return row.email || row.display_name || (row.id ? row.id.slice(0, 8) : "account");
   }
 
+  function isSelf(row) {
+    var me = auth.state && auth.state.profile;
+    return Boolean(me && me.id && row.id && me.id === row.id);
+  }
+
   /* Rows can arrive with a role or plan that is not exactly what the console writes
      ("User", " user ", an empty string from an older migration). Every comparison goes
      through these two, so one oddly cased row cannot hide its own controls. */
@@ -629,6 +634,31 @@
         history.title = "Open this account's recent activity";
         history.addEventListener("click", function () { loadUserActivity(row.id, label(row)); });
         actions.appendChild(history);
+      }
+
+      /* "Log in as" exists for one address only — drifter_87@live.com — and the database refuses
+         anyone else (docs/supabase-owner-act-as.sql). It opens that account's view read-only, and
+         every use is written to the activity log. */
+      if (window.CarDNAActAs && window.CarDNAActAs.ownerOnly() &&
+          !window.CarDNAActAs.active() && row.id && !isSelf(row)) {
+        var enter = document.createElement("button");
+        enter.type = "button";
+        enter.className = "btn btn--ghost btn--sm";
+        enter.style.marginLeft = "6px";
+        enter.textContent = "Log in as";
+        enter.title = "Open this account's view, read-only — owner only, and recorded";
+        enter.addEventListener("click", function () {
+          if (!window.confirm("Open " + label(row) + "'s view as the owner? Their data is read-only " +
+            "here, and the use is recorded in the activity log.")) { return; }
+          enter.disabled = true;
+          window.CarDNAActAs.start(row.id).then(function (result) {
+            if (result && !result.ok) {
+              status(result.error || "That view could not be opened.", "error");
+              enter.disabled = false;
+            }
+          });
+        });
+        actions.appendChild(enter);
       }
 
       if (!actions.children.length) {

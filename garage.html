@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Garage — CarDNA</title>
 <meta name="description" content="Your saved vehicles, with full decode export to Excel, Markdown, CSV or PDF.">
-<link rel="stylesheet" href="assets/style.css?v=p48">
-<link rel="stylesheet" href="assets/motion.css?v=p48">
+<link rel="stylesheet" href="assets/style.css?v=p50">
+<link rel="stylesheet" href="assets/motion.css?v=p50">
 </head>
 <body data-require-auth>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p48"></script>
+<script src="assets/site-shell.js?v=p50"></script>
 
 <main>
   <section class="page-head">
@@ -74,10 +74,13 @@
         <button class="btn btn--ghost" type="button" id="garage-clear">Clear garage</button>
       </p>
 
+      <p class="vault-status" data-cloud-status aria-live="polite"></p>
+
       <div class="notice" style="margin-top:28px">
-        <strong>Where this lives.</strong> Saved vehicles sit in this browser's local storage under
-        <code>cardna.garage</code>, tied to the account you are signed in as, and mirror to Supabase so
-        they follow you between devices.
+        <strong>Where this lives.</strong> Your saved vehicles are rows in Supabase, one per car per
+        account, so they are there on any device with a connection. This browser keeps a copy under
+        <code>cardna.garage</code> so the page renders at once and works offline; a change made
+        offline is queued and sent when the connection is back.
       </div>
     </div>
   </section>
@@ -200,19 +203,21 @@
 
 <div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p48"></script>
-<script src="assets/auth.js?v=p48"></script>
-<script src="assets/app.js?v=p48"></script>
-<script src="assets/preview.js?v=p48"></script>
-<script src="assets/garage.js?v=p48"></script>
-<script src="assets/vin-schema.js?v=p48"></script>
-<script src="assets/export.js?v=p48"></script>
-<script src="assets/vehicle.js?v=p48"></script>
-<script src="assets/surfaces.js?v=p48"></script>
-<script src="assets/bulk.js?v=p48"></script>
-<script src="assets/api.js?v=p48"></script>
-<script src="assets/team.js?v=p48"></script>
-<script src="assets/account.js?v=p48"></script>
-<script src="assets/motion.js?v=p48"></script>
+<script src="assets/supabase-config.js?v=p50"></script>
+<script src="assets/auth.js?v=p50"></script>
+<script src="assets/app.js?v=p50"></script>
+<script src="assets/actas.js?v=p50"></script>
+<script src="assets/preview.js?v=p50"></script>
+<script src="assets/cloud.js?v=p50"></script>
+<script src="assets/garage.js?v=p50"></script>
+<script src="assets/vin-schema.js?v=p50"></script>
+<script src="assets/export.js?v=p50"></script>
+<script src="assets/vehicle.js?v=p50"></script>
+<script src="assets/surfaces.js?v=p50"></script>
+<script src="assets/bulk.js?v=p50"></script>
+<script src="assets/api.js?v=p50"></script>
+<script src="assets/team.js?v=p50"></script>
+<script src="assets/account.js?v=p50"></script>
+<script src="assets/motion.js?v=p50"></script>
 </body>
 </html>

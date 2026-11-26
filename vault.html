@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Private vault — CarDNA</title>
 <meta name="description" content="Keep a list of VINs encrypted inside your own browser, or as an encrypted file only you can open.">
-<link rel="stylesheet" href="assets/style.css?v=p48">
+<link rel="stylesheet" href="assets/style.css?v=p50">
 <link rel="stylesheet" href="assets/motion.css">
 </head>
 <body data-require-auth>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p48"></script>
+<script src="assets/site-shell.js?v=p50"></script>
 
 <main>
 
@@ -20,9 +20,10 @@
       <div class="kicker">Private vault</div>
       <h1>A VIN list only you can read.</h1>
       <p>
-        Your account lives in Supabase, but this list does not: the vault keeps VINs encrypted
-        with a pass phrase inside your own browser, and can export the encrypted copy as a file
-        you keep yourself. Nobody else can open either without that phrase.
+        The list is encrypted with your pass phrase before it leaves this tab, and only that cipher
+        text is mirrored to your account in Supabase — so it is there on your next device and
+        unreadable on both. The encrypted file you download is the same copy; nobody can open any of
+        them without the phrase.
       </p>
     </div>
   </section>
@@ -85,10 +86,12 @@
 
       <p class="vault-status" id="vault-status" aria-live="polite"></p>
 
+      <p class="vault-status" data-cloud-status aria-live="polite"></p>
+
       <div class="vault-io">
         <label class="btn btn--ghost btn--sm" for="vault-file">Load an encrypted vault file</label>
         <input type="file" id="vault-file" accept=".json,application/json" hidden>
-        <span>Nothing leaves this tab.</span>
+        <span>Only the encrypted copy leaves this tab.</span>
       </div>
 
       <noscript>
@@ -104,7 +107,7 @@
     <div class="container">
       <div class="section-head">
         <div class="kicker">What “secret” means here</div>
-        <h2>Encrypted in the tab, never uploaded.</h2>
+        <h2>Encrypted before it leaves the tab.</h2>
       </div>
 
       <div class="grid-3">
@@ -117,8 +120,10 @@
         <div class="card">
           <span class="card-num">02 / storage</span>
           <h3>Two places, both yours</h3>
-          <p>The encrypted copy sits in this browser under <code>cardna.vault</code>, and the file you
-            download is the same cipher text. Both need the pass phrase to open.</p>
+          <p>The cipher text is mirrored to your account in Supabase, so a second device you sign in
+            on finds the locked vault already there. The same blob sits in this browser under
+            <code>cardna.vault</code>, and the file you download is that same cipher text. All three
+            need the pass phrase to open.</p>
         </div>
         <div class="card">
           <span class="card-num">03 / honest limits</span>
@@ -136,9 +141,11 @@
       </div>
 
       <div class="notice" style="margin-top:14px">
-        <strong>What the vault does not do.</strong> It is not mirrored to your account: the
-        encrypted blob stays in this browser and in the file you download, so clearing site data
-        means re-importing that file. The garage is the list that follows you between devices.
+        <strong>What the vault does.</strong> The cipher text is mirrored to your account in Supabase,
+        so the locked blob is there on any other device you sign in on, and it stays unreadable
+        without the pass phrase — we never see the list or the phrase. Clearing site data no longer
+        means re-importing a file, though the downloaded file is still the copy that outlives the
+        account.
       </div>
     </div>
   </section>
@@ -148,10 +155,12 @@
 <div data-site-footer data-site-root=""></div>
 
 <script src="assets/supabase-config.js"></script>
-<script src="assets/auth.js?v=p48"></script>
-<script src="assets/app.js?v=p48"></script>
-<script src="assets/preview.js?v=p48"></script>
+<script src="assets/auth.js?v=p50"></script>
+<script src="assets/app.js?v=p50"></script>
+<script src="assets/actas.js?v=p50"></script>
+<script src="assets/preview.js?v=p50"></script>
+<script src="assets/cloud.js?v=p50"></script>
 <script src="assets/motion.js"></script>
-<script src="assets/vault.js"></script>
+<script src="assets/vault.js?v=p50"></script>
 </body>
 </html>

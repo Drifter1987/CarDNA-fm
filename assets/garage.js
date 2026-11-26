@@ -12,6 +12,8 @@
   /* ------------------------------------------------------------------ local store */
 
   function read() {
+    /* The owner's view of another account shows that account's cars, and changes nothing. */
+    if (window.CarDNAActAs && window.CarDNAActAs.active()) { return window.CarDNAActAs.vehicles(); }
     try {
       var raw = window.localStorage.getItem(KEY);
       var list = raw ? JSON.parse(raw) : [];
@@ -406,6 +408,7 @@
       return read().some(function (item) { return item.vin === vin; });
     },
     save: function (entry) {
+      if (window.CarDNAActAs && window.CarDNAActAs.active()) { return window.CarDNAActAs.refused(); }
       var current = read();
       var replacing = current.some(function (item) { return item.vin === entry.vin; });
       var lim = limits();
@@ -440,12 +443,17 @@
       return { ok: true, count: capped.length, sync: synced };
     },
     remove: function (vin) {
+      if (window.CarDNAActAs && window.CarDNAActAs.active()) {
+        var stop = window.CarDNAActAs.refused();
+        throw new Error(stop.error);
+      }
       var list = read().filter(function (item) { return item.vin !== vin; });
       write(list);
       submit("drop", vin, null);
       return list.length;
     },
     clear: function () {
+      if (window.CarDNAActAs && window.CarDNAActAs.active()) { return 0; }
       write([]);
       if (!serverReady()) { return; }
 

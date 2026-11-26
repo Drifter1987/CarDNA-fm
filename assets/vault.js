@@ -11,6 +11,14 @@
   var MIN_PASS = 8;
   var LIST_CAP = 400;
 
+  /* The vault on this device belongs to the account you are signed in as, so two people on one
+     device never read each other's blob. Signed out, the device keeps its own. */
+  function storeKey() {
+    var auth = window.CarDNAAuth;
+    var s = auth && auth.state && auth.state.session;
+    return s && s.id ? STORE_KEY + "." + s.id : STORE_KEY;
+  }
+
   var VIN_RE = /\b[A-HJ-NPR-Z0-9]{17}\b/g;
 
   var host = document.getElementById("vault-app");
@@ -284,6 +292,10 @@
   /* ------------------------------------------------------------------ actions */
 
   function save() {
+    if (window.CarDNAActAs && window.CarDNAActAs.active()) {
+      setStatus(window.CarDNAActAs.refused().error, "error");
+      return;
+    }
     var pass = pickPass();
     if (!pass) { return; }
 
@@ -295,14 +307,19 @@
       state.pass = pass;
       state.saved = text;
       try {
-        window.localStorage.setItem(STORE_KEY, JSON.stringify(record));
+        window.localStorage.setItem(storeKey(), JSON.stringify(record));
       } catch (err) {
         setStatus("Could not write to this browser's storage: " + err.message, "error");
         return;
       }
-      setStatus(parseVins(text).items.length + " VINs encrypted and saved in this browser.", "ok");
+      var count = parseVins(text).items.length;
+      setStatus(count + " VIN" + (count === 1 ? "" : "s") + " encrypted and saved.", "ok");
       clearPassFields();
       refresh();
+
+      /* The cipher text is mirrored to the account in Supabase, so the locked vault is on any
+         device the account signs in on. It is still unreadable without the pass phrase. */
+      if (window.CarDNACloud) { window.CarDNACloud.put("vault", "current", record); }
     }).catch(function (err) {
       setStatus("Could not save: " + (err && err.message ? err.message : String(err)), "error");
     });
@@ -351,10 +368,15 @@
   }
 
   function forget() {
-    if (!window.confirm("Delete the encrypted vault from this browser? " +
+    if (window.CarDNAActAs && window.CarDNAActAs.active()) {
+      setStatus(window.CarDNAActAs.refused().error, "error");
+      return;
+    }
+    if (!window.confirm("Delete the encrypted vault from this browser and from your account? " +
       "Any file you downloaded is unaffected.")) { return; }
 
-    try { window.localStorage.removeItem(STORE_KEY); } catch (err) { /* ignore */ }
+    try { window.localStorage.removeItem(storeKey()); } catch (err) { /* ignore */ }
+    if (window.CarDNACloud) { window.CarDNACloud.remove("vault", "current"); }
 
     state = { record: null, pass: "", text: "", saved: "" };
     var textarea = document.getElementById("vault-text");
@@ -440,11 +462,23 @@
   }
 
   try {
-    var raw = window.localStorage.getItem(STORE_KEY);
+    var raw = window.localStorage.getItem(storeKey());
     var stored = raw ? JSON.parse(raw) : null;
     state.record = looksLikeVault(stored) ? stored : null;
   } catch (err) {
     state.record = null;
+  }
+
+  /* No vault on this device, but the account has one: adopt the cipher text from Supabase. It is
+     still locked — the pass phrase is what opens it, and it never travels to the server. */
+  if (!state.record && window.CarDNACloud) {
+    window.CarDNACloud.get("vault", "current").then(function (fromCloud) {
+      if (!looksLikeVault(fromCloud)) { return; }
+      state.record = fromCloud;
+      try { window.localStorage.setItem(storeKey(), JSON.stringify(fromCloud)); } catch (err) { /* ignore */ }
+      refresh();
+      setStatus("Loaded your encrypted vault from your account. Unlock it with its pass phrase.", "");
+    }).catch(function () { /* the local vault stays */ });
   }
 
   var unlockBtn = document.getElementById("vault-unlock");

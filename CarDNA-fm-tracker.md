@@ -51,23 +51,27 @@ documents into one shell without breaking a single URL.
 
 ## Current state
 
-**Branch** `main`. Latest commit `29d3343` (25 Nov 2026, "Share that copies, folded recalls, credit moved
-to legal"), made in Turn 44 and **not pushed**. It carries every change from Turns 42 and 43, so the working
-tree is clean and the local branch is one commit ahead of `origin/main` (`4edef90`). `?v=p48` on all 14 pages.
-The private preview at `https://cardna-fm-g2j6--preview.freemilk.app` serves these same files. GitHub Pages
-has `4edef90` until the commit is pushed.
+**Branch** `main`. Latest commit `722d5e7` (25 Nov 2026, "Tracker: record 29d3343, correct the stale state"),
+which is being pushed with this turn. Uncommitted on top of it and committed here: **Turn 45** — one
+account's cloud storage — and **Turn 46** — the owner's read-only "log in as" view (`assets/actas.js`,
+`docs/supabase-owner-act-as.sql`, the button in `assets/admin.js`, the write guards in `garage.js`,
+`cloud.js`, `vin.js`, `vault.js`), with `?v=p50` on all 14 pages.
 
-**Verified (Turn 43, as the owner, desktop 1280×800, no console errors):** the decoder's share panel copies
-and shows the link; the report's Share button copies and says so above the field grid; every recall campaign
-is listed folded and expands; and the cache is proved — a signed-in decode wrote `decode_cache` and the report
-rendered "2017 TESLA Model S", 9 of 12 fields. Not verified: the account export's download, the picker, the
-keyboard pass, and the `?vin=` deep link.
+**Live in the database, found in the browser this turn:** `cardna_cloud` exists — the garage and vault
+pages say *"In your account, in Supabase — available on any device while you are online."*, so the Boss ran
+`docs/supabase-user-cloud.sql`. **Not run:** `docs/supabase-owner-act-as.sql`, so the "Log in as" button
+answers honestly and opens nothing yet. The shared browser was signed in as the **free test account**
+`sefipe7182@jcaton.com` this turn (its session has expired: 3 queued saves are refused), not as the owner.
 
-**Working tree:** clean. Every file below is in `29d3343`. Do not re-commit them; `git status` is the check.
-Touched across Turns 42–43: `assets/app.js`, `assets/report.js`, `assets/report-view.js`, `assets/vehicle.js`,
-`assets/style.css`, `assets/site-shell.js`, `assets/surfaces.js`, `assets/account.js`, `assets/vin.js`,
-`garage.html`, `decode.html`, `index.html`, `pricing.html`, `legal.html`, all 14 HTML pages (version),
-`README.md`, `cardna-fm-plan.md`, `docs/car-brands.md`, this tracker.
+**Verified (Turn 45, as the owner and in the Free role preview):** garage, vault, decode, index decoder tab
+and admin all load with no console errors; the cloud status line was honest while the table was missing.
+**Verified (Turn 46, as the free account):** `USER VIEW` with no "Log in as" button, 4 vehicles, the vault
+panel, and the live cloud line. **Not verified:** the button as the owner, and any act-as view.
+
+**Working tree — uncommitted:** `assets/actas.js`, `docs/supabase-owner-act-as.sql`, `assets/admin.js`,
+`assets/garage.js`, `assets/cloud.js`, `assets/vin.js`, `assets/vault.js`, `assets/style.css`, `admin.html`,
+`garage.html`, `vault.html`, `decode.html`, `index.html`, `legal.html`, all 14 pages (version),
+`cardna-fm-plan.md`, `README.md`, this tracker. Check `git status`.
 
 **Confirmed working:**
 
@@ -147,7 +151,7 @@ Touched across Turns 42–43: `assets/app.js`, `assets/report.js`, `assets/repor
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 44 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 46 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -833,9 +837,14 @@ surviving record, not a transcript.
 
 Refreshed in Turn 43. Statuses reflect the working tree and the latest browser checks. Do not resume project work until the user asks.
 
-1. **Cache security (the biggest gap now).** The cache holds real rows and the report is public, but any
-   signed-in account may write an arbitrary `payload` for any valid VIN, so a poisoned row would be shown to
-   visitors. Fix with a trusted write path (an edge function that calls vPIC itself) before relying on it.
+1. **Cloud storage needs one SQL run**, then the test the Boss asked for. Run
+   `docs/supabase-user-cloud.sql` in Supabase → SQL Editor (one file, idempotent, no secrets). Until then
+   the garage and vault pages say so in red and nothing is uploaded. Then sign the free test account in on
+   this device: save a vehicle, decode a VIN, save a vault, and confirm a second device (or a cleared
+   browser) shows all three. A real free-account sign-in is the Boss's step — I do not have its password.
+2. **Cache security.** Any signed-in account may still write an arbitrary `decode_cache.payload` for any
+   valid VIN, and the report is public. `docs/cloud-storage.md` argues the trusted write path and the
+   European decode proxy are one piece of work (an edge function that calls vPIC / the vendor itself).
 2. **Unseen in a signed-in session:** the account export's download, the bulk picker at 320 px, the keyboard
    pass. Fixed in code (Turn 42), not yet seen to work.
 3. **`?vin=` deep link.** The preview's sign-in hop strips the query. Typed VINs work; the link is unverified.
@@ -1101,3 +1110,66 @@ Refreshed in Turn 43. Statuses reflect the working tree and the latest browser c
 
 
 | 25 Nov 2026 | Turn 44: every change from Turns 42 and 43 committed as `29d3343` (27 files, `?v=p48` on all 14 pages, not pushed); tracker checked and corrected — front matter moved to 25 Nov / Turn 44 and the "uncommitted" state replaced by the commit hash and a clean tree; an edit that swallowed the `**Open**:` header and its cache-security item was caught on read-back and restored; Turn 44 entry and this row added. |
+
+
+
+### Turn 45 — One account's cloud storage (`F-28`): `cardna_cloud`, wired and honest; `?v=p49`
+
+- **Input**: "1- each user must have his dedicated cloud based storage on supabase database that us always available with an active internet connection. 2- fix it. 3- check it on all pages and all account roles, sign in to free users account as well and test there. 4- tell me where you saved the details about these points and what are the cheap options and if there is a possibility to wire the decode payments only when the user uses the decode type that requires paid service."
+- **What was actually missing:** the garage was already per account (`vehicles`), but recent lookups and the vault were one browser's only — a second device started empty. So "cloud storage" meant two new per-account rows, not a rewrite.
+- **Output**:
+  - **`docs/supabase-user-cloud.sql` (new, 183 lines).** `public.cardna_cloud (user_id, kind, key, data jsonb, updated_at)`, primary key on the first three, one policy per command each `user_id = auth.uid()`, a restrictive blocked-account policy (guarded by `to_regprocedure` so a project without `cardna_is_active` still runs), grants to `authenticated` only, and a plan cap of 20 / 200 / 2000 / unlimited enforced by a `before insert` trigger. It also replaces `cardna_delete_my_account` to delete these rows, and now guards `cardna_cloud` and `vault_entries` with `to_regclass` — so a missing table can no longer make a deletion fail.
+  - **`assets/cloud.js` (new, 361 lines).** `get` / `put` / `remove` / `flush` / `probe` / `snapshot` / `clear`, a mirror per account (`cardna.cloud.<uid>`), an offline queue (`cardna.cloud.queue`) sent on `online` and after the session resolves, and one status line rendered into every `[data-cloud-status]`. Every state is named: in your account, kept here and will sync, signed out, or *"Cloud storage is not set up yet: run docs/supabase-user-cloud.sql in Supabase. Nothing was uploaded."*
+  - **Wiring.** `assets/vin.js`: recent lookups are now per account (`cardna.recent.<uid>`, device-wide only when signed out), written to the cloud on every decode and read back on load. `assets/vault.js`: the local blob is per account (`cardna.vault.<uid>`), the cipher text is pushed to the cloud on save, adopted from the cloud on a new device, and "Delete" now removes the account's copy too. `assets/account.js`: the export gained `recentLookups` and reads the vault from the cloud snapshot; a deletion clears the cloud mirror, its queue, and both per-account local keys.
+  - **Pages.** `garage.html` and `vault.html` gained the status line and honest "where this lives" copy; the vault page's promise changed from "never uploaded" to "encrypted before it leaves the tab", because only the cipher text is uploaded now. `legal.html` privacy was rewritten to say exactly what is in Supabase and what stays in the tab.
+  - Version `?v=p49` on all 14 pages.
+- **Files**: `assets/cloud.js` (new), `docs/supabase-user-cloud.sql` (new), `docs/cloud-storage.md` (new), `assets/vin.js`, `assets/vault.js`, `assets/account.js`, `garage.html`, `vault.html`, `decode.html`, `index.html`, `legal.html`, all 14 pages (version), `cardna-fm-plan.md` (`F-28`), `README.md`, this tracker.
+- **Two of my own bugs, found in the browser and fixed:**
+  1. `assets/account.js` stopped parsing — an edit left a stray `}` that closed the `.then` callback early, so "Download everything" answered "This panel is missing its module." Removed; the export now runs and produced `cardna-account-2026-11-26.json` with 4 vehicles and `recentLookups`.
+  2. The cloud status never left its neutral sentence: `get()` returned the mirror while the session was still loading, and nothing re-read after it resolved. Added `probe()`, called from `auth.ready` and on `online`, which reads the table once and sets "in your account" or the honest "not set up yet".
+- **Verified in the browser** on the private preview, desktop 1280×800, as the owner, no console errors anywhere:
+  - `garage.html`: the red line `Cloud storage is not set up yet: run docs/supabase-user-cloud.sql in Supabase. Nothing was uploaded.` (correct — the table is absent: a direct GET answers `PGRST205`), the 4 saved vehicles, the plan-limit line empty for the owner, the new "Where this lives" notice.
+  - `vault.html`: the same status line, `No vault yet…`, the new intro, the h2 "Encrypted before it leaves the tab.", "Only the encrypted copy leaves this tab.", and the three cards.
+  - `decode.html` and the `index.html` decoder tab: `1HGCM82633A004352` renders `30 of 104 fields filed`, the RECENT chip appears, no error naming `cardna_cloud`.
+  - `admin.html` as owner: loads, 3 accounts, 0 paid plans, plan mix `Free 3`.
+  - **All roles:** the owner, and the owner's role preview for User · Free (chip `ROLE · USER · FREE`, Admin nav hidden, limit `Free plan · 4 of 1 saved vehicle · over the limit`) — the status line is identical. Admin's own pages were not opened as an admin account.
+- **Not verified, and why:** the free test account `sefipe7182@jcaton.com` was **not** signed in — a sign-in needs the account's password, which I do not have and will not ask for. The owner's role preview is not the same thing as a real free account. And no cloud write has ever succeeded: the table does not exist until the SQL is run.
+- **Commits**: none. Uncommitted: everything above.
+- **Open**:
+  1. **Run `docs/supabase-user-cloud.sql` in Supabase → SQL Editor**, then the red line becomes "In your account, in Supabase — available on any device while you are online." Nothing is uploaded until then.
+  2. Then a real free-account test: sign that account in on this device, save one vehicle, decode one VIN, save a vault, and check a second device (or a cleared browser) shows all three.
+  3. `F-28`'s cap is unproven: no account has ever reached 20 rows.
+  4. Cache write security (Turn 43) is unchanged, and `docs/cloud-storage.md` argues it is the same piece of work as the European decode proxy.
+- **Documents for this turn**: `docs/cloud-storage.md` is the record the Boss asked for — what is in which table, why it is cheap, and the metering answer. It is also `F-28` in `cardna-fm-plan.md` §4, a row in `README.md`, the privacy text in `legal.html`, and this entry.
+
+
+| 26 Nov 2026 | Turn 45: one account's cloud storage (`F-28`) — `docs/supabase-user-cloud.sql` (new table `cardna_cloud`, per-owner RLS, blocked-account policy, plan cap, deletion updated with `to_regclass` guards) and `assets/cloud.js` (per-account mirror, offline queue, honest status line); recent lookups and the vault cipher text are now per account and mirrored to Supabase; `assets/vin.js`, `assets/vault.js`, `assets/account.js`, `garage.html`, `vault.html` on all 14 pages at `?v=p49`; vault and legal copy corrected to "encrypted before it leaves the tab"; two of my own bugs found in the browser and fixed (a stray `}` broke `account.js`; the status line never probed after sign-in); owner, Free role preview, decode and admin pages verified with no console errors; the free test account was not signed in (no password), and nothing was uploaded because the SQL has not been run; `docs/cloud-storage.md` records the design, cost and the metered-decode answer. |
+
+
+
+### Turn 46 — The owner's "log in as" view (`F-29`); `?v=p50`
+
+- **Input**: "In the admin dashboard, add a 'login as this user' button and I will be logged in as that specific user without even having his password because I'm the owner and I have this right. This button must be ONLY available for the owner drifter_87@live.com. Let me know if you something from me via interactive prompt without stopping your response. I can sign in whenever you ask me to do so. Commit and push."
+- **The honest limit, stated first:** a browser cannot mint another account's Supabase session. That needs the `service_role` key, which must never be in a page — so a real session swap is a server function and a decision of its own (`D-15` below). What was built is the middle that needs no server: the owner opens that account's **view** — profile, plan, role, cars, recent lookups, encrypted vault, decode count — read-only.
+- **Output**:
+  - **`docs/supabase-owner-act-as.sql` (new, 114 lines).** `cardna_act_as(target uuid, ending boolean)` `security definer`: refuses unless the caller's role is `owner` **and** their address is `drifter_87@live.com` (the button is a convenience, the database is the rule); refuses its own account, a missing account and another owner; returns the target's profile, saved vehicles, `recent`/`vault` from `cardna_cloud` (guarded with `to_regclass`), the decode count, and `readonly: true`; writes `events` kind `act_as` / `act_as_end`.
+  - **`assets/actas.js` (new, 195 lines).** `start` / `stop` / `active` / `vehicles` / `recent` / `vault` / `decodes` / `refused`; state in `sessionStorage` so the view ends when the tab closes; the target's profile replaces `CarDNAAuth.state.profile` (chip, plan, nav gate), a sticky banner names the account and offers "Return to the owner console", leaving the view is recorded, and `stop` returns to `admin.html`.
+  - **The button.** `assets/admin.js` renders "Log in as" per row only when the signed-in account is the owner **and** drifter_87@live.com **and** not already viewing someone, with a confirm, and refuses its own row. Writes are blocked while viewing: `assets/garage.js` (save/remove/clear), `assets/cloud.js` (put/remove), `assets/vin.js` (recent lookups), `assets/vault.js` (save/delete) all return that plain refusal instead of writing on their behalf.
+  - **`.actas-bar`** style in `assets/style.css`; `actas.js` loaded on the five pages that carry account data (`admin`, `garage`, `vault`, `decode`, `index`); `?v=p50` on all 14 pages.
+  - **Copy:** `legal.html` says one named owner may open another account's view, read-only, that the database refuses everyone else, and that each use is recorded.
+- **Files**: `assets/actas.js` (new), `docs/supabase-owner-act-as.sql` (new), `assets/admin.js`, `assets/garage.js`, `assets/cloud.js`, `assets/vin.js`, `assets/vault.js`, `assets/style.css`, `admin.html`, `garage.html`, `vault.html`, `decode.html`, `index.html`, `legal.html`, all 14 pages (version), `cardna-fm-plan.md` (`F-29`), `README.md`, this tracker.
+- **The free account is live, and the browser moved to it.** This turn's browser check found the shared browser signed in as **`sefipe7182@jcaton.com` (ROLE · USER · FREE)** — the free test account the Boss was asked about last turn. That is the real free-account test, and it now shows:
+  - `garage.html`: 4 vehicles, `Free plan · 4 of 1 saved vehicle`, and `3 changes were refused by your account (Your sign-in has expired. Sign in again to save.)` — that session has expired, so its queued saves are refused. Worth knowing, not caused by this turn.
+  - `admin.html` as that account: `USER VIEW`, the "This account is not an owner" notice, no table — and **no "Log in as" button**, which is the owner-only rule working from the other side.
+  - `vault.html`: renders, `0 VINs`, no error.
+  - **`cardna_cloud` is live**: both pages read `In your account, in Supabase — available on any device while you are online.` — so `docs/supabase-user-cloud.sql` was run by the Boss between turns, and `F-28`'s storage is real.
+- **Not verified**: the button itself. It needs the owner signed in on this browser, and the browser holds the free account. `docs/supabase-owner-act-as.sql` has also not been run. Both were asked for (next turn's prompt).
+- **Commits**: this turn's work committed and pushed (message and hash in the change log below).
+- **Open**:
+  1. **Sign the owner in on this browser** → the console row should show "Log in as"; click the free account's row, and the banner should name it, with its 4 cars and its plan in the chip.
+  2. **Run `docs/supabase-owner-act-as.sql`** — until then the button answers "needs docs/supabase-owner-act-as.sql" and opens nothing.
+  3. **`D-15`, a real session swap**: possible only with a Supabase edge function holding the `service_role` key, which is a server, a secret and a decision — not a page.
+  4. The free test account's session has expired: sign it in again before trusting its garage writes.
+
+
+| 26 Nov 2026 | Turn 46: the owner's read-only "log in as" view (`F-29`) — `docs/supabase-owner-act-as.sql` (RPC `cardna_act_as`, owner **and** drifter_87@live.com only, refuses self/missing/another owner, audited as `act_as` / `act_as_end`) and `assets/actas.js` (session-scoped view, profile swap for the chip and limits, sticky banner with a way back); the "Log in as" button in `assets/admin.js` for that address alone; writes refused while viewing (garage, cloud, vault, recents); `.actas-bar` style; `actas.js` on five pages; `?v=p50` everywhere; `F-29`, README and `legal.html` copy. Browser found the shared browser signed in as the free test account (its session expired, 3 refused saves) and **`cardna_cloud` live** — the Boss ran `supabase-user-cloud.sql`, so `F-28` is real; `admin.html` showed `USER VIEW` with no "Log in as" button, which is the owner-only rule from the other side. The button itself and the act-as view are unverified (owner not signed in; act-as SQL not run). Committed and pushed. |

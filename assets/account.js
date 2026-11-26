@@ -57,8 +57,22 @@
         try { vehicles = garage.list() || []; } catch (err) { vehicles = []; }
       }
 
-      var vault = null;
-      try { vault = window.localStorage.getItem("cardna.vault"); } catch (err) { vault = null; }
+      /* Everything the account holds in the cloud, as this device last saw it: recent lookups and
+         the encrypted vault blob. The garage is read from the same account rows. */
+      var cloud = null;
+      if (window.CarDNACloud && window.CarDNACloud.snapshot) {
+        try { cloud = window.CarDNACloud.snapshot(); } catch (err) { cloud = null; }
+      }
+
+      var vault = cloud && cloud.vault ? cloud.vault : null;
+      if (!vault) {
+        try {
+          var candidates = ["cardna.vault" + (me.id ? "." + me.id : ""), "cardna.vault"];
+          for (var i = 0; i < candidates.length && !vault; i += 1) {
+            vault = window.localStorage.getItem(candidates[i]);
+          }
+        } catch (err) { vault = null; }
+      }
 
       var payload = {
         product: "CarDNA",
@@ -71,10 +85,13 @@
           joined: me.created_at || ""
         },
         vehicles: vehicles,
-        vaultCipherText: vault ? safeParse(vault) : null,
-        note: "Everything this browser and this account hold. A vehicle listed here may still be " +
-          "one the account refused (this browser keeps it, the account did not). Your activity " +
-          "rows live in Supabase; ask us for a copy if you need them."
+        recentLookups: cloud && cloud.recent ? cloud.recent : null,
+        vaultCipherText: typeof vault === "string" ? safeParse(vault) : (vault || null),
+        note: "Everything this account holds. Saved vehicles are the account's own rows in " +
+          "Supabase; recent lookups and the encrypted vault are mirrored there too, and this file " +
+          "carries the copy this device last saw. A vehicle listed here may still be one the " +
+          "account refused (this browser keeps it, the account did not). Your activity rows live " +
+          "in Supabase; ask us for a copy if you need them."
       };
 
       var name = "cardna-account-" + stamp() + ".json";
@@ -141,6 +158,13 @@
               try { window.localStorage.removeItem("cardna.garage"); } catch (err) { /* ignore */ }
               try { window.localStorage.removeItem("cardna.garage.queue"); } catch (err) { /* ignore */ }
             }
+            /* The account's cloud mirror and anything still queued for it go too, so nothing of
+               a deleted account is left in this browser. */
+            if (window.CarDNACloud && window.CarDNACloud.clear) { window.CarDNACloud.clear(); }
+            try { window.localStorage.removeItem("cardna.recent." + (me && me.id ? me.id : "")); }
+            catch (err) { /* ignore */ }
+            try { window.localStorage.removeItem("cardna.vault." + (me && me.id ? me.id : "")); }
+            catch (err) { /* ignore */ }
             window.setTimeout(function () { window.location.replace("signin.html"); }, 1600);
             return {
               ok: true,

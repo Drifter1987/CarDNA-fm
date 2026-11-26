@@ -442,9 +442,17 @@
     return { fields: fields, notes: notes };
   }
 
+  /* Recent lookups belong to the account you are signed in as, so two people on one device do
+     not read each other's VINs. Signed out, the device keeps its own list as before. */
+  function recentStoreKey() {
+    var auth = window.CarDNAAuth;
+    var s = auth && auth.state && auth.state.session;
+    return s && s.id ? RECENT_KEY + "." + s.id : RECENT_KEY;
+  }
+
   function getRecent() {
     try {
-      var raw = window.localStorage.getItem(RECENT_KEY);
+      var raw = window.localStorage.getItem(recentStoreKey());
       var parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (err) {
@@ -452,12 +460,42 @@
     }
   }
 
+  function writeRecent(list) {
+    try { window.localStorage.setItem(recentStoreKey(), JSON.stringify(list)); } catch (err) { /* ignore */ }
+    return list;
+  }
+
   function addRecent(vin, label) {
+    /* A read-only view of another account does not add to its list. */
+    if (window.CarDNAActAs && window.CarDNAActAs.active()) { return getRecent(); }
     var list = getRecent().filter(function (item) { return item.vin !== vin; });
     list.unshift({ vin: vin, label: label || "" });
-    list = list.slice(0, MAX_RECENT);
-    try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch (err) { /* ignore */ }
+    list = writeRecent(list.slice(0, MAX_RECENT));
+
+    /* The same list is mirrored to the account in Supabase, so it is there on the next device. */
+    if (window.CarDNACloud) { window.CarDNACloud.put("recent", "list", list); }
     return list;
+  }
+
+  /* The account's list wins on a new device: cloud rows first, then anything this device decoded
+     that the account has not seen yet. */
+  function mergeRecent(stored) {
+    var byVin = Object.create(null);
+    var order = [];
+
+    (Array.isArray(stored) ? stored : []).forEach(function (item) {
+      if (!item || !item.vin || byVin[item.vin]) { return; }
+      byVin[item.vin] = { vin: item.vin, label: item.label || "" };
+      order.push(item.vin);
+    });
+
+    getRecent().forEach(function (item) {
+      if (!item || !item.vin || byVin[item.vin]) { return; }
+      byVin[item.vin] = { vin: item.vin, label: item.label || "" };
+      order.push(item.vin);
+    });
+
+    return writeRecent(order.slice(0, MAX_RECENT).map(function (vin) { return byVin[vin]; }));
   }
 
   function countFields() {
@@ -847,6 +885,23 @@
       input.value = picked;
       decode(picked, true);
     });
+
+    /* The account's recent list, from Supabase, once the account is known. Signed out, or with
+       the table missing, the device's own list is what is shown. */
+    if (window.CarDNACloud) {
+      if (window.CarDNAAuth && window.CarDNAAuth.ready) {
+        window.CarDNAAuth.ready(function () {
+          window.CarDNACloud.get("recent", "list").then(function (stored) {
+            if (!Array.isArray(stored) || !stored.length) { return; }
+            mergeRecent(stored);
+            renderRecent(recentHost, function (picked) {
+              input.value = picked;
+              decode(picked, true);
+            });
+          }).catch(function () { /* local recents stay */ });
+        });
+      }
+    }
 
     var requested = new URLSearchParams(window.location.search).get("vin");
     if (requested) {

@@ -51,12 +51,14 @@ npx serve .
 | `assets/export.js` | Full-record export: Markdown, CSV, a real .xlsx (merged sheet + one sheet per model, written without a library) and print-to-PDF |
 | `assets/motion.css` | Motion layer: entry reveals, panel and tab transitions, pointer spotlight, button sheen, the animated parts diagram and the VIN scan. Inert unless `motion.js` runs |
 | `assets/motion.js` | Scroll reveals with stagger, counting stats, tab transitions, a pointer-tracked card glow and the 17-slot VIN scan that runs while a decode is in flight. Returns immediately when the visitor prefers reduced motion |
-| `assets/vin.js` | VIN validation, vPIC decode over the shared 104-field schema, decode warnings, recent lookups in `localStorage`, `?vin=` deep links |
+| `assets/cloud.js` | One account's cloud storage: recent lookups and the encrypted vault mirrored to `cardna_cloud`, a per-account local mirror, an offline queue, and the honest "not set up yet" line when the SQL has not been run |
+| `assets/actas.js` | The owner's "log in as" view of one account: read-only, a banner with a way back, and every use recorded — the button is for drifter_87@live.com alone, and the database refuses anyone else (`docs/supabase-owner-act-as.sql`) |
+| `assets/vin.js` | VIN validation, vPIC decode over the shared 104-field schema, decode warnings, recent lookups per account (mirrored to Supabase), `?vin=` deep links |
 | `assets/vin-schema.js` | The single 104-field VIN schema, shared by the decoder and the comparison tool |
 | `tools/vin-compare.html` | Keyless decoder comparison: vPIC, AI Kit Edge, AI Kit Unified, NHTSA recalls — full schema per VIN, plus field-by-field diff |
 | `assets/makes.js` | Loads the static catalogue, groups brands by country, instant search across brands and models |
 | `assets/garage.js` | Saved vehicles in `localStorage`: save, list, remove, clear — shared by the decoder and `garage.html` |
-| `assets/vault.js` | Private vault: PBKDF2-SHA256 key derivation, AES-256-GCM encryption, VIN parsing and encrypted import/export — see below |
+| `assets/vault.js` | Private vault: PBKDF2-SHA256 key derivation, AES-256-GCM encryption, VIN parsing and encrypted import/export, with the cipher text mirrored to the account — see below |
 | `data/vehicles.csv` | Static catalogue: 15,068 rows, one per model, six vehicle kinds (1.1 MB) — CC BY 4.0 |
 | `data/engines.csv` | 30,535 engine variants with generation, years, body, power, torque and dimensions (5 MB) — ODbL |
 | `data/catalog_car_makes.json` | Make metadata with country codes, used to group the brands |
@@ -78,23 +80,29 @@ npx serve .
   (30,535 variants). Loaded lazily the first time a brand is opened, then cached in memory.
 
 Accounts live in Supabase. An account stores an email, a hashed password, a display name, a plan
-and a role; the vehicle data you decode is still sent straight from the browser to NHTSA. Recent
-lookups and the vault stay in `localStorage`; the garage is mirrored to your account, so saved cars
-follow you between devices.
+and a role. **Each account has its own place in the database, reached whenever the browser is online:**
+saved vehicles in `vehicles`, recent lookups and the *encrypted* vault blob in `cardna_cloud` — rows only
+that account can read, enforced by row-level security rather than by the page. The vehicle record you
+decode is still sent straight from the browser to NHTSA. `docs/cloud-storage.md` records the design, its
+cost and how a paid decode would be charged.
 
 ## Private vault
 
-There is no database. Everything the browser keeps is in `localStorage`, per device:
+There is no plain VIN list on any server. Three copies exist, and every one of them is cipher text:
 
-- `cardna.recent` — the last six VINs you decoded
-- `cardna.garage` — vehicles you saved
-- `cardna.vault` — your encrypted VIN list
+- `cardna.vault.<account>` — this browser, per account
+- `cardna_cloud`, kind `vault`, key `current` — the account's own row in Supabase
+- the file `cardna-vault-<date>.json` — only if you download it
 
-`vault.html` encrypts that list with AES-256-GCM, the key derived from your pass phrase through
+`vault.html` encrypts the list with AES-256-GCM, the key derived from your pass phrase through
 PBKDF2-SHA256 (210,000 iterations, random salt and IV). Only the cipher text is written; the pass
-phrase is never stored. "Download encrypted file" saves the same cipher text as JSON and "Load an
-encrypted vault file" reads it back, so the list survives clearing the browser. There is no recovery
-if the phrase is lost.
+phrase is never stored and never sent. "Download encrypted file" saves that same cipher text as JSON and
+"Load an encrypted vault file" reads it back, so the list survives losing the device. There is no
+recovery if the phrase is lost — not by us either, because we cannot read the blob.
+
+Recent lookups (`cardna.recent.<account>`) and the garage (`cardna.garage`) are readable by the account
+that owns them, on any device it signs in on; the local copy is a cache so the page renders at once and
+works offline.
 
 Plain VIN lists never belong in this repository — `.gitignore` excludes `private/`, `*.cardna` and
 exported `cardna-vault-*` / `cardna-vins-*` files.
@@ -133,8 +141,12 @@ wiring for each:
 
 **Waiting on the database, not on a decision:** the server-side decode count (`F-26`) and the VIN cache
 (`F-27`) are wired to `docs/supabase-decode-log-cache-delete.sql`, which has been run. The cache was proved
-in Turn 43: a signed-in decode writes the vPIC answer, and the report renders it. The licensed parts layer
-and the European vendor proxy still need contracts.
+in Turn 43: a signed-in decode writes the vPIC answer, and the report renders it. **The per-account cloud
+storage (`F-28`) is wired to `docs/supabase-user-cloud.sql`, which has not been run yet**: until it is, the
+garage and vault pages say so in red and keep recent lookups and the vault in this browser only. **The
+owner's "log in as" view (`F-29`) is wired to `docs/supabase-owner-act-as.sql`, also not run yet**:
+until it is, the button in the staff console answers honestly and opens nothing. The
+licensed parts layer and the European vendor proxy still need contracts.
 
 ## Documents
 
@@ -144,6 +156,7 @@ and the European vendor proxy still need contracts.
 | `cardna-fm-plan.md` | The plan and feature registry: status of every feature, its wiring contract, the build order |
 | `README.md` | This file: what the product is, publicly |
 | `CarDNA-fm-tracker.md` | The turn-by-turn record: decisions, what was verified, what is open |
+| `docs/cloud-storage.md` | One account's storage: what is in which table, why it is cheap, and how a paid decode would be charged |
 | `AGENT.md` | Superseded by `instructions.md`; kept for history |
 
 ## What is deliberately not here yet

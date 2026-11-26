@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Privacy, terms &amp; data licences — CarDNA</title>
 <meta name="description" content="How CarDNA handles data, what the service promises, and the licences behind the vehicle catalogue.">
-<link rel="stylesheet" href="assets/style.css?v=p48">
+<link rel="stylesheet" href="assets/style.css?v=p50">
 <link rel="stylesheet" href="assets/motion.css">
 </head>
 <body>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p48"></script>
+<script src="assets/site-shell.js?v=p50"></script>
 
 <main>
   <section class="page-head">
@@ -28,23 +28,37 @@
         <div class="card">
           <h3 id="privacy">Privacy</h3>
           <p>
-            CarDNA has accounts and no backend of its own for vehicle data. A VIN you decode is sent to NHTSA's public vPIC API
-            from your browser; we never receive or store it. Recent lookups, saved vehicles and your
-            private vault live in your browser's local storage (<code>cardna.recent</code>,
-            <code>cardna.garage</code>, <code>cardna.vault</code>) and disappear when you clear site
-            data. The first two are readable by anyone using this browser; the vault is encrypted with a
-            pass phrase you choose and cannot be read without it. There are no analytics, advertising or
-            tracking cookies on this site.
+            A VIN you decode is sent to NHTSA's public vPIC API from your browser; we do not store the
+            vehicle record ourselves. Your account's own data lives in Supabase, in rows only you can
+            read — enforced by the database, not by this page: your saved vehicles, your last six
+            recent lookups, and the <em>encrypted</em> copy of your vault.
+          </p>
+          <p>
+            The vault's pass phrase never leaves your browser, and neither does the plain list: only the
+            AES-256-GCM cipher text is stored, so the locked blob can sit in your account without
+            anyone — us included — being able to read it. Recent lookups and the saved garage are
+            stored readable, by you, on any device you sign in on. There are no analytics,
+            advertising or tracking cookies on this site.
+          </p>
+          <p>
+            This browser also keeps a copy of each of those (<code>cardna.garage</code>,
+            <code>cardna.recent.&lt;account&gt;</code>, <code>cardna.vault.&lt;account&gt;</code>) so a
+            page renders at once and works offline; a change made offline is queued and sent when the
+            connection is back. Clearing site data removes that copy, not your account's rows.
           </p>
           <p>
             If a paid European decoder is added later, it will run through a proxy that keeps the API key
             server-side and stores only the decoded result, keyed by VIN — never your identity.
           </p>
           <p>
-            The database schema for accounts, a synced garage and an owner-only VIN list is written but
-            not in use yet, so nothing about you reaches a server today. When it is switched on, saved
-            vehicles will be readable only by their owner, enforced in the database rather than in the
-            page.
+            One owner account — the address named in <code>docs/supabase-owner-act-as.sql</code> — may
+            open another account's view from the staff console, read-only, to help with a support
+            request. That view cannot change anything of theirs, the database refuses every other
+            account, and each use is recorded in the activity log.
+          </p>
+          <p>
+            If the account storage has not been switched on in this project yet, the page says so and
+            keeps recent lookups and the vault in this browser only, under the keys above.
           </p>
         </div>
 
@@ -109,9 +123,9 @@
 <div data-site-footer data-site-root=""></div>
 
 <script src="assets/supabase-config.js"></script>
-<script src="assets/auth.js?v=p48"></script>
-<script src="assets/app.js?v=p48"></script>
-<script src="assets/preview.js?v=p48"></script>
+<script src="assets/auth.js?v=p50"></script>
+<script src="assets/app.js?v=p50"></script>
+<script src="assets/preview.js?v=p50"></script>
 <script src="assets/motion.js"></script>
 </body>
 </html>
