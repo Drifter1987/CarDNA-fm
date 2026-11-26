@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/
 > Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 15 November 2026 — Chat 1, Turn 41
+> Last updated: 25 November 2026 — Chat 1, Turn 44
 
 ## How this file works
 
@@ -51,12 +51,11 @@ documents into one shell without breaking a single URL.
 
 ## Current state
 
-**Branch** `main`. Latest commit `4edef90` (25 Nov 2026, "Review pass: five bugs on the report page and
-in the docs"), pushed to `origin/main`. Uncommitted on top of it: Turn 42 (report field mapping, export
-download, bulk picker, light-theme edges) and Turn 43 (share that copies, folded recalls, quieter copy,
-the footer credit moved to legal), with `?v=p48` on all 14 pages. The private preview at
-`https://cardna-fm-g2j6--preview.freemilk.app` serves the working tree. GitHub Pages is not confirmed to
-carry the uncommitted work.
+**Branch** `main`. Latest commit `29d3343` (25 Nov 2026, "Share that copies, folded recalls, credit moved
+to legal"), made in Turn 44 and **not pushed**. It carries every change from Turns 42 and 43, so the working
+tree is clean and the local branch is one commit ahead of `origin/main` (`4edef90`). `?v=p48` on all 14 pages.
+The private preview at `https://cardna-fm-g2j6--preview.freemilk.app` serves these same files. GitHub Pages
+has `4edef90` until the commit is pushed.
 
 **Verified (Turn 43, as the owner, desktop 1280×800, no console errors):** the decoder's share panel copies
 and shows the link; the report's Share button copies and says so above the field grid; every recall campaign
@@ -64,11 +63,11 @@ is listed folded and expands; and the cache is proved — a signed-in decode wro
 rendered "2017 TESLA Model S", 9 of 12 fields. Not verified: the account export's download, the picker, the
 keyboard pass, and the `?vin=` deep link.
 
-**Working tree — uncommitted:** `assets/app.js`, `assets/report.js`, `assets/report-view.js`,
-`assets/vehicle.js`, `assets/style.css`, `assets/site-shell.js`, `assets/surfaces.js`, `assets/account.js`,
+**Working tree:** clean. Every file below is in `29d3343`. Do not re-commit them; `git status` is the check.
+Touched across Turns 42–43: `assets/app.js`, `assets/report.js`, `assets/report-view.js`, `assets/vehicle.js`,
+`assets/style.css`, `assets/site-shell.js`, `assets/surfaces.js`, `assets/account.js`, `assets/vin.js`,
 `garage.html`, `decode.html`, `index.html`, `pricing.html`, `legal.html`, all 14 HTML pages (version),
-`README.md`, `cardna-fm-plan.md`, `docs/car-brands.md`, `CarDNA-fm-tracker.md`. Check `git status` before
-trusting this list.
+`README.md`, `cardna-fm-plan.md`, `docs/car-brands.md`, this tracker.
 
 **Confirmed working:**
 
@@ -148,7 +147,7 @@ trusting this list.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 43 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 44 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -1076,11 +1075,29 @@ Refreshed in Turn 43. Statuses reflect the working tree and the latest browser c
   - **Cache proof at last.** Signed in, `5YJSA1E26HF000337` decoded, then rendered on `report.html` as "2017 TESLA Model S" with 9 of 12 fields filled (Engine, Cylinders and Drive unfiled). That is the first signed-in decode to write `decode_cache` and the first populated report, closing the proof open since Turn 40.
   - Report Share: "Link copied." appears between the VIN header and the field grid, visible without scrolling, and stays put over three clicks.
   - Footer and copy: the pricing page's footer is "Data sources" alone, the credit line is gone from every page; the comparison row reads "US VIN decode (104 fields)"; `legal.html#sources` reached from the footer lands on the Data licences card (an address opened directly still has its fragment stripped by the preview hop); the credit sentence reads "Credit is required; it is given here, and the footer of every page links to it."
-- **Commits**: none. Uncommitted: all files above.
+- **Commits**: committed in Turn 44 as `29d3343` ("Share that copies, folded recalls, credit moved to legal"), with the rest of the Turn 42 work. Not pushed.
 - **Open**:
-  1. Cache security, unchanged and now more serious with a populated cache: any signed-in account may POST an arbitrary `payload` for any valid VIN, and the public report would show it. Needs a trusted write path (an edge function that calls vPIC itself) before the cache is relied on.
+  1. Cache security, unchanged and more serious with a populated cache: any signed-in account may POST an arbitrary `payload` for any valid VIN, and the public report would show it. Needs a trusted write path (an edge function that calls vPIC itself) before the cache is relied on.
   2. The account export's download, the bulk picker at 320 px and the keyboard pass are unseen in a signed-in session.
   3. The `?vin=` deep link through the preview sign-in hop.
   4. Section scroll-reveals stay blank when the page is jumped straight to the bottom (seen twice this turn on `decode.html`); motions should reveal what is already in view.
   5. The footer no longer names the source datasets; the credit is one click away. If the Boss wants it visible, put a short "Data: VehiclesDB, gor3a" line back in the footer.
   6. `pricing.html`'s lede still says "per-lookup price past it", which is the offer, kept deliberately.
+
+
+
+### Turn 44 — Everything committed as `29d3343`; tracker checked against the commit
+
+- **Input**: "Commit all uncommitted changes. Did you update the project's turn tracker.md? If not then do it. Whats next now?"
+- **Output**:
+  - **Tracker check, answered.** It *was* updated in Turn 43 — the entry, `## Current state`, `## Open work`, the project index row and the change-log row were all there. Two things were stale and are fixed now: the front matter still said "Last updated: 15 November 2026 — Chat 1, Turn 41", and `## Current state` still described Turns 42 and 43 as uncommitted. Both now name `29d3343` and a clean tree.
+  - **One edit did damage, caught and repaired.** Replacing the Turn 43 "Commits" line also swallowed the `**Open**:` header and its first item (cache security). Read back immediately, seen in the diff, and restored with the item intact.
+  - **Commit `29d3343`** carries 27 files: the Turn 42 and Turn 43 work plus `?v=p48` on all 14 pages. Not pushed, so Pages still serves `4edef90`.
+  - **Preview**: serves these files already; a publish was not needed for a commit that changes no file.
+- **Files**: this tracker only (the code was committed, not altered).
+- **Verified**: `git_status` clean on `main`, one commit ahead of `origin/main`; `git_log` shows `29d3343` at the head. Not verified: that Pages/CI accept the commit — that needs a push, which was not asked for.
+- **Commits**: `29d3343` (code and docs), plus this tracker entry in a second commit.
+- **Open**: unchanged from Turn 43 — cache write security first, then the three unseen signed-in checks, the `?vin=` link, and the scroll-reveal bug. Push and Pages wait on the Boss.
+
+
+| 25 Nov 2026 | Turn 44: every change from Turns 42 and 43 committed as `29d3343` (27 files, `?v=p48` on all 14 pages, not pushed); tracker checked and corrected — front matter moved to 25 Nov / Turn 44 and the "uncommitted" state replaced by the commit hash and a clean tree; an edit that swallowed the `**Open**:` header and its cache-security item was caught on read-back and restored; Turn 44 entry and this row added. |
