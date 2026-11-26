@@ -24,16 +24,17 @@
     return { ok: false, error: "preview", message: reason };
   }
 
+  /* Saved from inside the click that asked for it. A download started later, from a timer, can
+     lose that click, and the browser then opens the file in the tab instead of saving it. */
   function download(text, type, name) {
-    var blob = new Blob([text], { type: type });
-    var url = URL.createObjectURL(blob);
+    var url = URL.createObjectURL(new Blob([text], { type: type }));
     var link = document.createElement("a");
     link.href = url;
     link.download = name;
     document.body.appendChild(link);
     link.click();
     link.remove();
-    window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    window.setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
 
   function stamp() {
@@ -78,11 +79,9 @@
 
       var name = "cardna-account-" + stamp() + ".json";
 
-      /* Paint the sentence first: some browsers replace the tab with the file, and the
-         confirmation must be on screen before that happens. */
-      window.setTimeout(function () {
-        download(JSON.stringify(payload, null, 2), "application/json;charset=utf-8", name);
-      }, 500);
+      /* Started here, inside the click: the surface runner calls this synchronously from the
+         button, so the save belongs to that click and the tab stays where it is. */
+      download(JSON.stringify(payload, null, 2), "application/json;charset=utf-8", name);
 
       return {
         ok: true,

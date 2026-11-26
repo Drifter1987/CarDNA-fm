@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CarDNA — read any vehicle in 17 characters | GMOttomotive</title>
 <meta name="description" content="CarDNA decodes a VIN into the exact vehicle, and browses 319 car brands with 5,600+ models, generations and engines. A GMOttomotive product.">
-<link rel="stylesheet" href="assets/style.css?v=p43">
-<link rel="stylesheet" href="assets/motion.css?v=p43">
+<link rel="stylesheet" href="assets/style.css?v=p48">
+<link rel="stylesheet" href="assets/motion.css?v=p48">
 </head>
 <body class="is-app" data-require-auth>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p43"></script>
+<script src="assets/site-shell.js?v=p48"></script>
 
 <div class="tabbar">
   <div class="container tabbar-inner" role="tablist" aria-label="Sections">
@@ -85,8 +85,8 @@
       <div class="grid-2" style="grid-template-columns:1fr">
         <div class="decoder">
           <h2>Read a VIN</h2>
-          <p class="decoder-sub">US manufacturer record from vPIC, plus a European structural decode
-            (WMI, model year, plant) — every field shown, blanks as “—”.</p>
+          <p class="decoder-sub">The manufacturer-filed record, plus a structural decode for European
+            VINs — every field shown, blanks as “—”.</p>
 
           <form class="vin-form" id="vin-form" novalidate>
             <label class="vin-label" for="vin">Vehicle identification number</label>
@@ -125,12 +125,12 @@
             </li>
             <li>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span><strong>Free and unlimited</strong>NHTSA vPIC, no key and no per-lookup cost.</span>
+              <span><strong>European VINs</strong>WMI, model year and plant read from the VIN itself.</span>
             </li>
           </ul>
 
           <p style="margin-top:22px;font-size:.86rem;color:var(--dim-2)">
-            vPIC is the US federal record — non-US and pre-1981 vehicles can return “no record”.
+            Non-US and pre-1981 vehicles can return “no record”.
           </p>
         </div>
       </div>
@@ -266,9 +266,8 @@
       <div class="panel-head">
         <div class="kicker">Pricing</div>
         <h2>Identity is free. Forever.</h2>
-        <p>You should never pay to find out what car you own. American records and the whole catalogue
-          cost nothing to serve, so they stay free. European factory data is bought per lookup, so it
-          carries a quota — and the quota is set so a plan stays healthy even if you use all of it.</p>
+        <p>You should never pay to find out what car you own. The catalogue and American records are
+          free; European factory data is bought per lookup, so it carries a quota.</p>
       </div>
 
       <span class="preview-flag" data-preview="payments"></span>
@@ -328,13 +327,13 @@
 
 <div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p43"></script>
-<script src="assets/auth.js?v=p43"></script>
-<script src="assets/app.js?v=p43"></script>
-<script src="assets/preview.js?v=p43"></script>
-<script src="assets/garage.js?v=p43"></script>
-<script src="assets/vin-schema.js?v=p43"></script>
-<script src="assets/vin.js?v=p43"></script>
+<script src="assets/supabase-config.js?v=p48"></script>
+<script src="assets/auth.js?v=p48"></script>
+<script src="assets/app.js?v=p48"></script>
+<script src="assets/preview.js?v=p48"></script>
+<script src="assets/garage.js?v=p48"></script>
+<script src="assets/vin-schema.js?v=p48"></script>
+<script src="assets/vin.js?v=p48"></script>
 <script>
   (function () {
     "use strict";
@@ -353,6 +352,6 @@
     });
   })();
 </script>
-<script src="assets/motion.js?v=p43"></script>
+<script src="assets/motion.js?v=p48"></script>
 </body>
 </html>

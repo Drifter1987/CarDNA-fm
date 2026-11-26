@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>VIN decoder — CarDNA</title>
-<meta name="description" content="Decode any VIN into make, model, year, engine and plant with NHTSA vPIC. Free with a CarDNA account.">
-<link rel="stylesheet" href="assets/style.css?v=p43">
-<link rel="stylesheet" href="assets/motion.css?v=p43">
+<meta name="description" content="Decode any VIN into make, model, year, engine and plant. Free with a CarDNA account.">
+<link rel="stylesheet" href="assets/style.css?v=p48">
+<link rel="stylesheet" href="assets/motion.css?v=p48">
 </head>
 <body data-require-auth>
 
 <div data-site-header data-site-root=""></div>
-<script src="assets/site-shell.js?v=p43"></script>
+<script src="assets/site-shell.js?v=p48"></script>
 
 <main>
 
@@ -20,11 +20,10 @@
       <div class="kicker">VIN decoder</div>
       <h1>Seventeen characters, one exact car.</h1>
       <p>
-        Two decoders run on every VIN. NHTSA's vPIC gives the US manufacturer-filed record — engine,
-        drivetrain, dimensions, weights, safety systems and plant. A European structural decode reads
-        the WMI, model year, plant and serial from the VIN itself, which is what still works for
-        European cars the US register has never heard of. Everything is always shown; fields this
-        vehicle did not file appear as “—”. One free account, no marketing email, no quota.
+        Every VIN is read twice. The manufacturer-filed record gives engine, drivetrain, dimensions,
+        weights, safety systems and plant; a structural decode reads the WMI, model year and plant
+        from the VIN itself, which is what still works for European cars. Every field is shown, and
+        one this vehicle did not file appears as “—”.
       </p>
     </div>
   </section>
@@ -91,9 +90,9 @@
           <span class="preview-flag" data-preview="parts"></span>
 
           <div class="notice" style="margin-top:0">
-            <strong>What we do not show.</strong> vPIC is the US federal record. Non-US vehicles,
-            pre-1981 classics and factory option codes usually live in the OEM catalogue instead —
-            that is the layer we license next, and the reason a VIN can decode to "no record".
+            <strong>What we do not show.</strong> Non-US vehicles, pre-1981 classics and factory
+            option codes usually live in the OEM catalogue instead — that is the layer we license
+            next, and the reason a VIN can decode to "no record".
           </div>
         </div>
       </div>
@@ -187,6 +186,7 @@
             <button class="btn btn--sm" type="button" data-surface-run>Copy a share link</button>
           </div>
           <p class="surface-status" data-surface-status aria-live="polite"></p>
+          <div class="surface-output" data-surface-output></div>
         </div>
       </div>
     </div>
@@ -196,16 +196,16 @@
 
 <div data-site-footer data-site-root=""></div>
 
-<script src="assets/supabase-config.js?v=p43"></script>
-<script src="assets/auth.js?v=p43"></script>
-<script src="assets/app.js?v=p43"></script>
-<script src="assets/preview.js?v=p43"></script>
-<script src="assets/garage.js?v=p43"></script>
-<script src="assets/vin-schema.js?v=p43"></script>
-<script src="assets/vin.js?v=p43"></script>
-<script src="assets/surfaces.js?v=p43"></script>
-<script src="assets/vehicle.js?v=p43"></script>
-<script src="assets/report.js?v=p43"></script>
+<script src="assets/supabase-config.js?v=p48"></script>
+<script src="assets/auth.js?v=p48"></script>
+<script src="assets/app.js?v=p48"></script>
+<script src="assets/preview.js?v=p48"></script>
+<script src="assets/garage.js?v=p48"></script>
+<script src="assets/vin-schema.js?v=p48"></script>
+<script src="assets/vin.js?v=p48"></script>
+<script src="assets/surfaces.js?v=p48"></script>
+<script src="assets/vehicle.js?v=p48"></script>
+<script src="assets/report.js?v=p48"></script>
 <script>
   (function () {
     "use strict";

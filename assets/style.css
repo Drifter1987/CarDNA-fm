@@ -45,6 +45,14 @@
 
 [data-theme="light"] .site-header { background: rgba(244, 246, 250, .9); }
 [data-theme="light"] .tabbar { background: rgba(244, 246, 250, .94); }
+/* Light theme: the 12 % hairline vanishes on white cards, so cards and tiles get a firmer edge. */
+[data-theme="light"] .card,
+[data-theme="light"] .surface,
+[data-theme="light"] .tier,
+[data-theme="light"] .model-panel,
+[data-theme="light"] .notice { border-color: rgba(10, 16, 28, .2); }
+[data-theme="light"] .card:hover,
+[data-theme="light"] .surface:hover { border-color: rgba(10, 16, 28, .32); }
 [data-theme="light"] .btn--ghost:hover { background: rgba(10, 16, 28, .05); }
 [data-theme="light"] .tab:hover { background: rgba(10, 16, 28, .06); }
 [data-theme="light"] .trim,
@@ -257,6 +265,9 @@ img, svg { display: block; max-width: 100%; }
 .dna { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 18px; }
 .dna-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .dna-vin { font: 600 .8rem/1 var(--mono); letter-spacing: .14em; color: var(--lime); }
+.dna-head-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.dna-share-status { margin: -4px 0 12px; font: 500 11px/1.5 var(--mono); letter-spacing: .02em; color: var(--dim-2); }
+.dna-share-status:empty { display: none; }
 .dna-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .dna-row { background: var(--panel); padding: 11px 13px; }
 .dna-key { font: 600 9px/1 var(--mono); letter-spacing: .13em; text-transform: uppercase; color: var(--dim-2); margin-bottom: 6px; }
@@ -295,6 +306,8 @@ img, svg { display: block; max-width: 100%; }
 }
 .card:hover { border-color: var(--line-strong); }
 .card h3 { margin-bottom: 10px; }
+/* A link straight to a card's heading (legal.html#sources) must not land under the sticky header. */
+.card > h3[id] { scroll-margin-top: 104px; }
 .card p { color: var(--dim); font-size: .93rem; }
 .card-icon { width: 34px; height: 34px; margin-bottom: 16px; color: var(--lime); }
 
@@ -1616,12 +1629,49 @@ body.is-app .shared-footer .footer-bottom {
 .surface > p { color: var(--dim); font-size: .9rem; margin-top: 6px; }
 .surface .preview-flag { margin-top: 0; }
 .surface-controls { margin-top: 14px; }
-.surface-controls input[type="file"] {
-  width: 100%;
-  font: 500 11px/1.6 var(--mono);
-  color: var(--dim);
+/* The CSV picker: the browser's own file control is hidden and its label is drawn in the design
+   system, so it takes the palette, wraps on a phone and shows a focus ring. The input stays in the
+   tab order and is named by the label. */
+.file-pick {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--panel-2);
+  cursor: pointer;
 }
-.surface-controls input[type="file"]:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.file-pick:hover { border-color: var(--lime); }
+.file-pick:focus-within { outline: 2px solid var(--lime); outline-offset: 2px; }
+.file-pick__label {
+  padding: 7px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--text);
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.file-pick__name {
+  min-width: 0;
+  color: var(--dim);
+  font: 500 12px/1.4 var(--mono);
+  overflow-wrap: anywhere;
+}
+.file-pick input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
 .surface-status {
   min-height: 16px;
   margin-top: 12px;
@@ -1652,31 +1702,89 @@ body.is-app .shared-footer .footer-bottom {
   }
 }
 
+/* The native file picker, matched to the panel it sits in: only the browser's own button can be
+   styled, and the tail text needs room rather than a clipped half-word. */
+.surface-controls input[type="file"] {
+  min-width: 0;
+  max-width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--dim);
+  font: 500 12px/1.6 var(--mono);
+}
+.surface-controls input[type="file"]::file-selector-button {
+  margin-right: 10px;
+  padding: 5px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text);
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .06em;
+  cursor: pointer;
+}
+.surface-controls input[type="file"]::file-selector-button:hover {
+  border-color: var(--lime);
+}
+
 
 /* The rich half of a surface's answer — a recall list today, exported records later. */
 .surface-output { margin-top: 12px; display: grid; gap: 10px; }
 .surface-output:empty { display: none; }
 .surface-output .recall {
   border-top: 1px solid var(--line);
-  padding-top: 10px;
   font-size: .88rem;
 }
-.surface-output .recall:first-child { border-top: 0; padding-top: 0; }
+.surface-output .recall:first-child { border-top: 0; }
+
+/* One campaign folds to a single line. A native details element, so the keyboard, a screen reader
+   and a phone already know how it opens; this only draws the marker and the spacing. */
+.surface-output .recall > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 10px 0;
+  cursor: pointer;
+  list-style: none;
+}
+.surface-output .recall > summary::-webkit-details-marker { display: none; }
+.surface-output .recall > summary::before {
+  content: "+";
+  flex: 0 0 12px;
+  font: 600 12px/1.4 var(--mono);
+  color: var(--lime);
+}
+.surface-output .recall[open] > summary::before { content: "\2013"; }
+.surface-output .recall > summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.surface-output .recall > summary:hover b { color: var(--text); }
 .surface-output .recall b {
-  display: block;
-  margin-bottom: 4px;
   font: 600 10px/1.5 var(--mono);
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--lime);
 }
-.surface-output .recall span { display: block; color: var(--dim); }
-.surface-output .recall span + span { margin-top: 4px; }
-.surface-output .recall em {
-  display: block;
-  margin-top: 6px;
+.surface-output .recall .recall-campaign {
   font: 500 10px/1.5 var(--mono);
+  letter-spacing: .06em;
+  color: var(--dim-2);
+}
+.surface-output .recall-body { padding: 0 0 12px 22px; }
+.surface-output .recall-body span { display: block; color: var(--dim); }
+.surface-output .recall-body span + span { margin-top: 4px; }
+.surface-output .recall-body em {
+  display: inline;
+  margin: 0 5px 0 0;
+  font: 600 10px/1.5 var(--mono);
   font-style: normal;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.surface-output .recall-body .recall-meta {
+  font: 500 10px/1.5 var(--mono);
   letter-spacing: .06em;
   color: var(--dim);
 }
@@ -1686,21 +1794,4 @@ body.is-app .shared-footer .footer-bottom {
   letter-spacing: .06em;
   color: var(--dim);
 }
-
-
-/* The recall entry's inline "Remedy" label and its campaign/date line. */
-.surface-output .recall em {
-  display: inline;
-  margin: 0 5px 0 0;
-  font: 600 10px/1.5 var(--mono);
-  font-style: normal;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--dim);
-}
-.surface-output .recall .recall-meta {
-  margin-top: 6px;
-  font: 500 10px/1.5 var(--mono);
-  letter-spacing: .06em;
-  color: var(--dim);
-}
+.surface-output .recall-more a { overflow-wrap: anywhere; }

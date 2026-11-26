@@ -51,19 +51,24 @@ documents into one shell without breaking a single URL.
 
 ## Current state
 
-**Branch** `main`, up to date with `origin/main` as of the latest status check. Latest commit `1beac6a`
-(15 Nov 2026, "Free plan: 3 VIN decodes in total; upgrade link when the garage is full"), pushed, and
-GitHub Pages serves it.
+**Branch** `main`. Latest commit `4edef90` (25 Nov 2026, "Review pass: five bugs on the report page and
+in the docs"), pushed to `origin/main`. Uncommitted on top of it: Turn 42 (report field mapping, export
+download, bulk picker, light-theme edges) and Turn 43 (share that copies, folded recalls, quieter copy,
+the footer credit moved to legal), with `?v=p48` on all 14 pages. The private preview at
+`https://cardna-fm-g2j6--preview.freemilk.app` serves the working tree. GitHub Pages is not confirmed to
+carry the uncommitted work.
 
-**Working tree — uncommitted:**
+**Verified (Turn 43, as the owner, desktop 1280×800, no console errors):** the decoder's share panel copies
+and shows the link; the report's Share button copies and says so above the field grid; every recall campaign
+is listed folded and expands; and the cache is proved — a signed-in decode wrote `decode_cache` and the report
+rendered "2017 TESLA Model S", 9 of 12 fields. Not verified: the account export's download, the picker, the
+keyboard pass, and the `?vin=` deep link.
 
-- Modified: `README.md`, `about.html`, `admin.html`, `assets/style.css`, `decode.html`, `garage.html`,
-  `index.html`, `legal.html`, `makes.html`, `pricing.html`, `reset.html`, `signin.html`,
-  `tools/parse-public-apis.html`, `tools/vin-compare.html`, `vault.html` — the P1 badge work (Turn 30).
-- Untracked: `AGENT.md`, `CarDNA-fm-tracker.md`, `instructions.md`, `cardna-fm-plan.md`,
-  `assets/preview.js`, `docs/supabase-migration.sql`, `docs/supabase-migration-2.sql`; `Skills/` is ignored.
-- Both migrations have been run by the Boss in the Supabase SQL Editor, so the database is ahead of the
-  repository even though the SQL lives in `docs/`.
+**Working tree — uncommitted:** `assets/app.js`, `assets/report.js`, `assets/report-view.js`,
+`assets/vehicle.js`, `assets/style.css`, `assets/site-shell.js`, `assets/surfaces.js`, `assets/account.js`,
+`garage.html`, `decode.html`, `index.html`, `pricing.html`, `legal.html`, all 14 HTML pages (version),
+`README.md`, `cardna-fm-plan.md`, `docs/car-brands.md`, `CarDNA-fm-tracker.md`. Check `git status` before
+trusting this list.
 
 **Confirmed working:**
 
@@ -143,7 +148,7 @@ GitHub Pages serves it.
 
 | # | Chat | Started | Status | Turns recorded |
 |---|---|---|---|---|
-| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 39 |
+| 1 | CarDNA-fm build and restructure | 12 Nov 2026 | active | 43 |
 
 Add a row here when a new chat starts, and a matching `## Chat N` section below. Never renumber.
 
@@ -827,41 +832,32 @@ surviving record, not a transcript.
 
 ## Open work
 
-Taken from the specification's requirement list; statuses reflect the current working tree and latest known checks. Do not resume project work until the user asks.
+Refreshed in Turn 43. Statuses reflect the working tree and the latest browser checks. Do not resume project work until the user asks.
 
-1. **The Boss's step: run `docs/supabase-decode-log-cache-delete.sql`.** It creates `decode_log` and
-   `decode_cache`, the two functions that make the free decode limit a rule, and
-   `cardna_delete_my_account()` — which refuses to delete an owner, in the database. The browser modules
-   are wired to those names next; nothing is claimed as working until a real row is seen.
-2. **Wire the client to that SQL** — the decode count into `assets/auth.js` and `assets/vin.js`, the cache
-   into the decode path, and `assets/account.js` to the export (client-side JSON) and the deletion RPC.
-3. **F-23, the shareable report**, which needs the cache populated first.
-4. **Bugs found by the Turn 36 export test, none fixed yet:** the export decodes with vPIC only, so a
-   European VIN exports a page of "—" while the in-app decoder would have shown the structural fallback;
-   the garage's plan/limit line flashes Free limits for the owner before the profile resolves; the
-   "Download DNA" dropdown overlaps the row buttons under it; and per-row checkboxes look filled when
-   unchecked.
-2. **Finish the P2 batch's loose ends.** The "Your data" confirm box still only says which action it
-   belongs to by position; the surface grid's cards end ragged once one gains a message (by design, but
-   worth a look); `assets/preview.js` hiding a badge on a live flag is still unproven.
-3. **Commit and push the P2 batch** — it is committed in Turn 32 together with the documents.
-3. **`LAY-02` / `LAY-03` residual checks.** 320 px and the intermediate widths, native swipe and keyboard
-   traversal, active-link marking per route, and non-staff Admin visibility (needs a role change — not
-   permitted). Colour and dark-theme contrast were re-checked for the badge only.
-4. **Supabase behaviour, not just objects.** A save at the cap, a blocked account, and a staff read of
-   `events` have never been exercised. Needs a throwaway account.
-5. **`SYN-03`** — the queue, per-car status and retry are built; a browser test with a refusal and an
-   offline save is still outstanding.
-6. **`F-26` server-side entitlement count.** The 3-decode limit is a browser counter that clearing site
-   data resets. This is the biggest gap between what the pricing page sells and what the code enforces.
-7. **`PLT-01` — the European decoder proxy**, the change that makes Pro real. Needs `D-13`.
-8. **`SHL-01` / `SHL-02` — one document** with hash routes and a single tab bar.
-9. **`F-12` commerce** — needs `D-12`; the waitlist placeholder (`F-22`) is the free interim step.
-10. **`dna-fm-brain`** — needs a real look on a device.
-11. **Plan scroll fix** — stable in FreeMilk phone and desktop previews; confirm in Koder on iOS. Keep the
-    internal plan in the private FreeMilk preview; do not publish it to GitHub Pages.
-12. **Visual follow-up** — the VIN field-by-field hint above the empty decoder state at 1280 px, the unused
-    matrix space, faint light-theme card borders, and the phone landscape black render.
+1. **Cache security (the biggest gap now).** The cache holds real rows and the report is public, but any
+   signed-in account may write an arbitrary `payload` for any valid VIN, so a poisoned row would be shown to
+   visitors. Fix with a trusted write path (an edge function that calls vPIC itself) before relying on it.
+2. **Unseen in a signed-in session:** the account export's download, the bulk picker at 320 px, the keyboard
+   pass. Fixed in code (Turn 42), not yet seen to work.
+3. **`?vin=` deep link.** The preview's sign-in hop strips the query. Typed VINs work; the link is unverified.
+4. **Scroll-reveal blank sections.** Jumping straight to the bottom of a long page left sections at opacity 0
+   (seen twice on `decode.html`, Turn 43). Reveal whatever is already in view, without relying on the observer.
+5. **Theme label.** It reads LIGHT in dark mode. Deliberate (it names the switch target); may be misread.
+6. **Engine unit.** vPIC returns displacement in litres without a unit; the report shows the raw number.
+7. **Footer credit.** The credit now lives on `legal.html` and the footer links to it as "Data sources". If
+   the Boss wants the datasets named on every page, add a short line back.
+8. **Decisions the Boss owns, no code yet:** `D-12` payments, `D-13` European vendor, `D-14` parts licence,
+   `D-4` product-domain email, and the `seats` and `api_keys` tables behind the team and API panels.
+9. **Account deletion and its stale-session cleanup.** Proven on a disposable account in Turn 39; re-test only
+   after a new deletion, which needs a throwaway account.
+10. **Export contents.** The JSON holds browser-local vehicles, which may include refused unsynced rows; the
+    note says so. Activity rows are not included.
+11. **Free test account** `sefipe7182@jcaton.com` holds four local garage vehicles against a one-vehicle limit,
+    three of them refused queue entries. Not to be cleared without the Boss's say-so.
+12. **`dna-fm-brain`** — needs a real look on a device.
+13. **Plan scroll fix** — stable in FreeMilk phone and desktop previews; confirm in Koder on iOS.
+
+
 
 ## Blockers and owner decisions
 
@@ -879,9 +875,21 @@ Taken from the specification's requirement list; statuses reflect the current wo
 - **`D-10`** every unwired feature ships frontend-complete behind the start icon (Turn 28).
 - **`D-11`** going live is wiring only: flag plus function, never a redesign (Turn 28).
 - **`D-15`** start-icon badge text is **"Coming soon"** on every unwired feature (decided by the Boss, Turn 29). The copy on a feature's own page may say more; the badge does not.
-- **`D-12`** payment processor and merchant details — planned, not yet opened for decision.
-- **`D-13`** European data vendor and contract — planned, not yet opened for decision.
-- **`D-14`** catalogue licence scope and terms — planned, not yet opened for decision.
+- **`D-12`** payment processor and merchant details — planned, not yet opened for decision. Advice given
+  in Turn 42, two routes: (a) Stripe Billing, lowest fees, but CarDNA is the seller and owes EU VAT, so it
+  needs Stripe Tax or a manual rate and a VAT registration (OSS for EU consumers); (b) a merchant of record
+  such as Paddle or Lemon Squeezy, which collects and remits VAT for each sale at a higher fee, with less
+  administration. Recommendation: (b) while the team is small, moving to (a) once volume justifies the VAT
+  work. PayPal, if wanted, is a second button on the same flow, not a second system. Decide the route, the
+  merchant entity and the price IDs before any checkout code. No charge is wired until then.
+
+- **`D-13`** European data vendor and contract — planned, not yet opened for decision. Advice given in
+  Turn 42: contract with one vendor whose per-lookup price is published, behind the signed-request proxy in
+  `docs/eu-decoder-integration.md`; the permanent cache is what keeps the cost flat. Check the data-
+  processing terms and where the vendor stores requests before signing.
+- **`D-14`** catalogue licence scope and terms — planned, not yet opened for decision. Licence the parts
+  data only for a use the vendor allows in writing (display per VIN, no bulk distribution); the plan's
+  F-15 entry already says a bulk file may need an edge function instead.
 
 ## Files in play
 
@@ -1013,3 +1021,66 @@ Taken from the specification's requirement list; statuses reflect the current wo
 - **Verified**: Private preview, browser inspector, at 1280×800 and 390×844, signed in as the owner. The theme toggle now exists on `report.html` and switches the whole page between dark and light and back; the hamburger opens the nine-link menu and closes it; the form is styled (mono field, lime button); a VIN with no cache row shows "No report for … yet." with the "Decode it" link; no console errors, no unstyled element, no overflow at either width. Not verified: a populated report (the cache is still empty), the `?vin=` deep link (the preview's own sign-in hop strips the query), and the theme label semantics the inspector flagged — `LIGHT` in dark mode names what you would switch *to*, which is deliberate but can be misread.
 - **Commits**: committed and pushed; Pages build checked.
 - **Open**: The cache has still never stored or served a row — that needs one signed-in decode, which is the Boss's step. Then the remaining polish: the account export replaces the tab instead of downloading; the bulk-upload file picker is off-palette and clipped; light-theme card borders are faint; the 320 px and keyboard checks.
+
+
+
+### Turn 42 — Report field mapping fixed; export saves in place; picker and light-theme edges; `?v=p45`
+
+- **Input**: "1 yours, 2 you do it, 3 payment wiring, own domain and EU subscriptions later, but advice needed." Read as: (1) the signed-in decode is the agent's to run; (2) the polish pass is the agent's to do; (3) the three decisions wait, with advice requested.
+- **Output**:
+  - **Report mapping bug fixed.** `assets/report-view.js` read `payload.Results[0]` as one flat row. The cached payload is vPIC's `Results: [{ Variable, Value }]`. The page now flattens it into a `Variable → Value` map (`filedFields`), dropping empty, `0` and "Not Applicable" rows the same way the decoder does.
+  - **Account export saves from the click.** `assets/account.js` builds a Blob and clicks its download link inside the button's own click, instead of a timer 500 ms later; the blob URL is revoked after 4 s. The committed version already used a Blob, and an uncommitted data-URL attempt sat in the tree before this turn — both had the tab-replacing symptom, so the timer was the suspect and is now gone. Not seen to save in a browser: the check was blocked by the sign-in gate.
+  - **Bulk picker restyled.** `garage.html` wraps the native file input in a `.file-pick` label: a palette chip reading "Choose a CSV file", a name line that reads "No file chosen" until a file is picked, and the input hidden but still focusable. `assets/surfaces.js` (`bindFiles`) updates the name line on change. New rules in `assets/style.css`.
+  - **Light-theme card edges.** `[data-theme="light"]` rules in `assets/style.css` firm the border on cards, surfaces, tiers, the model panel and notices. Dark theme is unchanged.
+  - Version `?v=p45` on all 14 HTML pages (105 references, none left at `p44`). Preview published.
+- **Files**: `assets/report-view.js`, `assets/account.js`, `assets/style.css`, `assets/surfaces.js`, `garage.html`, all 14 HTML pages (version), `cardna-fm-plan.md` (F-23 wiring and open items corrected), this tracker. `README.md` was checked and already states the cache proof as missing, so it is unchanged.
+- **Verified**:
+  - Report, in the browser on the private preview at 1280×800, typed VIN `1HGCM82633A004352` (the cached Honda row): heading "2003 HONDA Accord"; 11 of 12 rows filled, Drive is a dash (vPIC filed none). No console errors. Engine shows the raw value `2.998832712`, with no unit.
+  - Report, VIN `5YJSA1E26HF000337` (not cached): "No report for … yet." with the Decode link. Correct empty state.
+  - Light theme, `pricing.html` at 1280×800: page and cards read as white on grey; Free, Workshop and Business edges are a faint single grey line; the Pro card's lime edge reads clearly. The header label reads DARK in light mode, as designed.
+  - Not verified: the cache write. The preview's sign-in gate sent the browser to `signin.html` on every page that needs an account, so no signed-in decode ran, and no row was written.
+  - Not verified: the account export's download (needs a signed-in session); the bulk picker's look at 320 px and 1280 px (behind the same gate); the keyboard pass.
+  - Not verified: the `?vin=` deep link. A fresh open of `report.html?vin=…` still lands on the empty form, because the preview's sign-in hop strips the query.
+- **Commits**: none. Uncommitted: all files above.
+- **Open**:
+  1. One signed-in decode, which fills `decode_cache` and proves the cache write, the report render and a cache-served second decode. Needs a session the browser can use: a preview sign-in that keeps the session, or the Boss running the decode from their own account.
+  2. Account export download, bulk picker at 320 px, and the keyboard pass: all behind the same sign-in gate.
+  3. Cache security: authenticated users may still write arbitrary `payload` for any valid VIN (`docs/supabase-decode-log-cache-delete.sql`). A poisoned row would appear on the public report. Fix with a trusted write path before the cache is treated as safe.
+  4. The `?vin=` deep link through the preview sign-in hop.
+  5. The theme label reads LIGHT in dark mode. Deliberate, as it names the switch target, but it can be misread.
+  6. Engine value unit: vPIC returns litres with no unit label.
+  7. Decisions for the Boss, not code: D-12 payments, D-13 European vendor, D-14 parts licence, D-4 product-domain email, and the `seats` and `api_keys` tables.
+
+
+| 25 Nov 2026 | Turn 42: report field mapping fixed (vPIC `Results` flattened), account export saves from the click (Blob, no timer), bulk picker restyled as a labelled `.file-pick`, light-theme card edges firmed; `?v=p45` on all 14 pages; populated report render verified in the browser (11 of 12 fields); cache write, export, picker and keyboard pass blocked by the preview sign-in gate; `D-12`–`D-14` advice recorded; open work and current state refreshed. |
+
+| 25 Nov 2026 | Turn 43: the share panel's missing output region found (the link was built and discarded, and no code had ever called the clipboard), so the decoder's panel now copies and shows the link with a Copy and an Open control; one `CarDNACopy` helper with an `execCommand` fallback; a Share button on the report record; every recall campaign listed and folded to one line (cap and "first 8" note gone); the "no key", "per-lookup" and "no quota" asides trimmed from home, decoder and pricing, with the detail kept on `legal.html`; the footer's data-credit line replaced by a "Data sources" link; `?v=p48` on all 14 pages. The cache proof closed in the browser: a signed-in decode wrote `decode_cache` and the report rendered "2017 TESLA Model S", 9 of 12 fields. |
+
+
+
+### Turn 43 — Share that copies, folded recalls, quieter copy, credit moved to legal; `?v=p48`
+
+- **Input**: "What's next on the plan?" plus four preview comments, answered in plan mode and then implemented on approval: (1) recalls collapsible — all campaigns shown; (2) the share link copies nothing, and a share button that works; (3) less provider, quota and key detail in public copy, with the full detail in the legal terms; (4) remove the footer credit line "Vehicle data by VehiclesDB (CC BY 4.0) and gor3a (ODbL) · VIN: NHTSA vPIC", keeping a "Data sources" link to `legal.html#sources`.
+- **Output**:
+  - **Share link, the real bug.** The decoder's share panel had no `[data-surface-output]`, so `surfaces.js` rendered the returned HTML into nothing: the link was built and thrown away, and no code had ever called the clipboard. `decode.html` now has the output region. `assets/report.js` copies the URL inside the click, answers in a sentence, and returns the link with a Copy button and an Open link.
+  - **One clipboard helper.** `assets/app.js` exports `CarDNACopy.text`, using `navigator.clipboard` and falling back to a hidden textarea with `execCommand("copy")`. Every `[data-copy]` control reports "Copied" or "Copy failed" instead of failing silently.
+  - **Report Share button.** `assets/report-view.js` adds a Share control to the record header: the copy runs first, then the device's share sheet where one exists, so a sheet that never opens cannot swallow the feedback. The status line sits between the header row and the field grid, where it is visible without scrolling.
+  - **Recalls folded, all shown.** `assets/vehicle.js` renders every campaign as a `<details class="recall">`: component and campaign number on the summary line, summary, remedy and filed date inside. The 8-campaign cap and its "Showing the first 8" note are gone. Styles replaced in `assets/style.css`, with the `+`/`–` marker drawn in CSS.
+  - **Quieter public copy.** The "no key and no per-lookup cost" line on `index.html` became a European-VIN benefit; the decoder sub-line, the vPIC caveat, the `decode.html` page-head tail ("no marketing email, no quota") and the pricing comparison row lost their provider name. `legal.html` gained a Terms sentence on the free plan (3 decodes, 1 saved vehicle) and its "Data licences" card keeps every provider and licence.
+  - **Footer credit.** `assets/site-shell.js` renders **Data sources** → `legal.html#sources` instead of the VehiclesDB/gor3a/vPIC line. `legal.html` now says the credit is given there and the footer links to it; `docs/car-brands.md` matches. `.card > h3[id]` gained `scroll-margin-top`, so `#sources` no longer lands under the sticky header.
+  - Version `?v=p48` on all 14 HTML pages; published to the private preview.
+- **Files**: `assets/app.js`, `assets/report.js`, `assets/report-view.js`, `assets/vehicle.js`, `assets/style.css`, `assets/site-shell.js`, `decode.html`, `index.html`, `pricing.html`, `legal.html`, all 14 HTML pages (version), `README.md`, `cardna-fm-plan.md`, `docs/car-brands.md`, this tracker.
+- **Verified**, in the browser on the private preview as the owner, desktop 1280×800, no console errors:
+  - Recalls for `1HGCM82633A004352`: "24 campaigns on record for this 2003 Honda Accord.", all 24 folded to one line each with the campaign number; the first two expand to the summary, the REMEDY paragraph and "filed …", and collapse again; the old "Showing the first 8" note is absent.
+  - Share panel: "Link copied. A report for 1HGCM82633A004352, readable without an account." with the URL line, a Copy link button that reads "Copied" on press, and an Open the report link.
+  - **Cache proof at last.** Signed in, `5YJSA1E26HF000337` decoded, then rendered on `report.html` as "2017 TESLA Model S" with 9 of 12 fields filled (Engine, Cylinders and Drive unfiled). That is the first signed-in decode to write `decode_cache` and the first populated report, closing the proof open since Turn 40.
+  - Report Share: "Link copied." appears between the VIN header and the field grid, visible without scrolling, and stays put over three clicks.
+  - Footer and copy: the pricing page's footer is "Data sources" alone, the credit line is gone from every page; the comparison row reads "US VIN decode (104 fields)"; `legal.html#sources` reached from the footer lands on the Data licences card (an address opened directly still has its fragment stripped by the preview hop); the credit sentence reads "Credit is required; it is given here, and the footer of every page links to it."
+- **Commits**: none. Uncommitted: all files above.
+- **Open**:
+  1. Cache security, unchanged and now more serious with a populated cache: any signed-in account may POST an arbitrary `payload` for any valid VIN, and the public report would show it. Needs a trusted write path (an edge function that calls vPIC itself) before the cache is relied on.
+  2. The account export's download, the bulk picker at 320 px and the keyboard pass are unseen in a signed-in session.
+  3. The `?vin=` deep link through the preview sign-in hop.
+  4. Section scroll-reveals stay blank when the page is jumped straight to the bottom (seen twice this turn on `decode.html`); motions should reveal what is already in view.
+  5. The footer no longer names the source datasets; the credit is one click away. If the Boss wants it visible, put a short "Data: VehiclesDB, gor3a" line back in the footer.
+  6. `pricing.html`'s lede still says "per-lookup price past it", which is the offer, kept deliberately.

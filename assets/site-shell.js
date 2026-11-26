@@ -88,7 +88,7 @@
       '<div class="container">' +
         '<div class="footer-bottom">' +
           '<span>© ' + new Date().getFullYear() + ' GMOttomotive · CarDNA · <a href="' + root + 'legal.html">Legal</a></span>' +
-          '<span>Vehicle data by <a href="https://vehiclesdb.com">VehiclesDB</a> (CC BY 4.0) and <a href="https://github.com/gor3a/vehicle-makes-models">gor3a</a> (ODbL) · VIN: NHTSA vPIC</span>' +
+          '<span><a href="' + root + 'legal.html#sources">Data sources</a></span>' +
         '</div>' +
       '</div>';
 

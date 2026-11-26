@@ -87,7 +87,7 @@ the wording is the same on every surface.
 | F-24 | Owner analytics dashboard | `admin.html` | live | — |
 | F-25 | Self-serve data export and account deletion | `garage.html` | live (limited: deletion untested, owner refused in SQL) | — |
 | F-26 | Server-side entitlement check (decode count) | invisible | SQL ready (`docs/supabase-decode-log-cache-delete.sql`); client wiring next | — |
-| F-27 | Server-side VIN cache (`decode_cache`) | invisible | live (limited): vPIC answers are read from and written to `decode_cache.payload` by `assets/vin.js` for signed-in decodes; the report reads it. Repeat-decode proof still pending. | — |
+| F-27 | Server-side VIN cache (`decode_cache`) | invisible | live: vPIC answers are read from and written to `decode_cache.payload` by `assets/vin.js` for signed-in decodes; the report reads it. Proved in Turn 43 (a signed-in decode filled the cache and the report rendered it). | — |
 
 ### 4.1 Where the icon stands today
 
@@ -172,9 +172,9 @@ nothing else. Data shapes are final now; the view must not change when the real 
 - **Placeholder behaviour:** validates the VIN, then answers `{ ok:false, error:"preview" }` with the reason.
 - **Cost:** none — NHTSA's public API, already used in `tools/vin-compare.html`.
 - **Done when:** a VIN with a recall shows it, a VIN without shows the empty state, and the export
-  carries the same list. All three now hold: the panel is live (Turn 33) and every export — Markdown,
-  CSV, XLSX and the print-to-PDF view — carries a Recalls section, looked up during `prepare()` in
-  `assets/export.js` (Turn 36).
+  carries the same list. All three now hold: the panel is live (Turn 33), every campaign is listed and
+  folded to one line (Turn 43), and every export — Markdown, CSV, XLSX and the print-to-PDF view —
+  carries a Recalls section, looked up during `prepare()` in `assets/export.js` (Turn 36).
 
 ### F-15 · Licensed parts catalogue — `parts`
 
@@ -243,13 +243,15 @@ nothing else. Data shapes are final now; the view must not change when the real 
 - **Module:** `window.CarDNAReport.share({ vin })` → `{ ok, url, message, html }`. The URL is
   `report.html?vin=<vin>`. GitHub Pages cannot serve `/r/<vin>`, so the report is a page with a query,
   not a path. `assets/report-view.js` renders it.
-- **Wiring as built (Turn 40):** the link is built and shown; the report page reads
-  `public.decode_cache` (`select=payload`) anonymously and shows the filed fields only. A VIN nobody
-  has decoded while signed in shows an honest "no report yet" state with a link to the decoder.
+- **Wiring as built (Turn 40, render fixed Turn 42):** the link is built and shown; the report page reads
+  `public.decode_cache` (`select=payload`) anonymously, flattens vPIC's `Results` into fields, and shows
+  the filed record only. A VIN nobody has decoded while signed in shows an honest "no report yet" state
+  with a link to the decoder.
 - **Privacy:** the filed record only. The link carries nothing but the VIN; never the note, the garage
   label or the account.
-- **Still open:** the populated render (needs a cached row), the copy-to-clipboard behaviour (the link is
-  shown, not copied), and the SEO/indexing claim, which is untested.
+- **Still open:** the `?vin=` deep link through the preview sign-in hop, and the SEO/indexing claim, which
+  is untested. The cache write and the copy-to-clipboard behaviour were proved in Turn 43 (the decoder's
+  panel copies on submit and shows the link; the report page has its own Share button).
 
 ### F-24 · Owner analytics — `analytics`
 

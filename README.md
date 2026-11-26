@@ -40,7 +40,7 @@ npx serve .
 | File | Purpose |
 |---|---|
 | `assets/style.css` | The whole design system: dark blueprint palette, acid-lime accent, mono labels |
-| `assets/app.js` | Mobile nav, current year, delegated copy-to-clipboard, and the tab controller (hash-routed, arrow-key navigable) |
+| `assets/app.js` | Mobile nav, current year, the shared clipboard helper (with a fallback for browsers that refuse it), and the tab controller (hash-routed, arrow-key navigable) |
 | `assets/preview.js` | The start icon: marks a feature that is built in the interface but not wired yet, and hides the marker the moment its flag turns true |
 | `assets/surfaces.js` | The surface runtime: one panel per unwired feature, with locked, working, not-connected, done and error states decided in one place |
 | `assets/billing.js` | Checkout, the billing portal, invoices and overage — the shape a payment processor will return, without ever claiming a charge |
@@ -108,13 +108,14 @@ every feature whose service is missing:** each one is built, carries a small "Co
 live changes one flag and one function body — never a layout or a sentence.
 
 **Live and working:** US VIN decoding (NHTSA vPIC, 104 fields), the European structural decode used as a
-fallback, the whole static catalogue, **recalls and complaints on any VIN** (vPIC for make, model and year,
-then NHTSA's public recall feed — the panel lists the campaigns and every export carries them),
-accounts with roles and plans, the garage with server sync and a retry queue, the encrypted vault,
-Markdown / CSV / PDF / Excel export, the staff console, analytics for the owner, the **waitlist** (a real
-row in Supabase per address and interest, insert-only for visitors and staff-readable), the **shareable
-report** at `report.html?vin=…` (the filed record only, readable without an account, served from the VIN
-cache — and a VIN shows there once someone has decoded it while signed in), the free plan's limits
+fallback, the whole static catalogue, **recalls and complaints on any VIN** (every campaign listed, each
+folded to one line you can expand — the component, campaign number, summary, remedy and filed date, and
+every export carries them), accounts with roles and plans, the garage with server sync and a retry queue,
+the encrypted vault, Markdown / CSV / PDF / Excel export, the staff console, analytics for the owner, the
+**waitlist** (a real row in Supabase per address and interest, insert-only for visitors and
+staff-readable), the **shareable report** at `report.html?vin=…` (the filed record only, readable without
+an account, served from the VIN cache — and a VIN shows there once someone has decoded it while signed in;
+the decoder's panel copies the link, and the report has its own Share button), the free plan's limits
 (3 decodes in total, 1 saved vehicle), and self-serve account export and deletion.
 
 **Finished, waiting for its service** — `cardna-fm-plan.md` §4.1 and §4.2 name the module and the exact
@@ -131,9 +132,9 @@ wiring for each:
 | Email verification and recovery | `signin.html`, `reset.html` | a product-domain sender (`D-4`) |
 
 **Waiting on the database, not on a decision:** the server-side decode count (`F-26`) and the VIN cache
-(`F-27`) are wired to `docs/supabase-decode-log-cache-delete.sql`, which has been run. One proof is
-still missing: a signed-in decode that fills the cache, then the same VIN decoded again from it. The
-report page reads that cache. The licensed parts layer and the European vendor proxy still need contracts.
+(`F-27`) are wired to `docs/supabase-decode-log-cache-delete.sql`, which has been run. The cache was proved
+in Turn 43: a signed-in decode writes the vPIC answer, and the report renders it. The licensed parts layer
+and the European vendor proxy still need contracts.
 
 ## Documents
 

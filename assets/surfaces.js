@@ -226,9 +226,23 @@
     });
   }
 
+  /* A file picker's label shows the chosen file's name, so the choice is visible before Run. */
+  function bindFiles() {
+    Array.prototype.slice.call(document.querySelectorAll("[data-surface] .file-pick input[type=\"file\"]")).forEach(function (field) {
+      field.addEventListener("change", function () {
+        var label = field.closest(".file-pick");
+        var name = label && label.querySelector("[data-file-name]");
+        if (name) {
+          name.textContent = field.files && field.files[0] ? field.files[0].name : "No file chosen";
+        }
+      });
+    });
+  }
+
   function start() {
     bindSurfaces();
     bindCheckout();
+    bindFiles();
     prime();
 
     var a = auth();

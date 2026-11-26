@@ -68,6 +68,44 @@
   var year = document.getElementById("year");
   if (year) { year.textContent = String(new Date().getFullYear()); }
 
+  /* ---------------------------------------------------------------- copy
+     One way to put text on the clipboard. navigator.clipboard needs a secure context and is
+     missing in some in-app browsers, so a textarea route backs it up. Resolves true only when
+     the text really reached the clipboard, so a control can say so instead of pretending. */
+  function legacyCopy(text) {
+    var holder = document.createElement("textarea");
+    holder.value = text;
+    holder.setAttribute("readonly", "");
+    holder.style.position = "fixed";
+    holder.style.top = "-1000px";
+    holder.style.opacity = "0";
+    document.body.appendChild(holder);
+
+    var copied = false;
+    try {
+      holder.select();
+      holder.setSelectionRange(0, text.length);
+      copied = document.execCommand("copy");
+    } catch (err) {
+      copied = false;
+    }
+    holder.remove();
+    return copied;
+  }
+
+  function copyText(value) {
+    var text = String(value == null ? "" : value);
+    if (!text) { return Promise.resolve(false); }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function () { return true; },
+        function () { return legacyCopy(text); });
+    }
+    return Promise.resolve(legacyCopy(text));
+  }
+
+  window.CarDNACopy = { text: copyText };
+
   /* copy-to-clipboard buttons (delegated, so results rendered later work too) */
   document.addEventListener("click", function (event) {
     var button = event.target && event.target.closest ? event.target.closest("[data-copy]") : null;
@@ -76,15 +114,14 @@
     var value = button.getAttribute("data-copy");
     if (!value) { return; }
 
-    var done = function () {
-      var original = button.textContent;
-      button.textContent = "Copied";
+    var original = button.textContent;
+    copyText(value).then(function (ok) {
+      button.textContent = ok ? "Copied" : "Copy failed";
+      if (!ok) {
+        button.setAttribute("title", "This browser blocked the copy. Select the link and copy it.");
+      }
       window.setTimeout(function () { button.textContent = original; }, 1600);
-    };
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(value).then(done, function () { /* ignore */ });
-    }
+    });
   });
 
   /* ---------------------------------------------------------------- tabs */

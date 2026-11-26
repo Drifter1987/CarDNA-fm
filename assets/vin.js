@@ -755,18 +755,20 @@
         /* F-27: a VIN this database has already read is answered from decode_cache, so a repeat
            decode costs no vPIC call. A miss, a refusal or a missing table falls through to NHTSA. */
         var payload = await cachedPayload(vin);
+        var fromCache = Boolean(payload);
         if (!payload) {
           var response = await fetch(ENDPOINT + encodeURIComponent(vin) + "?format=json");
           if (!response.ok) { throw new Error("HTTP " + response.status); }
           payload = await response.json();
-          /* Only a real answer is kept: an empty vPIC reply would otherwise stick for good. */
-          if (payload && payload.Results && payload.Results.length && payload.Results[0].ErrorCode !== undefined) {
-            storePayload(vin, payload);
-          }
         }
         var parsed = extract(payload);
         var fields = parsed.fields;
         var notes = parsed.notes || {};
+
+        /* Cache only a real answer: vPIC's error code is a row of its own, not a key on the
+           first row, so this asks the extractor what it actually got. An empty answer must never
+           be cached, or a VIN NHTSA later fixes would stay unreadable for good. */
+        if (!fromCache && Object.keys(fields).length) { storePayload(vin, payload); }
 
         var structural = structuralDecode(vin);
         if (!fields["Make"] && structural.make) { fields["Make"] = structural.make; }

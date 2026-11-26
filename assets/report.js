@@ -23,6 +23,17 @@
     return window.location.href.split("#")[0].split("?")[0].replace(/[^\/]*$/, "");
   }
 
+  /* The answer the panel shows: the link in words, and a control that copies it again. The copy
+     button carries its own data-copy, so app.js's delegated handler picks it up. */
+  function linkHtml(vin, url) {
+    return '<p class="recall-more">Report for ' + esc(vin) + ': <a href="' + esc(url) + '">' +
+      esc(url) + "</a></p>" +
+      '<div class="vault-actions" style="margin-top:2px">' +
+        '<button class="btn btn--sm btn--ghost" type="button" data-copy="' + esc(url) + '">Copy link</button>' +
+        '<a class="btn btn--sm btn--ghost" href="' + esc(url) + '">Open the report</a>' +
+      "</div>";
+  }
+
   window.CarDNAReport = {
     live: true,
 
@@ -34,13 +45,22 @@
       }
 
       var url = folder() + "report.html?vin=" + encodeURIComponent(vin);
-      return {
-        ok: true,
-        url: url,
-        message: "Link ready for " + vin + ". It shows the filed record only, once someone has " +
-          "decoded this VIN with CarDNA.",
-        html: '<p class="recall-more">Share this link: <a href="' + esc(url) + '">' + esc(url) + "</a></p>"
-      };
+
+      /* Copied inside the click that asked for it, so the browser still counts it as the
+         visitor's own action. Where copying is refused the link stays on screen to be copied. */
+      var copy = window.CarDNACopy && window.CarDNACopy.text
+        ? window.CarDNACopy.text(url)
+        : Promise.resolve(false);
+
+      return Promise.resolve(copy).then(function (copied) {
+        return {
+          ok: true,
+          url: url,
+          message: (copied ? "Link copied. " : "Copy the link below. ") +
+            "A report for " + vin + ", readable without an account.",
+          html: linkHtml(vin, url)
+        };
+      });
     }
   };
 })();

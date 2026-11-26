@@ -44,10 +44,22 @@
     out.innerHTML = html;
   }
 
-  /* The payload is the raw vPIC answer that decode_cache stores; the first Results row holds the
-     filed fields. Anything else is treated as "not in the cache". */
-  function row(payload) {
-    return payload && payload.Results && payload.Results[0] ? payload.Results[0] : null;
+  /* The payload is the raw vPIC answer that decode_cache stores: { Results: [ { Variable, Value }, … ] }.
+     It is flattened into one Variable → Value map, so the page reads each field by its vPIC name.
+     Empty rows, zeros and "Not Applicable" are dropped, as the decoder drops them. Anything else is
+     treated as "not in the cache". */
+  function filedFields(payload) {
+    var results = payload && payload.Results;
+    if (!Array.isArray(results) || !results.length) { return null; }
+    var fields = {};
+    results.forEach(function (item) {
+      var name = item && item.Variable;
+      if (!name || fields[name]) { return; }
+      var value = String(item.Value == null ? "" : item.Value).trim();
+      if (!value || value === "0" || /^not applicable$/i.test(value)) { return; }
+      fields[name] = value;
+    });
+    return Object.keys(fields).length ? fields : null;
   }
 
   function render(vin, fields) {
@@ -68,8 +80,11 @@
     }).join("");
 
     show('<div class="dna"><header class="dna-head"><span class="dna-vin">' + esc(vin) + "</span>" +
-      '<a class="btn btn--ghost btn--sm" href="decode.html?vin=' + encodeURIComponent(vin) + '">Decode this VIN</a>' +
-      "</header>" +
+      '<span class="dna-head-actions">' +
+        '<button class="btn btn--ghost btn--sm" type="button" data-share-report>Share</button>' +
+        '<a class="btn btn--ghost btn--sm" href="decode.html?vin=' + encodeURIComponent(vin) + '">Decode this VIN</a>' +
+      "</span></header>" +
+      '<p class="dna-share-status" aria-live="polite"></p>' +
       '<div class="dna-rows">' + rows + "</div>" +
       '<p class="dna-empty">Only what the NHTSA register filed. Nothing here is a note, a label or an account.</p>' +
       "</div>");
@@ -90,16 +105,15 @@
       if (!response.ok) { throw new Error("HTTP " + response.status); }
       return response.json();
     }).then(function (rows) {
-      var payload = rows && rows[0] && rows[0].payload;
-      var filed = row(payload);
-      if (!filed) {
+      var fields = rows && rows[0] && rows[0].payload ? filedFields(rows[0].payload) : null;
+      if (!fields) {
         setHint("No report for " + vin + " yet.", true);
         show('<div class="dna"><p class="dna-empty">Nobody has decoded this VIN with CarDNA yet, so ' +
           "there is no filed record to show. Decode it once from the decoder and this page will have it.</p>" +
           '<p><a class="btn btn--sm" href="decode.html?vin=' + encodeURIComponent(vin) + '">Decode it</a></p></div>');
         return;
       }
-      render(vin, filed);
+      render(vin, fields);
     }).catch(function () {
       setHint("The report could not be read. Nothing was changed; try again.", true);
       show('<div class="dna"><p class="dna-empty">The filed record is not available right now.</p></div>');
@@ -116,7 +130,46 @@
     out.innerHTML = "";
   }
 
+  /* The report's own Share control. The copy happens first and on its own, because that is the
+     part that always works; the device's share sheet is offered afterwards where the browser has
+     one, and a sheet that is dismissed or never answers leaves the copy in place. */
+  function bindShare() {
+    document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest ? event.target.closest("[data-share-report]") : null;
+      if (!button) { return; }
+
+      var host = button.closest(".dna");
+      var vinNode = host && host.querySelector(".dna-vin");
+      var vin = vinNode ? vinNode.textContent.trim() : "";
+      var base = window.location.href.split("#")[0].split("?")[0];
+      var url = vin ? base + "?vin=" + encodeURIComponent(vin) : window.location.href.split("#")[0];
+
+      var line = host && host.querySelector(".dna-share-status");
+      var say = function (text) { if (line) { line.textContent = text; } };
+
+      var attempt = window.CarDNACopy && window.CarDNACopy.text
+        ? window.CarDNACopy.text(url)
+        : Promise.resolve(false);
+
+      Promise.resolve(attempt).then(function (ok) {
+        say(ok ? "Link copied." : "Copy the address bar instead — this browser refused the copy.");
+
+        if (!navigator.share) { return; }
+        try {
+          var sheet = navigator.share({ title: document.title, url: url });
+          if (sheet && typeof sheet.then === "function") {
+            sheet.then(function () { say("Shared."); }, function () { /* dismissed: the copy stands */ });
+          }
+        } catch (err) {
+          /* No share sheet here; the copy is already done. */
+        }
+      });
+    });
+  }
+
   function start() {
+    bindShare();
+
     var requested = clean(new URLSearchParams(window.location.search).get("vin"));
     if (input && requested) { input.value = requested; }
 

@@ -8,7 +8,6 @@
   var VIN = /^[A-HJ-NPR-Z0-9]{17}$/;
   var VPIC = "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/";
   var RECALLS = "https://api.nhtsa.gov/recalls/recallsByVehicle";
-  var SHOWN = 8;
 
   function clean(value) {
     return String(value || "").replace(/\s+/g, "").toUpperCase();
@@ -34,23 +33,23 @@
     });
   }
 
+  /* Every campaign, one folded line each. A native details element, so the keyboard, a screen
+     reader and a phone all already know how it opens. */
   function listHtml(recalls) {
-    var html = recalls.slice(0, SHOWN).map(function (recall) {
-      var meta = [recall.campaign, recall.date ? "filed " + recall.date : ""]
-        .filter(Boolean).join(" \u00b7 ");
-      return '<div class="recall">' +
-        "<b>" + esc(recall.component || "Campaign") + "</b>" +
-        (recall.summary ? "<span>" + esc(recall.summary) + "</span>" : "") +
-        (recall.remedy ? "<span><em>Remedy</em> " + esc(recall.remedy) + "</span>" : "") +
-        (meta ? "<span class=\"recall-meta\">" + esc(meta) + "</span>" : "") +
-        "</div>";
-    }).join("");
+    return recalls.map(function (recall) {
+      var body = "";
+      if (recall.summary) { body += "<span>" + esc(recall.summary) + "</span>"; }
+      if (recall.remedy) { body += "<span><em>Remedy</em> " + esc(recall.remedy) + "</span>"; }
+      if (recall.date) { body += '<span class="recall-meta">filed ' + esc(recall.date) + "</span>"; }
 
-    if (recalls.length > SHOWN) {
-      html += '<p class="recall-more">Showing the first ' + SHOWN + " of " +
-        recalls.length + ". The full list is on NHTSA's site.</p>";
-    }
-    return html;
+      return '<details class="recall">' +
+        "<summary>" +
+          "<b>" + esc(recall.component || "Campaign") + "</b>" +
+          (recall.campaign ? '<span class="recall-campaign">' + esc(recall.campaign) + "</span>" : "") +
+        "</summary>" +
+        '<div class="recall-body">' + body + "</div>" +
+        "</details>";
+    }).join("");
   }
 
   window.CarDNAVehicle = {

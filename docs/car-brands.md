@@ -45,11 +45,12 @@ and are optional: a brand without a match simply shows no parent.
 
 ## Licence — attribution is required
 
-CC BY 4.0 requires **visible credit and a link** wherever the data is shown. Every page footer carries:
+CC BY 4.0 requires **visible credit and a link** wherever the data is shown. The credit is on
+`legal.html` (the "Data licences" section), and every page footer links to it as **Data sources**:
 
-> Vehicle data by [VehiclesDB](https://vehiclesdb.com) (CC BY 4.0) · VIN: NHTSA vPIC
+> Makes and models — [VehiclesDB](https://vehiclesdb.com), licensed CC BY 4.0.
 
-Do not remove it. The upstream register notices are also listed in the dataset's `ATTRIBUTION.md`;
+Do not remove that section. The upstream register notices are also listed in the dataset's `ATTRIBUTION.md`;
 if you add another country's register data, add its notice too.
 
 ## Refreshing the data
