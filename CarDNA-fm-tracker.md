@@ -85,7 +85,10 @@ the two-step button, the act-as banner stating the server count, the write refus
 - Garage: local cache first, then Supabase mirror; save upserts, remove deletes; undo for removals.
 - Audit rows for role, plan and block changes; console activity list.
 - Sticky header on every non-app page (Turn 11).
-- In the latest private preview, the shared header/footer appeared on all 13 routes, root-relative links from `/tools/` worked, the two-row phone header fit, the index tab-strip continuation cue appeared only when tabs remained hidden, and comparison-table hints behaved as expected at 390×844 and 1280×800.
+- The shared header/footer on every route, root-relative links from `/tools/`, the two-row phone header, the
+  index tab-strip continuation cue and the comparison-table hints at 390×844 and 1280×800 — all checked in
+  the FreeMilk preview before it was retired (Turn 49). The public site serves the same shell and its pages
+  load (Turn 49); the phone-width items have not been re-checked there.
 - Phone header, LAY-04 (Turn 19, `?v=p20`): at 390×844 the menu button holds the corner of row one with the theme toggle beside it as one group, the account chip sits flush on the right edge of row two, and the "by GMOttomotive" sub-brand stays on one line. At 1280×800 the header is the same two rows as before (logo plus toggle and chip, nav beneath), with nothing wrapped or clipped.
 - Pricing and VIN comparison table frames rendered as contained regions; the tools-page table styling rendered. Native swipe scrolling and keyboard focus were not exercised.
 - Project tracking: this tracker is maintained each turn (active from Turn 13).
