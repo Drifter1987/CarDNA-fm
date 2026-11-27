@@ -2,9 +2,14 @@
 --
 -- What this is, plainly: a browser cannot mint another account's Supabase session. That needs the
 -- service_role key, which must never be in a page, so a real session swap is a server function and a
--- decision of its own. What this file adds is the honest middle: ONE account — drifter_87@live.com,
+-- decision of its own. What this file adds is the honest middle: ONE account — the owner's address,
 -- refused by email in the database, not only by the button — may read another account's view: its
 -- profile, saved vehicles, recent lookups, encrypted vault blob and decode count. Read-only.
+--
+-- THE OWNER'S ADDRESS IS A PLACEHOLDER. In the function below, replace `<owner-email>` with the
+-- owner account's address before running this file. The function already in the database holds the
+-- real address, so nothing needs re-running unless it is rebuilt. The address is kept out of this
+-- repository's published files on purpose.
 --
 -- Every use is written to public.events (kind 'act_as' and 'act_as_end'), so it is never silent.
 --
@@ -35,7 +40,7 @@ begin
   select lower(u.email) into my_mail from auth.users u where u.id = me;
 
   /* The one account allowed to look, in the database, by address as well as by role. */
-  if coalesce(my_role, 'user') <> 'owner' or my_mail is distinct from 'drifter_87@live.com' then
+  if coalesce(my_role, 'user') <> 'owner' or my_mail is distinct from '<owner-email>' then
     return jsonb_build_object('ok', false, 'error', 'Only the owner may open another account''s view.');
   end if;
 

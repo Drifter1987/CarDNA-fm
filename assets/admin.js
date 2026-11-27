@@ -858,9 +858,9 @@
         actions.appendChild(history);
       }
 
-      /* "Log in as" exists for one address only — drifter_87@live.com — and the database refuses
-         anyone else (docs/supabase-owner-act-as.sql). It opens that account's view read-only, and
-         every use is written to the activity log. */
+      /* "Log in as" exists for the owner role only, and the database refuses every other address
+         (docs/supabase-owner-act-as.sql). It opens that account's view read-only, and every use is
+         written to the activity log. */
       if (window.CarDNAActAs && window.CarDNAActAs.ownerOnly() &&
           !window.CarDNAActAs.active() && row.id && !row.demo && !isSelf(row)) {
         var enter = document.createElement("button");

@@ -10,7 +10,13 @@ a handful of small vanilla-JS modules, no build step, no dependencies, no backen
 
 Two places, and no others: **GitHub** holds the public files, **Supabase** holds account data.
 GitHub Pages serves this repository at `https://drifter1987.github.io/CarDNA-fm/` — no separate host,
-no build step, no third platform.
+no build step, no third platform. That address is also the test surface; the private preview is retired.
+
+**Only the app is published.** Pages serves `main` through Jekyll, and `_config.yml` keeps the project's
+documents (`instructions.md`, `cardna-fm-plan.md`, the tracker), the `docs/` folder with the database SQL,
+and the research files in `data/` off the site. They stay in the repository for the work, and are not
+served to visitors. A `testing` branch holds risky work until it is merged into `main`; a repository has
+one Pages site, so `testing` is not viewable on its own.
 
 To run it locally, any static file server works:
 
@@ -52,7 +58,7 @@ npx serve .
 | `assets/motion.css` | Motion layer: entry reveals, panel and tab transitions, pointer spotlight, button sheen, the animated parts diagram and the VIN scan. Inert unless `motion.js` runs |
 | `assets/motion.js` | Scroll reveals with stagger (anything in view or already passed is revealed, so a jump or a deep link never leaves a section blank), counting stats, tab transitions, a pointer-tracked card glow and the 17-slot VIN scan that runs while a decode is in flight. Returns immediately when the visitor prefers reduced motion |
 | `assets/cloud.js` | One account's cloud storage: recent lookups and the encrypted vault mirrored to `cardna_cloud`, a per-account local mirror, an offline queue, and the honest "not set up yet" line when the SQL has not been run |
-| `assets/actas.js` | The owner's "log in as" view of one account: read-only, a banner with a way back, and every use recorded — the button is for drifter_87@live.com alone, and the database refuses anyone else (`docs/supabase-owner-act-as.sql`) |
+| `assets/actas.js` | The owner's "log in as" view of one account: read-only, a banner with a way back, and every use recorded — the button is for the owner account alone, and the database refuses anyone else (`docs/supabase-owner-act-as.sql`) |
 | `assets/vin.js` | VIN validation, vPIC decode over the shared 104-field schema, decode warnings, recent lookups per account (mirrored to Supabase), `?vin=` deep links |
 | `assets/vin-schema.js` | The single 104-field VIN schema, shared by the decoder and the comparison tool |
 | `tools/vin-compare.html` | Keyless decoder comparison: vPIC, AI Kit Edge, AI Kit Unified, NHTSA recalls — full schema per VIN, plus field-by-field diff |

@@ -1,9 +1,10 @@
 /* CarDNA — the owner's "log in as" view of one account.
-   Only drifter_87@live.com sees the button (assets/admin.js), and the database refuses anyone else
-   (docs/supabase-owner-act-as.sql). What it does honestly: the console shows that account as the app
-   would, in reading only — its profile, plan and role in the chip, its saved vehicles, its recent
-   lookups, its encrypted vault and its decode count — with a banner saying so and a way back. Nothing
-   is written on their behalf, and it is never silent: the database records each use.
+   Only the owner's account sees the button (assets/admin.js), and the database refuses anyone else by
+   role and by address (docs/supabase-owner-act-as.sql, which names the address — this file does not).
+   What it does honestly: the console shows that account as the app would, in reading only — its
+   profile, plan and role in the chip, its saved vehicles, its recent lookups, its encrypted vault and
+   its decode count — with a banner saying so and a way back. Nothing is written on their behalf, and
+   it is never silent: the database records each use.
 
    What it is not, and cannot be from a page: a Supabase session for that account. That needs the
    service_role key, which belongs on a server, so a real sign-in needs a server function. */
@@ -11,7 +12,6 @@
   "use strict";
 
   var KEY = "cardna.actas";
-  var OWNER = "drifter_87@live.com";
   var state = { target: null, at: "" };
 
   function readState() {
@@ -30,8 +30,9 @@
   }
 
   /* The owner-only rule follows the view the console is showing, not the raw session: an owner
-     previewing Admin must not keep the button. The role comes from the effective view, the address
-     from the signed-in profile — `effective()` carries no email of its own. */
+     previewing Admin must not keep the button. Only the role is checked here — the address is the
+     database's rule (docs/supabase-owner-act-as.sql), so nothing personal ships in this file. An
+     owner role with a different address sees the button and is refused when it presses it. */
   function ownerOnly() {
     var auth = window.CarDNAAuth;
     if (!auth) { return false; }
@@ -41,9 +42,8 @@
 
     var role = auth.effectiveRole ? String(auth.effectiveRole() || "").toLowerCase()
       : String(me.role || "").toLowerCase();
-    var mail = String(me.email || "").toLowerCase();
 
-    return role === "owner" && mail === OWNER;
+    return role === "owner";
   }
 
   function active() { return Boolean(state.target && state.target.id); }
@@ -205,7 +205,6 @@
 
   window.CarDNAActAs = {
     ownerOnly: ownerOnly,
-    ownerEmail: OWNER,
     active: active,
     profile: function () { return state.target ? state.target.profile : null; },
     vehicles: vehicles,

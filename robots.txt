@@ -1,0 +1,7 @@
+# CarDNA is in testing. Nothing here should reach a search engine yet.
+#
+# At launch: replace the two lines below with `User-agent: *` / `Allow: /`, and set the
+# `robots` meta tag in report.html back to `index,follow`.
+
+User-agent: *
+Disallow: /

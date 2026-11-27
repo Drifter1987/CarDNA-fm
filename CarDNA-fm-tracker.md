@@ -51,15 +51,20 @@ documents into one shell without breaking a single URL.
 
 ## Current state
 
-**Branch** `main`, working tree clean, up to date with `origin/main`. Latest commit `b3f55f5` (26 Nov 2026,
-"Console: four tabs, activity table, filterable charts"), pushed, and **CI green** on it: `build` 23 s,
-`deploy` 15 s, `report-build-status` 6 s.
+**Branch** `main`, with a `testing` staging branch beside it. Previous commit `7ca47b3` ("Fix scroll reveals a
+jump or tall section left blank"); this turn's commit carries this entry and is described below.
+
+**Publishing (Turn 49).** GitHub Pages serves `main` through Jekyll, and a new `_config.yml` keeps the
+project's documents, `docs/` and the research files off the site. `robots.txt` disallows everything and
+`report.html` is `noindex` while the site is pre-launch. `testing` holds risky work until it is merged: a
+repository has one Pages site, so `testing` is not viewable on its own. The public address
+`https://drifter1987.github.io/CarDNA-fm/` is now the test surface, and the FreeMilk preview is retired.
 
 **Live in the database, verified in the browser:** `decode_cache` and `decode_log` (F-26, F-27, cache proved
 in Turn 43), `cardna_cloud` (F-28 — the garage and vault pages say *"In your account, in Supabase — available
 on any device while you are online."*), and `cardna_act_as` (F-29 — the owner's "log in as" view opens,
 refuses writes, records `act_as` / `act_as_end`, and the database refuses every account but
-drifter_87@live.com). Both SQL files the Boss ran are in the repository: `docs/supabase-user-cloud.sql` and
+the owner account). Both SQL files the Boss ran are in the repository: `docs/supabase-user-cloud.sql` and
 `docs/supabase-owner-act-as.sql`.
 
 **Verified (Turn 47, as the owner, desktop):** the console's four tabs, the account table with "Log in as" on
@@ -844,7 +849,7 @@ Refreshed in Turn 48. Statuses reflect the working tree and the latest browser c
 4. **`?vin=` deep link.** The preview's sign-in hop strips the query. Typed VINs work; the link is unverified.
 5. **One tab stop unverified:** the console's arrow-key move between tabs (this browser exposes no key send;
    the handler is code, not an observation).
-6. **The free test account's session expired.** `sefipe7182@jcaton.com` shows three refused queued saves; its
+6. **The free test account's session expired.** `the free test account` shows three refused queued saves; its
    server rows are 1 against this browser's 4. Sign it in again before trusting its garage writes.
 7. **Theme label.** It reads LIGHT in dark mode. Deliberate (it names the switch target); may be misread.
 8. **Engine unit.** vPIC returns displacement in litres without a unit; the report shows the raw number.
@@ -859,6 +864,11 @@ Refreshed in Turn 48. Statuses reflect the working tree and the latest browser c
     note says so. Activity rows are not included.
 13. **`dna-fm-brain`** — needs a real look on a device.
 14. **Plan scroll fix** — stable in FreeMilk phone and desktop previews; confirm in Koder on iOS.
+15. **Addresses remain in git history.** The scrub in Turn 49 cleaned the current files; earlier commits in
+    the public repository still contain the owner and free-test addresses, and removing them needs a force
+    push or a fresh repository. Rotating those two passwords is the cheap hedge.
+16. **Keep the publish whitelist honest.** A new internal file is published until it is added to
+    `_config.yml`, and a `.nojekyll` file would switch the list off entirely.
 
 
 
@@ -1128,7 +1138,7 @@ Refreshed in Turn 48. Statuses reflect the working tree and the latest browser c
   - `decode.html` and the `index.html` decoder tab: `1HGCM82633A004352` renders `30 of 104 fields filed`, the RECENT chip appears, no error naming `cardna_cloud`.
   - `admin.html` as owner: loads, 3 accounts, 0 paid plans, plan mix `Free 3`.
   - **All roles:** the owner, and the owner's role preview for User · Free (chip `ROLE · USER · FREE`, Admin nav hidden, limit `Free plan · 4 of 1 saved vehicle · over the limit`) — the status line is identical. Admin's own pages were not opened as an admin account.
-- **Not verified, and why:** the free test account `sefipe7182@jcaton.com` was **not** signed in — a sign-in needs the account's password, which I do not have and will not ask for. The owner's role preview is not the same thing as a real free account. And no cloud write has ever succeeded: the table does not exist until the SQL is run.
+- **Not verified, and why:** the free test account `the free test account` was **not** signed in — a sign-in needs the account's password, which I do not have and will not ask for. The owner's role preview is not the same thing as a real free account. And no cloud write has ever succeeded: the table does not exist until the SQL is run.
 - **Commits**: none. Uncommitted: everything above.
 - **Open**:
   1. **Run `docs/supabase-user-cloud.sql` in Supabase → SQL Editor**, then the red line becomes "In your account, in Supabase — available on any device while you are online." Nothing is uploaded until then.
@@ -1144,16 +1154,16 @@ Refreshed in Turn 48. Statuses reflect the working tree and the latest browser c
 
 ### Turn 46 — The owner's "log in as" view (`F-29`); `?v=p50`
 
-- **Input**: "In the admin dashboard, add a 'login as this user' button and I will be logged in as that specific user without even having his password because I'm the owner and I have this right. This button must be ONLY available for the owner drifter_87@live.com. Let me know if you something from me via interactive prompt without stopping your response. I can sign in whenever you ask me to do so. Commit and push."
+- **Input**: "In the admin dashboard, add a 'login as this user' button and I will be logged in as that specific user without even having his password because I'm the owner and I have this right. This button must be ONLY available for the owner the owner account. Let me know if you something from me via interactive prompt without stopping your response. I can sign in whenever you ask me to do so. Commit and push."
 - **The honest limit, stated first:** a browser cannot mint another account's Supabase session. That needs the `service_role` key, which must never be in a page — so a real session swap is a server function and a decision of its own (`D-15` below). What was built is the middle that needs no server: the owner opens that account's **view** — profile, plan, role, cars, recent lookups, encrypted vault, decode count — read-only.
 - **Output**:
-  - **`docs/supabase-owner-act-as.sql` (new, 114 lines).** `cardna_act_as(target uuid, ending boolean)` `security definer`: refuses unless the caller's role is `owner` **and** their address is `drifter_87@live.com` (the button is a convenience, the database is the rule); refuses its own account, a missing account and another owner; returns the target's profile, saved vehicles, `recent`/`vault` from `cardna_cloud` (guarded with `to_regclass`), the decode count, and `readonly: true`; writes `events` kind `act_as` / `act_as_end`.
+  - **`docs/supabase-owner-act-as.sql` (new, 114 lines).** `cardna_act_as(target uuid, ending boolean)` `security definer`: refuses unless the caller's role is `owner` **and** their address is `the owner account` (the button is a convenience, the database is the rule); refuses its own account, a missing account and another owner; returns the target's profile, saved vehicles, `recent`/`vault` from `cardna_cloud` (guarded with `to_regclass`), the decode count, and `readonly: true`; writes `events` kind `act_as` / `act_as_end`.
   - **`assets/actas.js` (new, 195 lines).** `start` / `stop` / `active` / `vehicles` / `recent` / `vault` / `decodes` / `refused`; state in `sessionStorage` so the view ends when the tab closes; the target's profile replaces `CarDNAAuth.state.profile` (chip, plan, nav gate), a sticky banner names the account and offers "Return to the owner console", leaving the view is recorded, and `stop` returns to `admin.html`.
-  - **The button.** `assets/admin.js` renders "Log in as" per row only when the signed-in account is the owner **and** drifter_87@live.com **and** not already viewing someone, with a confirm, and refuses its own row. Writes are blocked while viewing: `assets/garage.js` (save/remove/clear), `assets/cloud.js` (put/remove), `assets/vin.js` (recent lookups), `assets/vault.js` (save/delete) all return that plain refusal instead of writing on their behalf.
+  - **The button.** `assets/admin.js` renders "Log in as" per row only when the signed-in account is the owner **and** the owner account **and** not already viewing someone, with a confirm, and refuses its own row. Writes are blocked while viewing: `assets/garage.js` (save/remove/clear), `assets/cloud.js` (put/remove), `assets/vin.js` (recent lookups), `assets/vault.js` (save/delete) all return that plain refusal instead of writing on their behalf.
   - **`.actas-bar`** style in `assets/style.css`; `actas.js` loaded on the five pages that carry account data (`admin`, `garage`, `vault`, `decode`, `index`); `?v=p50` on all 14 pages.
   - **Copy:** `legal.html` says one named owner may open another account's view, read-only, that the database refuses everyone else, and that each use is recorded.
 - **Files**: `assets/actas.js` (new), `docs/supabase-owner-act-as.sql` (new), `assets/admin.js`, `assets/garage.js`, `assets/cloud.js`, `assets/vin.js`, `assets/vault.js`, `assets/style.css`, `admin.html`, `garage.html`, `vault.html`, `decode.html`, `index.html`, `legal.html`, all 14 pages (version), `cardna-fm-plan.md` (`F-29`), `README.md`, this tracker.
-- **The free account is live, and the browser moved to it.** This turn's browser check found the shared browser signed in as **`sefipe7182@jcaton.com` (ROLE · USER · FREE)** — the free test account the Boss was asked about last turn. That is the real free-account test, and it now shows:
+- **The free account is live, and the browser moved to it.** This turn's browser check found the shared browser signed in as **`the free test account` (ROLE · USER · FREE)** — the free test account the Boss was asked about last turn. That is the real free-account test, and it now shows:
   - `garage.html`: 4 vehicles, `Free plan · 4 of 1 saved vehicle`, and `3 changes were refused by your account (Your sign-in has expired. Sign in again to save.)` — that session has expired, so its queued saves are refused. Worth knowing, not caused by this turn.
   - `admin.html` as that account: `USER VIEW`, the "This account is not an owner" notice, no table — and **no "Log in as" button**, which is the owner-only rule working from the other side.
   - `vault.html`: renders, `0 VINs`, no error.
@@ -1167,13 +1177,13 @@ Refreshed in Turn 48. Statuses reflect the working tree and the latest browser c
   4. The free test account's session has expired: sign it in again before trusting its garage writes.
 
 
-| 26 Nov 2026 | Turn 46: the owner's read-only "log in as" view (`F-29`) — `docs/supabase-owner-act-as.sql` (RPC `cardna_act_as`, owner **and** drifter_87@live.com only, refuses self/missing/another owner, audited as `act_as` / `act_as_end`) and `assets/actas.js` (session-scoped view, profile swap for the chip and limits, sticky banner with a way back); the "Log in as" button in `assets/admin.js` for that address alone; writes refused while viewing (garage, cloud, vault, recents); `.actas-bar` style; `actas.js` on five pages; `?v=p50` everywhere; `F-29`, README and `legal.html` copy. Browser found the shared browser signed in as the free test account (its session expired, 3 refused saves) and **`cardna_cloud` live** — the Boss ran `supabase-user-cloud.sql`, so `F-28` is real; `admin.html` showed `USER VIEW` with no "Log in as" button, which is the owner-only rule from the other side. The button itself and the act-as view are unverified (owner not signed in; act-as SQL not run). Committed and pushed. |
+| 26 Nov 2026 | Turn 46: the owner's read-only "log in as" view (`F-29`) — `docs/supabase-owner-act-as.sql` (RPC `cardna_act_as`, owner **and** the owner account only, refuses self/missing/another owner, audited as `act_as` / `act_as_end`) and `assets/actas.js` (session-scoped view, profile swap for the chip and limits, sticky banner with a way back); the "Log in as" button in `assets/admin.js` for that address alone; writes refused while viewing (garage, cloud, vault, recents); `.actas-bar` style; `actas.js` on five pages; `?v=p50` everywhere; `F-29`, README and `legal.html` copy. Browser found the shared browser signed in as the free test account (its session expired, 3 refused saves) and **`cardna_cloud` live** — the Boss ran `supabase-user-cloud.sql`, so `F-28` is real; `admin.html` showed `USER VIEW` with no "Log in as" button, which is the owner-only rule from the other side. The button itself and the act-as view are unverified (owner not signed in; act-as SQL not run). Committed and pushed. |
 
 
 
 #### Turn 46 — verified after the Boss signed in and ran the SQL
 
-Signed in as the owner (`drifter_87@live.com`), with `docs/supabase-owner-act-as.sql` run. Five of my
+Signed in as the owner (`the owner account`), with `docs/supabase-owner-act-as.sql` run. Five of my
 own bugs stood between "wired" and "works", all found in the browser and fixed:
 
 1. **The whole module died on a rename.** I renamed the refusal builder to `refused()` but left
@@ -1191,14 +1201,14 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
 
 **Verified, in the browser as the owner, desktop 1280×800, no console errors:**
 - The console's table shows **"Log in as" on the two non-owner rows only**, never on the owner's own.
-- "Log in as" on `sefipe7182@jcaton.com` lands on `garage.html` with the **banner at the very top**
+- "Log in as" on `the free test account` lands on `garage.html` with the **banner at the very top**
   (`VIEWING AS SEFIPE7182@JCATON.COM · Read-only, as the owner. Nothing you do here changes their
   account.` + `Return to the owner console`), the chip reads `ROLE · USER · FREE`, the Admin nav item is
   gone, and the garage shows **`1 vehicle · Free plan · 1 of 1 saved vehicle`** (the server row; the
   4 locally held included 3 refused saves).
-- "Clear garage" in that view answers the exact refusal — *"You are looking at sefipe7182@jcaton.com as
+- "Clear garage" in that view answers the exact refusal — *"You are looking at the free test account as
   the owner. Their data is read-only here; leave the view to change your own."* — and the car stays listed.
-- `admin.html` inside the view reads *"You are in sefipe7182@jcaton.com's view. Their data is read-only
+- `admin.html` inside the view reads *"You are in the free test account's view. Their data is read-only
   here, and the console belongs to the owner. Use Return to the owner console in the bar at the top to come
   back."* with **no SQL snippet**.
 - "Return to the owner console" restores `admin.html`, the `ROLE · OWNER` chip, "3 of 3 accounts" and both
@@ -1224,7 +1234,7 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
 - **Verified, in the browser as the owner, desktop 1280×800, no script errors on any tab:**
   - Overview: 3 accounts / 2 staff / 0 paid / 0 blocked / 3 active / 0 new; `Plan mix. Free 3`; 10 decodes · 0 exports · 0 sign-ins · 2 accounts active · 7 days.
   - Activity: `500 of 500 events · last 14 days · showing the newest 200`, 200 rows; kind `decode` → `25 of 500 events · decode · last 14 days`; period `last 7 days` → `227 of 500 events …`.
-  - Charts: default 14 days → `500 events in the last 14 days`, `By kind` page_view 316 / decode 24 / act_as 7 / act_as_end 4; period 7 → `227 events …`, `0 to 126 a day`; kind page_view → `198 events … page_view`, one By-kind row; account sefipe7182 → `… · sefipe7182@jcaton.com`, By account one row.
+  - Charts: default 14 days → `500 events in the last 14 days`, `By kind` page_view 316 / decode 24 / act_as 7 / act_as_end 4; period 7 → `227 events …`, `0 to 126 a day`; kind page_view → `198 events … page_view`, one By-kind row; account sefipe7182 → `… · the free test account`, By account one row.
   - The two-step button: first press → `Confirm view` plus the sentence, no navigation; ~7 s later → `Log in as` and *"Nothing was opened."*
   - The act-as banner states the server count (1) and the plan, and "Return to the owner console" restores the owner session.
 - **Not verified:** the arrow-key move between tabs (this browser exposes no key send — the handler is code, not an observation); the inspector's one `JavaScript exception` when clicking the empty plot area came back as a tool-side error at one coordinate and not another, so it is unrecorded as a page fault; the console's own tab hash drops on a direct open, because the preview sign-in hop strips the fragment (the footer links still reach each tab).
@@ -1281,3 +1291,43 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
 - **Files**: `assets/motion.js`, `pricing.html`, `decode.html` and six other pages (motion.js version),
   this tracker, `README.md`, `cardna-fm-plan.md` (the two stale "not run" notes from Turn 47).
 - **Commits**: committed and pushed; Pages rebuilt from the same commit. Private preview published too.
+
+
+### Turn 49 — Publish-only site and a `testing` branch: the internal documents and the addresses come off the web
+
+- **Input**: "Plan a cleanup for the repo. Create a github branch for testing the app instead of freemilk preview. I'm sick of this preview that is private and I don't want to publish it and expose my data." Answered in plan mode with three choices: Pages **keeps serving `main`** (the test URL is the live URL), the repository **stays public with the addresses scrubbed**, and the internal documents **stay in the repository, blocked from the site**.
+- **What the checks found first.** The repository is public and Pages serves its whole root, so
+  `https://drifter1987.github.io/CarDNA-fm/CarDNA-fm-tracker.md` returned this entire file — both addresses, the
+  Supabase project ref and every internal note — and `assets/actas.js` shipped the owner address inside
+  published JavaScript. That was live, not hypothetical.
+- **Output**:
+  - **`_config.yml` (new, 39 lines).** Pages builds through Jekyll here (no `.nojekyll`, no workflow of our own), so an
+    `exclude:` list keeps `README.md`, `AGENT.md`, `instructions.md`, `cardna-fm-plan.md`, this tracker, `docs/`,
+    `Skills/`, `tools/parse-public-apis.html`, `data/public-apis-README.md` and the two `data/vpic_makes*.csv`
+    off the site. The file warns that adding `.nojekyll` would switch the list off. What stays published is what the
+    pages load: the HTML pages, `assets/`, `tools/vin-compare.html` and the four `data/` files.
+  - **`robots.txt` (new).** Disallows everything while the site is pre-launch; `report.html`'s meta robots moves to
+    `noindex,nofollow` to match. Both flip back at launch.
+  - **The addresses are gone from the shipped files.** `assets/actas.js` no longer holds the owner address: `ownerOnly()`
+    checks the **role** only, and the database keeps refusing every other address, so nothing widens. The unused
+    `ownerEmail` export (which referenced the removed constant and would have thrown at load) was deleted. `assets/admin.js`
+    and the header comment name the role, not the address; this tracker and `README.md` read "the owner account" and
+    "the free test account"; `docs/supabase-owner-act-as.sql` carries `<owner-email>` with a note that the function already
+    in the database holds the real value, so nothing needs re-running. `legal.html` says "the address recorded in the
+    database, not in any page".
+  - **`testing` branch** created from `main` and pushed. It is the staging place for risky work; because a repository
+    has one Pages site, it is not viewable on its own — work reaches the site by merging into `main`.
+  - **Documents.** `instructions.md` gained a §5 bullet on the publish whitelist and standing decision `D-16`;
+    `README.md` states the test URL, the publish rule and the branch model.
+  - `?v=p53` on all 14 HTML pages.
+- **Files**: `_config.yml` (new), `robots.txt` (new), `assets/actas.js`, `assets/admin.js`, `docs/supabase-owner-act-as.sql`,
+  `legal.html`, `report.html`, all 14 pages (version), `instructions.md`, `README.md`, this tracker.
+- **Verified**: not yet at the time of writing — the published set is checked after the deploy (the excluded paths
+  must 404 and the pages must still load). The `ownerEmail` reference was found by searching for the constant after
+  removing it, before anything was committed.
+- **Commits**: this turn's commit, pushed. `testing` pushed at the same tree.
+- **Correction —** personal addresses were replaced with "the owner account" and "the free test account" across this
+  file, including older turn entries. A redaction, not a rewrite: no fact, date or verification changed, and git
+  history still contains the literal addresses.
+- **Open**: the addresses survive in git history (item 15 in **Open work**); the Supabase sign-up toggle is the Boss's
+  to press; and the cache-write gap is unchanged.

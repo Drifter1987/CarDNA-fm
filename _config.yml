@@ -1,0 +1,39 @@
+# CarDNA — what GitHub Pages is allowed to publish.
+#
+# GitHub Pages builds this repository through Jekyll (there is no `.nojekyll` file), and Jekyll
+# leaves every path in `exclude` out of the published site. The site is public, so this list is
+# what keeps the project's own documents, the database SQL and the research files off it.
+#
+# IMPORTANT: adding a `.nojekyll` file switches Jekyll off, and this list stops working — the whole
+# repository would be served again, internal documents included. If a `.nojekyll` file is ever
+# needed, replace this list with a build step that copies only the published set.
+#
+# Published: the HTML pages, `assets/`, `tools/vin-compare.html`, and `data/vehicles.csv`,
+# `data/engines.csv`, `data/brands.json`, `data/catalog_car_makes.json` — exactly what the pages load.
+
+title: CarDNA
+description: A VIN turned into the exact vehicle — a GMOttomotive product.
+
+exclude:
+  # The project's documents. Kept in the repository, never served.
+  - README.md
+  - AGENT.md
+  - instructions.md
+  - cardna-fm-plan.md
+  - CarDNA-fm-tracker.md
+  # The database side: schema, policies and functions.
+  - docs
+  # Agent skills kept on this device only.
+  - Skills
+  # Research and reference files the site does not load.
+  - data/public-apis-README.md
+  - data/vpic_makes.csv
+  - data/vpic_makes_car.csv
+  # An internal utility page, and the file it parses.
+  - tools/parse-public-apis.html
+  # Build and dependency folders Jekyll excludes by default; listed so that overriding this key
+  # never publishes them by accident.
+  - .sass-cache
+  - .jekyll-cache
+  - node_modules
+  - vendor
