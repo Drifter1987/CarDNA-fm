@@ -45,15 +45,24 @@
 
   var observer = null;
 
+  /* One way to show an element, whichever path asked for it: the observer, a jump, or the
+     safety pass. Revealing twice costs nothing. */
+  function reveal(element) {
+    if (!element || element.classList.contains("is-in")) { return; }
+    element.classList.add("is-in");
+    countInside(element);
+    if (observer) { observer.unobserve(element); }
+  }
+
   if ("IntersectionObserver" in window) {
+    /* Any part of the element counts: a section taller than the viewport could never reach a
+       ratio threshold, and stayed invisible. */
     observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) { return; }
-        entry.target.classList.add("is-in");
-        countInside(entry.target);
-        observer.unobserve(entry.target);
+        reveal(entry.target);
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    }, { threshold: 0, rootMargin: "0px 0px -4% 0px" });
   }
 
   function tag(element) {
@@ -72,8 +81,7 @@
     if (observer) {
       observer.observe(element);
     } else {
-      element.classList.add("is-in");
-      countInside(element);
+      reveal(element);
     }
   }
 
@@ -81,6 +89,40 @@
     var nodes = (scope || document).querySelectorAll(TARGETS);
     Array.prototype.forEach.call(nodes, tag);
   }
+
+  /* ------------------------------------------------------------- never blank
+     A page opened at its foot, or jumped there, must show what is on screen. Anything in
+     view — and anything already passed — is revealed, so a jump cannot leave a section at
+     opacity 0 waiting for an observer callback that already went by. */
+  function sweep() {
+    var nodes = document.querySelectorAll(".motion-reveal:not(.is-in)");
+    if (!nodes.length) { return; }
+
+    var height = window.innerHeight || 800;
+
+    Array.prototype.forEach.call(nodes, function (element) {
+      var rect = element.getBoundingClientRect();
+      if (rect.bottom <= 0 || rect.top < height) { reveal(element); }
+    });
+  }
+
+  var jump = { at: null, height: 0 };
+
+  function onJump() {
+    var offset = (document.querySelector(".app-scroll") || {}).scrollTop;
+    if (offset === undefined || offset === null) { offset = window.pageYOffset || 0; }
+
+    var height = window.innerHeight || 800;
+    var moved = jump.at === null ? 0 : Math.abs(offset - jump.at);
+
+    jump.at = offset;
+    jump.height = height;
+
+    if (jump.at === 0 || moved > height * 1.2) { sweep(); }
+  }
+
+  (document.querySelector(".app-scroll") || window)
+    .addEventListener("scroll", onJump, { passive: true });
 
   /* ------------------------------------------------------------------ counters */
 
@@ -339,6 +381,21 @@
     tagAll(document);
     setupScan();
     watchLists();
+
+    /* A deep link, an anchor, a restored scroll position or a reload that lands below the
+       first screen must show what is there: sweep now, after the first frame, and once the
+       page has fully loaded. */
+    sweep();
+    raf(sweep);
+    window.addEventListener("load", sweep);
+    window.addEventListener("hashchange", sweep);
+    window.addEventListener("beforeprint", sweep);
+    window.setTimeout(sweep, 1200);
+
+    /* The very first scroll event must have a place to compare with, or the first jump is the
+       one that measures nothing — which is exactly the jump that went blank. */
+    var startOffset = document.querySelector(".app-scroll");
+    jump.at = startOffset ? (startOffset.scrollTop || 0) : (window.pageYOffset || 0);
   }
 
   /* this file is loaded at the end of <body>, so the document is already parsed:

@@ -50,7 +50,7 @@ npx serve .
 | `assets/admin.js` | Staff console: four tabs with the account table, a filterable activity table and the charts (period, kind and account filters), role and plan control, blocking, and the owner-only read-only "log in as" button — two steps in the page, never a native dialog |
 | `assets/export.js` | Full-record export: Markdown, CSV, a real .xlsx (merged sheet + one sheet per model, written without a library) and print-to-PDF |
 | `assets/motion.css` | Motion layer: entry reveals, panel and tab transitions, pointer spotlight, button sheen, the animated parts diagram and the VIN scan. Inert unless `motion.js` runs |
-| `assets/motion.js` | Scroll reveals with stagger, counting stats, tab transitions, a pointer-tracked card glow and the 17-slot VIN scan that runs while a decode is in flight. Returns immediately when the visitor prefers reduced motion |
+| `assets/motion.js` | Scroll reveals with stagger (anything in view or already passed is revealed, so a jump or a deep link never leaves a section blank), counting stats, tab transitions, a pointer-tracked card glow and the 17-slot VIN scan that runs while a decode is in flight. Returns immediately when the visitor prefers reduced motion |
 | `assets/cloud.js` | One account's cloud storage: recent lookups and the encrypted vault mirrored to `cardna_cloud`, a per-account local mirror, an offline queue, and the honest "not set up yet" line when the SQL has not been run |
 | `assets/actas.js` | The owner's "log in as" view of one account: read-only, a banner with a way back, and every use recorded — the button is for drifter_87@live.com alone, and the database refuses anyone else (`docs/supabase-owner-act-as.sql`) |
 | `assets/vin.js` | VIN validation, vPIC decode over the shared 104-field schema, decode warnings, recent lookups per account (mirrored to Supabase), `?vin=` deep links |
@@ -139,14 +139,13 @@ wiring for each:
 | Team seats | `garage.html` | the `seats` table and the invitation email |
 | Email verification and recovery | `signin.html`, `reset.html` | a product-domain sender (`D-4`) |
 
-**Waiting on the database, not on a decision:** the server-side decode count (`F-26`) and the VIN cache
-(`F-27`) are wired to `docs/supabase-decode-log-cache-delete.sql`, which has been run. The cache was proved
-in Turn 43: a signed-in decode writes the vPIC answer, and the report renders it. **The per-account cloud
-storage (`F-28`) is wired to `docs/supabase-user-cloud.sql`, which has not been run yet**: until it is, the
-garage and vault pages say so in red and keep recent lookups and the vault in this browser only. **The
-owner's "log in as" view (`F-29`) is wired to `docs/supabase-owner-act-as.sql`, also not run yet**:
-until it is, the button in the staff console answers honestly and opens nothing. The
-licensed parts layer and the European vendor proxy still need contracts.
+**Live in the database:** the server-side decode count (`F-26`) and the VIN cache (`F-27`) run on
+`docs/supabase-decode-log-cache-delete.sql`; the cache was proved in Turn 43 — a signed-in decode writes the
+vPIC answer and the report renders it. **Per-account cloud storage (`F-28`)** runs on
+`docs/supabase-user-cloud.sql`: recent lookups and the vault cipher text live in `cardna_cloud`, and the
+garage and vault pages say so. **The owner's read-only "log in as" view (`F-29`)** runs on
+`docs/supabase-owner-act-as.sql` and is verified in the browser, including the database's refusal of every
+other account. The licensed parts layer and the European vendor proxy still need contracts.
 
 ## Documents
 

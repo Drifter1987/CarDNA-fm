@@ -51,27 +51,21 @@ documents into one shell without breaking a single URL.
 
 ## Current state
 
-**Branch** `main`. Latest commit `722d5e7` (25 Nov 2026, "Tracker: record 29d3343, correct the stale state"),
-which is being pushed with this turn. Uncommitted on top of it and committed here: **Turn 45** — one
-account's cloud storage — and **Turn 46** — the owner's read-only "log in as" view (`assets/actas.js`,
-`docs/supabase-owner-act-as.sql`, the button in `assets/admin.js`, the write guards in `garage.js`,
-`cloud.js`, `vin.js`, `vault.js`), with `?v=p50` on all 14 pages.
+**Branch** `main`, working tree clean, up to date with `origin/main`. Latest commit `b3f55f5` (26 Nov 2026,
+"Console: four tabs, activity table, filterable charts"), pushed, and **CI green** on it: `build` 23 s,
+`deploy` 15 s, `report-build-status` 6 s.
 
-**Live in the database, found in the browser this turn:** `cardna_cloud` exists — the garage and vault
-pages say *"In your account, in Supabase — available on any device while you are online."*, so the Boss ran
-`docs/supabase-user-cloud.sql`. **Not run:** `docs/supabase-owner-act-as.sql`, so the "Log in as" button
-answers honestly and opens nothing yet. The shared browser was signed in as the **free test account**
-`sefipe7182@jcaton.com` this turn (its session has expired: 3 queued saves are refused), not as the owner.
+**Live in the database, verified in the browser:** `decode_cache` and `decode_log` (F-26, F-27, cache proved
+in Turn 43), `cardna_cloud` (F-28 — the garage and vault pages say *"In your account, in Supabase — available
+on any device while you are online."*), and `cardna_act_as` (F-29 — the owner's "log in as" view opens,
+refuses writes, records `act_as` / `act_as_end`, and the database refuses every account but
+drifter_87@live.com). Both SQL files the Boss ran are in the repository: `docs/supabase-user-cloud.sql` and
+`docs/supabase-owner-act-as.sql`.
 
-**Verified (Turn 45, as the owner and in the Free role preview):** garage, vault, decode, index decoder tab
-and admin all load with no console errors; the cloud status line was honest while the table was missing.
-**Verified (Turn 46, as the free account):** `USER VIEW` with no "Log in as" button, 4 vehicles, the vault
-panel, and the live cloud line. **Not verified:** the button as the owner, and any act-as view.
-
-**Working tree — uncommitted:** `assets/actas.js`, `docs/supabase-owner-act-as.sql`, `assets/admin.js`,
-`assets/garage.js`, `assets/cloud.js`, `assets/vin.js`, `assets/vault.js`, `assets/style.css`, `admin.html`,
-`garage.html`, `vault.html`, `decode.html`, `index.html`, `legal.html`, all 14 pages (version),
-`cardna-fm-plan.md`, `README.md`, this tracker. Check `git status`.
+**Verified (Turn 47, as the owner, desktop):** the console's four tabs, the account table with "Log in as" on
+non-owner rows only, the Activity table and its filters, the Charts tab and its period/kind/account filters,
+the two-step button, the act-as banner stating the server count, the write refusal inside the view, and
+"Return to the owner console" restoring the owner session. No script errors on any tab.
 
 **Confirmed working:**
 
@@ -835,35 +829,36 @@ surviving record, not a transcript.
 
 ## Open work
 
-Refreshed in Turn 43. Statuses reflect the working tree and the latest browser checks. Do not resume project work until the user asks.
+Refreshed in Turn 48. Statuses reflect the working tree and the latest browser checks. Do not resume project work until the user asks.
 
-1. **Cloud storage needs one SQL run**, then the test the Boss asked for. Run
-   `docs/supabase-user-cloud.sql` in Supabase → SQL Editor (one file, idempotent, no secrets). Until then
-   the garage and vault pages say so in red and nothing is uploaded. Then sign the free test account in on
-   this device: save a vehicle, decode a VIN, save a vault, and confirm a second device (or a cleared
-   browser) shows all three. A real free-account sign-in is the Boss's step — I do not have its password.
-2. **Cache security.** Any signed-in account may still write an arbitrary `decode_cache.payload` for any
-   valid VIN, and the report is public. `docs/cloud-storage.md` argues the trusted write path and the
-   European decode proxy are one piece of work (an edge function that calls vPIC / the vendor itself).
-2. **Unseen in a signed-in session:** the account export's download, the bulk picker at 320 px, the keyboard
-   pass. Fixed in code (Turn 42), not yet seen to work.
-3. **`?vin=` deep link.** The preview's sign-in hop strips the query. Typed VINs work; the link is unverified.
-4. **Scroll-reveal blank sections.** Jumping straight to the bottom of a long page left sections at opacity 0
-   (seen twice on `decode.html`, Turn 43). Reveal whatever is already in view, without relying on the observer.
-5. **Theme label.** It reads LIGHT in dark mode. Deliberate (it names the switch target); may be misread.
-6. **Engine unit.** vPIC returns displacement in litres without a unit; the report shows the raw number.
-7. **Footer credit.** The credit now lives on `legal.html` and the footer links to it as "Data sources". If
-   the Boss wants the datasets named on every page, add a short line back.
-8. **Decisions the Boss owns, no code yet:** `D-12` payments, `D-13` European vendor, `D-14` parts licence,
-   `D-4` product-domain email, and the `seats` and `api_keys` tables behind the team and API panels.
-9. **Account deletion and its stale-session cleanup.** Proven on a disposable account in Turn 39; re-test only
-   after a new deletion, which needs a throwaway account.
-10. **Export contents.** The JSON holds browser-local vehicles, which may include refused unsynced rows; the
+1. **Cache write security (`F-27`) — the one thing standing between the preview and a safe public feature.**
+   Any signed-in account may still POST an arbitrary `decode_cache.payload` for any valid VIN, and the report
+   is public, so a poisoned row would be shown to visitors. The fix and the European decode proxy are one
+   piece of work: an edge function that calls vPIC (later the vendor) itself, with the browser losing write
+   access. `docs/cloud-storage.md` argues it; `D-15` is the decision it needs.
+2. **Scroll-reveal blank sections.** Jumping straight to the bottom of a long page leaves sections at
+   opacity 0 (seen twice on `decode.html`, Turn 43). Reveal whatever is already in view, without relying on
+   the observer. Small and self-contained.
+3. **Unseen in a signed-in session:** the account export's download, the bulk picker at 320 px, the keyboard
+   pass. Fixed in code (Turn 42), never seen to work.
+4. **`?vin=` deep link.** The preview's sign-in hop strips the query. Typed VINs work; the link is unverified.
+5. **One tab stop unverified:** the console's arrow-key move between tabs (this browser exposes no key send;
+   the handler is code, not an observation).
+6. **The free test account's session expired.** `sefipe7182@jcaton.com` shows three refused queued saves; its
+   server rows are 1 against this browser's 4. Sign it in again before trusting its garage writes.
+7. **Theme label.** It reads LIGHT in dark mode. Deliberate (it names the switch target); may be misread.
+8. **Engine unit.** vPIC returns displacement in litres without a unit; the report shows the raw number.
+9. **Footer credit.** The credit lives on `legal.html`; the footer links to it as "Data sources". If the Boss
+   wants the datasets named on every page, add a short line back.
+10. **Decisions the Boss owns, no code yet:** `D-12` payments, `D-13` European vendor, `D-14` parts licence,
+    `D-4` product-domain email, `D-15` server-side functions, and the `seats` and `api_keys` tables behind
+    the team and API panels.
+11. **Account deletion and its stale-session cleanup.** Proven on a disposable account in Turn 39; re-test
+    only after a new deletion, which needs a throwaway account.
+12. **Export contents.** The JSON holds browser-local vehicles, which may include refused unsynced rows; the
     note says so. Activity rows are not included.
-11. **Free test account** `sefipe7182@jcaton.com` holds four local garage vehicles against a one-vehicle limit,
-    three of them refused queue entries. Not to be cleared without the Boss's say-so.
-12. **`dna-fm-brain`** — needs a real look on a device.
-13. **Plan scroll fix** — stable in FreeMilk phone and desktop previews; confirm in Koder on iOS.
+13. **`dna-fm-brain`** — needs a real look on a device.
+14. **Plan scroll fix** — stable in FreeMilk phone and desktop previews; confirm in Koder on iOS.
 
 
 
@@ -1235,3 +1230,54 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
 - **Not verified:** the arrow-key move between tabs (this browser exposes no key send — the handler is code, not an observation); the inspector's one `JavaScript exception` when clicking the empty plot area came back as a tool-side error at one coordinate and not another, so it is unrecorded as a page fault; the console's own tab hash drops on a direct open, because the preview sign-in hop strips the fragment (the footer links still reach each tab).
 - **Files**: `admin.html` (four tabs, tables, filters, chart hosts), `assets/admin.js` (chart filter + render, tabs, the Activity table, one window for both, the two-step button), `assets/actas.js` (banner counts, `escapeHtml`), `assets/style.css` (`.apanel`, `.filters`, `.chart-*`, `.bar-*`, `.is-armed`).
 - **Commits**: committed and pushed this turn (`?v=p52` on `admin.html`; the other pages stay at `p50`, unchanged).
+
+
+### Turn 48 — "What is next?" and three documents brought back in line with the database
+
+- **Input**: "What is next to do?"
+- **Output**: no feature work. Checked the repository first (`git status` clean, `b3f55f5` pushed, CI green:
+  build 23 s, deploy 15 s, report-build-status 6 s), then corrected three documents that still described both
+  SQL files as unrun, though the Boss ran them and Turn 47 verified the result in the browser:
+  - `README.md` — the "waiting on the database" paragraph now states `F-26`, `F-27`, `F-28` and `F-29` as
+    live on their files, with `F-29` noted as verified including the database's refusal of every other account.
+  - `cardna-fm-plan.md` — the `F-28` and `F-29` registry rows move from "wired, waiting on one SQL run" to
+    **live**, with `F-29` naming `D-15` as the decision a real session swap would need.
+  - This tracker — **Current state** rewritten to `b3f55f5`, a clean tree and the verified items; **Open work**
+    refreshed, with the "run the cloud SQL" item removed, cache write security promoted to first, and the
+    duplicated `2.` numbering fixed.
+- **Files**: `README.md`, `cardna-fm-plan.md`, `CarDNA-fm-tracker.md`.
+- **Verified**: the three statements now match what the browser showed in Turn 47 and what the repository says
+  about the SQL files; CI's green run on `b3f55f5` was read directly.
+- **Commits**: none yet — documentation only, uncommitted at the time of writing.
+- **Open**: unchanged in substance; the ordered list is in **Open work** above.
+
+
+
+### Turn 48 — The scroll-reveal bug fixed, deployed (no decision taken: the owner's `D-15` server function waits)
+
+- **Input**: "What now? Let's move on to the next, keep decisions for later. Update tracker, deploy."
+- **What was fixed, and why it broke**: `assets/motion.js` revealed an element only when an
+  `IntersectionObserver` saw **12 % of it**, with the bottom of the viewport excluded by 6 %. Two faults followed:
+  an element taller than the viewport could never reach the ratio, and a page **jumped** to its foot never
+  got a callback for the blocks it passed — which is how sections stayed at `opacity: 0`.
+  - The observer now accepts **any** intersection (`threshold: 0`) and one `reveal()` serves every path
+    (observer, jump, safety pass), so there is one way to show an element.
+  - A `sweep()` reveals what is **in view or already passed**, run on boot, on the next frame, on `load`,
+    on `hashchange`, before printing, after 1.2 s, and on a **jump** of more than 1.2 viewports. The jump
+    tracker is seeded with the starting offset, because a first event with no origin measured nothing —
+    that was the residual bug in the first attempt this turn.
+  - `?v=p52` on `motion.js` everywhere it loads (seven pages had no version at all), and on
+    `motion.css` in `pricing.html`, which was the one page linking it unversioned.
+- **Verified, in the browser as the owner, desktop 1280×800, no console errors:**
+  - `decode.html`, **first action after load = one jump to the bottom**: `.motion-reveal:not(.is-in)` is **0**,
+    and both bottom panels (Recalls and complaints, Shareable report) and the footer are fully opaque. Top and
+    bottom again: still 0. Before the second fix the same jump left **7** blocks hidden mid-page.
+  - `pricing.html`: 10 targets still unrevealed on load (so the reveal is not blanket), the comparison table
+    legible when scrolled to, exactly 1 left before the closing band, 0 at the bottom.
+  - `index.html`: 0 on load, and Pricing and Catalogue tabs render fully; `admin.html` tabs render.
+- **Not verified:** the transition timing itself (only end states were judged), and `admin.html#charts` on a cold
+  open — the preview's sign-in hop rewrites `next=` and drops the fragment, so that tab cannot be deep-linked
+  here (it works when clicked in-page).
+- **Files**: `assets/motion.js`, `pricing.html`, `decode.html` and six other pages (motion.js version),
+  this tracker, `README.md`, `cardna-fm-plan.md` (the two stale "not run" notes from Turn 47).
+- **Commits**: committed and pushed; Pages rebuilt from the same commit. Private preview published too.
