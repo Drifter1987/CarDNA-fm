@@ -1377,3 +1377,49 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
 - **Correction —** the `Correction` note belongs here too: no current document now claims thirteen pages;
   older turn entries keep the count that was true when they were written.
 - **Open**: unchanged; see **Open work**.
+
+
+
+### Turn 52 — No passwords, no private data: the scan, the hardening, and what cannot be fixed from here
+
+- **Input**: "Delete all passwords nothing of the private information must be public."
+- **What the scan found — there were no passwords to delete.** Searched the whole working tree for
+  passwords, secret keys, tokens, connection strings, private paths and addresses:
+  - **No password, no `sb_secret_…`, no `service_role` key, no `sk_live`/`sk_test` key, no private key,
+    no `.env` file, no database URL** anywhere in a tracked file.
+  - **No personal address either** — the Turn 49 scrub holds: every address left is a placeholder
+    (`you@example.com`, `technician@workshop.com`), the company's own `hello@gmottomotive.com`, or a
+    synthetic test row (`codex-test@example.com`, `admin@example.com`, `rider@example.com`).
+  - The VINs in the files are the public examples the pages ship as samples
+    (`1HGCM82633A004352`, `JTDKN36U001234567`, `VSSZZZ5FZKR032237`, `WAUZZZF55JA120115`), not a car of
+    anyone's: they are on the decoder and comparison pages on purpose.
+- **What is public on purpose, and why removing it would break the app**: `assets/supabase-config.js`
+  holds the Supabase project URL and the **publishable** key. Supabase marks that key safe to publish — it
+  ships to every visitor and grants nothing by itself, because row-level security decides what any request may
+  read. The secret key is the one that must never ship, and it does not.
+- **What was changed**:
+  - **`.gitignore` hardened** from four lines to a rule with a comment: private keys and certificates
+    (`*.pem`, `*.key`, `*.p12`, `id_rsa*`), `service-role*`, `service_role*`, `sb_secret_*`, `*.secret`,
+    `.env` in every form (with `!.env.example`), the Supabase CLI's local state (`supabase/.temp/`,
+    `supabase/.branches/`), and editor folders — beside the existing VIN-list and export patterns.
+  - **`SECURITY.md` (new).** What must never be committed, the one key that is in the repository on
+    purpose and why, and the three ordered fixes for something already committed (rotate it; make the
+    repository private; start a clean repository), plus the pre-commit search. Excluded from the published site
+    in `_config.yml` like the other documents.
+- **What cannot be fixed from this chat, and the honest order of fixes**:
+  1. **Git history still holds the two personal addresses** from before Turn 49. Deleting a file does not
+     delete a commit: in a **public** repository the old blobs stay readable and are in every clone and fork.
+     These tools cannot rewrite history (no rebase or filter, no force push). The cheap fix that works even
+     there is **rotating those two passwords** in Supabase and on GitHub; the thorough one is **making the
+     repository private** (Settings → General → Danger zone), which on a Free plan also turns GitHub Pages off;
+     the third is a **fresh repository** from the current files, with the old one archived *and* private.
+  2. **The repository is public** (`Drifter1987/CarDNA-fm`, confirmed through the GitHub API), so the internal
+     documents — this tracker, the plan, `instructions.md`, `docs/` — are readable on github.com even though
+     Pages no longer serves them. Turn 49's decision kept them in the repository; if that changes, the same two
+     levers apply: private repository, or move them out.
+  3. **The Supabase sign-up toggle** is the Boss's to press (Authentication → Providers → Email → disable
+     "Allow new users to sign up"), while the site is public and anyone may reach the sign-in page.
+- **Verified**: the searches above returned no secret and no personal address; `_config.yml` still excludes every
+  document; nothing in the app changed, so no browser check was needed beyond the Pages deploy.
+- **Files**: `.gitignore`, `SECURITY.md` (new), `_config.yml`, `README.md`, this tracker.
+- **Commits**: this turn's commit, pushed; Pages rebuilds from it (the deploy is the check for the exclude list).

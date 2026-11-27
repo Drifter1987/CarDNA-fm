@@ -160,6 +160,7 @@ other account. The licensed parts layer and the European vendor proxy still need
 | File | What it is |
 |---|---|
 | `instructions.md` | The working rules: authority, standards, the placeholder convention, constraints |
+| `SECURITY.md` | What must never be committed: passwords, secret and service-role keys, `.env` files, personal addresses — and what to do when one has already gone in (repository only, not served) |
 | `cardna-fm-plan.md` | The plan and feature registry: status of every feature, its wiring contract, the build order |
 | `README.md` | This file: what the product is, publicly |
 | `CarDNA-fm-tracker.md` | The turn-by-turn record: decisions, what was verified, what is open |

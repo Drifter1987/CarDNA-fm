@@ -1,15 +1,42 @@
-# Anything private stays out of this repository — it is public.
+# Anything private stays out of this repository — the repository itself is public.
+#
+# What a secret looks like: nothing in this list is committed, and nothing like it ever should be.
+# The only key that belongs in a tracked file is the Supabase PUBLISHABLE key in
+# assets/supabase-config.js, which Supabase marks safe to share and which row-level security
+# makes harmless on its own.
 
-# VIN lists, exports, keys, scratch files
+# VIN lists, exports, scratch files
 private/
 *.cardna
 cardna-vault-*.json
 cardna-vins-*.txt
 
-# local environment
+# Keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+service-role*
+service_role*
+sb_secret_*
+*.secret
+
+# Environment files, in every form they are written
 .env
 .env.*
+!.env.example
+*.env.local
+
+# Supabase CLI state (holds the local database and its keys)
+supabase/.temp/
+supabase/.branches/
+
+# Local environment and editor noise
 .DS_Store
+.idea/
+.vscode/
 
 # Agent skills kept on this device only — not part of the published site
 Skills/

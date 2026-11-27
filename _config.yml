@@ -18,6 +18,7 @@ exclude:
   # The project's documents. Kept in the repository, never served.
   - README.md
   - AGENT.md
+  - SECURITY.md
   - instructions.md
   - cardna-fm-plan.md
   - CarDNA-fm-tracker.md
