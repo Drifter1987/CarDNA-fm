@@ -93,7 +93,7 @@ the wording is the same on every surface.
 
 ### 4.1 Where the icon stands today
 
-The module (`assets/preview.js`) and the style (`.preview-flag`) are built and loaded on all thirteen
+The module (`assets/preview.js`) and the style (`.preview-flag`) are built and loaded on all fourteen
 pages, so placing a badge is now one span and nothing else. P1 placed nine of them:
 
 | Page | Flag | Marks |

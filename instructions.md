@@ -110,7 +110,7 @@ description. It is an honesty marker, not decoration.
   frontend was not finished and that is a defect.
 
 The features carrying the icon today, and the exact function behind each, are in
-`cardna-fm-plan.md` §4 and §4.1. The module is `assets/preview.js`; it is loaded on all thirteen pages,
+`cardna-fm-plan.md` §4 and §4.1. The module is `assets/preview.js`; it is loaded on all fourteen pages,
 so placing a badge is one span and nothing else. The label is authored as "Coming soon" and upper-cased
 by CSS, matching the rest of the mono micro-labels.
 

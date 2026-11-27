@@ -1368,5 +1368,9 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
 - **Verified**: the statements were checked against the repository and the live site — the excluded paths
   return 404, `robots.txt` and the four `data/` files are served, and the six SQL files named in
   `instructions.md` all exist in `docs/`.
-- **Commits**: this turn's commit, pushed.
+- **Commits**: `f8e72e5` (the four documents), then a follow-up correcting "thirteen pages" to "fourteen" in
+  the plan and `instructions.md` — the module has been on fourteen since `report.html` arrived in Turn 40, and
+  both documents had kept the old count. Pushed.
+- **Correction —** the `Correction` note belongs here too: no current document now claims thirteen pages;
+  older turn entries keep the count that was true when they were written.
 - **Open**: unchanged; see **Open work**.
