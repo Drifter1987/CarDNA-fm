@@ -1423,3 +1423,19 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
   document; nothing in the app changed, so no browser check was needed beyond the Pages deploy.
 - **Files**: `.gitignore`, `SECURITY.md` (new), `_config.yml`, `README.md`, this tracker.
 - **Commits**: this turn's commit, pushed; Pages rebuilds from it (the deploy is the check for the exclude list).
+
+
+#### Turn 52 — verified on the public site
+
+- **Checked on `https://drifter1987.github.io/CarDNA-fm/`** (read-only, nothing signed in):
+  - `SECURITY.md` and `CarDNA-fm-tracker.md` both return the Pages **404**, and `instructions.md` and
+    `docs/supabase-migration.sql` too — the internal documents are off the site. (The new `SECURITY.md` did not
+    exist before this turn, so its 404 alone does not prove the updated exclude list; the deploy for `1fa02a1`
+    was still queued at that moment.)
+  - `index.html` lands on `signin.html?next=index.html`; the sign-in screen renders with **no console error**
+    and **no personal address** — the only address-like text is the placeholder `you@example.com`.
+  - `robots.txt` serves `User-agent: *` / `Disallow: /`.
+  - `assets/supabase-config.js` serves the project URL and a key that starts **`sb_publishable_`**, not `eyJ`:
+    it is the publishable key, and no secret key, service-role key or database URL is in it.
+- **Still true after this check:** the repository itself is public, so those documents and both addresses'
+  commits remain readable on github.com; only the *served site* is clean.
