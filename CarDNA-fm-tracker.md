@@ -1202,7 +1202,7 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
 **Verified, in the browser as the owner, desktop 1280×800, no console errors:**
 - The console's table shows **"Log in as" on the two non-owner rows only**, never on the owner's own.
 - "Log in as" on `the free test account` lands on `garage.html` with the **banner at the very top**
-  (`VIEWING AS SEFIPE7182@JCATON.COM · Read-only, as the owner. Nothing you do here changes their
+  (`VIEWING AS THE FREE TEST ACCOUNT · Read-only, as the owner. Nothing you do here changes their
   account.` + `Return to the owner console`), the chip reads `ROLE · USER · FREE`, the Admin nav item is
   gone, and the garage shows **`1 vehicle · Free plan · 1 of 1 saved vehicle`** (the server row; the
   4 locally held included 3 refused saves).
@@ -1234,7 +1234,7 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
 - **Verified, in the browser as the owner, desktop 1280×800, no script errors on any tab:**
   - Overview: 3 accounts / 2 staff / 0 paid / 0 blocked / 3 active / 0 new; `Plan mix. Free 3`; 10 decodes · 0 exports · 0 sign-ins · 2 accounts active · 7 days.
   - Activity: `500 of 500 events · last 14 days · showing the newest 200`, 200 rows; kind `decode` → `25 of 500 events · decode · last 14 days`; period `last 7 days` → `227 of 500 events …`.
-  - Charts: default 14 days → `500 events in the last 14 days`, `By kind` page_view 316 / decode 24 / act_as 7 / act_as_end 4; period 7 → `227 events …`, `0 to 126 a day`; kind page_view → `198 events … page_view`, one By-kind row; account sefipe7182 → `… · the free test account`, By account one row.
+  - Charts: default 14 days → `500 events in the last 14 days`, `By kind` page_view 316 / decode 24 / act_as 7 / act_as_end 4; period 7 → `227 events …`, `0 to 126 a day`; kind page_view → `198 events … page_view`, one By-kind row; account &lt;the free test account&gt; → `… · the free test account`, By account one row.
   - The two-step button: first press → `Confirm view` plus the sentence, no navigation; ~7 s later → `Log in as` and *"Nothing was opened."*
   - The act-as banner states the server count (1) and the plan, and "Return to the owner console" restores the owner session.
 - **Not verified:** the arrow-key move between tabs (this browser exposes no key send — the handler is code, not an observation); the inspector's one `JavaScript exception` when clicking the empty plot area came back as a tool-side error at one coordinate and not another, so it is unrecorded as a page fault; the console's own tab hash drops on a direct open, because the preview sign-in hop strips the fragment (the footer links still reach each tab).
