@@ -1322,10 +1322,15 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
   - `?v=p53` on all 14 HTML pages.
 - **Files**: `_config.yml` (new), `robots.txt` (new), `assets/actas.js`, `assets/admin.js`, `docs/supabase-owner-act-as.sql`,
   `legal.html`, `report.html`, all 14 pages (version), `instructions.md`, `README.md`, this tracker.
-- **Verified**: not yet at the time of writing — the published set is checked after the deploy (the excluded paths
-  must 404 and the pages must still load). The `ownerEmail` reference was found by searching for the constant after
-  removing it, before anything was committed.
-- **Commits**: this turn's commit, pushed. `testing` pushed at the same tree.
+- **Verified** on the live site after the deploy of `7e09dba`: `CarDNA-fm-tracker.md`, `instructions.md`,
+  `docs/cloud-storage.md` and `tools/parse-public-apis.html` each return **404**; `robots.txt` is served and
+  disallows everything; `report.html`, `assets/actas.js` and `data/brands.json` still load, so the app keeps
+  its files; the deployed `actas.js` contains no address; a repository-wide search for both addresses finds
+  none. A search for `{{` or `{%` across the HTML found none, so Jekyll's Liquid has nothing to eat. The
+  `ownerEmail` reference that would have thrown at load was found by searching for the constant after removing
+  it, before anything was committed.
+- **Commits**: `7e09dba` (the work) and `efb950b` (the two uppercase redactions), pushed to `main`.
+  `testing` created at `7e09dba` and pushed.
 - **Correction —** personal addresses were replaced with "the owner account" and "the free test account" across this
   file, including older turn entries. A redaction, not a rewrite: no fact, date or verification changed, and git
   history still contains the literal addresses.
