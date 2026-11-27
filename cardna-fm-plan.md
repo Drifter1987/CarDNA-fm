@@ -308,3 +308,23 @@ processor decision; P5 needs the vendor and catalogue decisions.
 
 Each is recorded in `CarDNA-fm-tracker.md` under **Blockers and owner decisions**; none is decided in
 passing.
+
+## 9. Publishing and branches
+
+GitHub Pages serves `main` at `https://drifter1987.github.io/CarDNA-fm/`, and that address is the test
+surface: the private preview is retired. Four rules hold it together, and they are standing decision
+`D-16` in `instructions.md`:
+
+- **The site carries the app, nothing else.** Pages builds through Jekyll, and `_config.yml` excludes
+  `README.md`, `AGENT.md`, `instructions.md`, this plan, the tracker, `docs/`, `Skills/`, the internal
+  parser and the research files. What is published is the pages, `assets/`, `tools/vin-compare.html` and
+  the four `data/` files the pages load. A new internal file is published until it is added to that list.
+- **No `.nojekyll` file.** It would switch Jekyll off and serve the whole repository again, documents
+  included.
+- **No personal data in a shipped file.** An address, a token or a session belongs in the database or in a
+  server function, never in `assets/`. The owner address lives in `docs/supabase-owner-act-as.sql`, which
+  is not published, and in the database function itself.
+- **`testing` is a staging branch, not a second site.** A repository has one Pages site, so work on
+  `testing` becomes visible only when it is merged into `main`. `robots.txt` disallows crawlers and
+  `report.html` is `noindex` while the product is pre-launch; both flip at launch.
+

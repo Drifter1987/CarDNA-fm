@@ -69,9 +69,11 @@ npx serve .
 | `data/engines.csv` | 30,535 engine variants with generation, years, body, power, torque and dimensions (5 MB) — ODbL |
 | `data/catalog_car_makes.json` | Make metadata with country codes, used to group the brands |
 | `data/brands.json` | Curated parent-group overlay (Volkswagen Group, Stellantis, Geely…) |
-| `data/vpic_makes.csv` | 12,423 manufacturer records — the full NHTSA registry, for reference |
-| `data/vpic_makes_car.csv` | The 195 makes filed as "Passenger Car" |
-| `data/public-apis-README.md` | The complete public-apis catalogue — ~2,000 free APIs in 51 categories |
+| `data/vpic_makes.csv` | 12,423 manufacturer records — the full NHTSA registry, for reference (repository only) |
+| `data/vpic_makes_car.csv` | The 195 makes filed as "Passenger Car" (repository only) |
+| `data/public-apis-README.md` | The complete public-apis catalogue — ~2,000 free APIs in 51 categories (repository only) |
+| `_config.yml` | What Pages publishes: the exclude list that keeps this file, the other documents, `docs/` and the research files off the site. Adding a `.nojekyll` file would switch it off |
+| `robots.txt` | Disallows every crawler while the site is pre-launch; flipped at launch |
 ## Data
 
 - **VIN decode:** two layers. NHTSA vPIC (`https://vpic.nhtsa.dot.gov/api`, public domain, no key)

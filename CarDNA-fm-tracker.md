@@ -4,9 +4,9 @@
 > Project: CarDNA-fm (`CarDNA-fm/` inside the GMOttomotive project folder)
 > Owner: GMOttomotive · Maintainer: Drifter1987
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
-> Public site: https://drifter1987.github.io/CarDNA-fm/
-> Preview: https://cardna-fm-g2j6--preview.freemilk.app
-> Last updated: 25 November 2026 — Chat 1, Turn 44
+> Public site: https://drifter1987.github.io/CarDNA-fm/ — also the test surface; the private preview is retired
+> Staging branch: `testing`, merged into `main`; Pages serves `main` only
+> Last updated: 27 November 2026 — Chat 1, Turn 50
 
 ## How this file works
 
@@ -28,8 +28,11 @@ GMOttomotive's vehicle-data family.
 
 - **Shape**: static HTML, two stylesheets, vanilla JS modules, no build step, no dependencies, no server.
 - **Pages**: `index.html` (app shell with tabs), `decode`, `makes`, `pricing`, `about`, `garage`,
-  `signin`, `admin`, `vault`, `legal`, `reset`, plus `tools/vin-compare.html` and
-  `tools/parse-public-apis.html`.
+  `signin`, `admin`, `vault`, `legal`, `reset`, plus `tools/vin-compare.html`. `tools/parse-public-apis.html`
+  is an internal utility and is not published.
+- **Publishing**: Pages serves `main`; `_config.yml` keeps the documents, `docs/` and the research files
+  off the site (Turn 49), `robots.txt` disallows crawlers and `report.html` is `noindex` while pre-launch.
+  `testing` is the staging branch and has no site of its own.
 - **Data**: NHTSA vPIC for the US record (public domain, no key); a European structural decoder inside
   `vin.js`; `data/vehicles.csv` (15,068 models), `data/engines.csv` (30,535 variants), `data/brands.json`
   and `data/catalog_car_makes.json` shipped with the site.
@@ -51,8 +54,10 @@ documents into one shell without breaking a single URL.
 
 ## Current state
 
-**Branch** `main`, with a `testing` staging branch beside it. Previous commit `7ca47b3` ("Fix scroll reveals a
-jump or tall section left blank"); this turn's commit carries this entry and is described below.
+**Branch** `main`, with a `testing` staging branch beside it. Latest code commit `7e09dba` ("Publish only
+the app; scrub addresses; add a testing branch"), followed by `efb950b` and `5d27c10` (tracker redactions and
+the deploy record), all pushed; this turn's documentation commit sits on top. The Pages build was green on
+`7e09dba`, and that is the deploy every live check in Turn 49 was measured against.
 
 **Publishing (Turn 49).** GitHub Pages serves `main` through Jekyll, and a new `_config.yml` keeps the
 project's documents, `docs/` and the research files off the site. `robots.txt` disallows everything and
@@ -920,6 +925,10 @@ Refreshed in Turn 48. Statuses reflect the working tree and the latest browser c
 | `index.html` | App shell: Overview, Decode, Brands, Catalogue, Pricing as tabs |
 | `admin.html`, `garage.html`, `decode.html`, `vault.html` | The four work surfaces |
 | `.gitignore` | Keeps `Skills/`, `private/` and exports out of the public repository |
+| `_config.yml` | What Pages publishes: the exclude list that keeps the documents, `docs/` and the research files off the site. A `.nojekyll` file would switch it off |
+| `robots.txt` | Disallows every crawler while the site is pre-launch; flipped at launch |
+| `assets/actas.js` | The owner's read-only "log in as" view: role-gated in the page, address-gated in the database |
+| `assets/cloud.js` | Per-account cloud storage: `cardna_cloud` mirror, local cache, offline queue |
 | `AGENT.md` | Working agreement and the tracker rule |
 | `Skills/claude-mem/` | The handoff and memory-search methods used to write this file |
 | `/scratchpad/cardna-restructure-plan.html` | The 33-requirement specification and `dna-fm-brain` |
@@ -1336,3 +1345,28 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
   history still contains the literal addresses.
 - **Open**: the addresses survive in git history (item 15 in **Open work**); the Supabase sign-up toggle is the Boss's
   to press; and the cache-write gap is unchanged.
+
+
+### Turn 50 — The publish rule written into every document
+
+- **Input**: "Update tracker.md and all docs with the new changes."
+- **Output**: no code changed; the Turn 49 rules are now stated wherever they belong, so nothing depends on
+  remembering them:
+  - `cardna-fm-plan.md` — a new **§9 Publishing and branches**: Pages serves `main` and that address is the
+    test surface; the site carries the app and nothing else through `_config.yml`; no `.nojekyll` file; no
+    personal data in a shipped file; `testing` is a staging branch, not a second site; `robots.txt` and the
+    `noindex` on `report.html` flip at launch.
+  - `instructions.md` — the SQL list in §2 now names all six files, `docs/supabase-user-cloud.sql` and
+    `docs/supabase-owner-act-as.sql` included (it had stopped at four).
+  - `README.md` — the Assets table gains `_config.yml` and `robots.txt`, and the three research files are
+    marked **repository only**, since they are no longer served.
+  - This tracker — the header drops the retired preview URL, names `testing`, and carries the new date;
+    **Project snapshot** states the publishing setup and that `tools/parse-public-apis.html` is internal;
+    **Files in play** gains `_config.yml`, `robots.txt`, `assets/actas.js` and `assets/cloud.js`.
+- **Files**: `cardna-fm-plan.md`, `instructions.md`, `README.md`, `CarDNA-fm-tracker.md`. No asset changed,
+  so the `?v=p53` version string stays as it is.
+- **Verified**: the statements were checked against the repository and the live site — the excluded paths
+  return 404, `robots.txt` and the four `data/` files are served, and the six SQL files named in
+  `instructions.md` all exist in `docs/`.
+- **Commits**: this turn's commit, pushed.
+- **Open**: unchanged; see **Open work**.
