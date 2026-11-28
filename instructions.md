@@ -133,10 +133,14 @@ by CSS, matching the rest of the mono micro-labels.
   by habit.
 
 - **What is published is a whitelist.** GitHub Pages serves `main` through Jekyll, and `_config.yml`
-  keeps the project's documents, `docs/` and the research files off the site. Nothing personal — an
-  address, a token, a session — belongs in a file that ships, and a `.nojekyll` file would switch the
-  list off. `testing` is the staging branch: risky work lands there and reaches the site only when it
-  is merged into `main`.
+  keeps the project's documents, `docs/` and the research files off the site. The list defends them
+  twice: each document is named, and the document extensions are excluded outright (`*.md`, `*.sql`,
+  `*.yml`, `*.yaml`, `*.toml`, `*.log`, `*.sh`, `*.py`, at the root and in every folder), so a
+  document written later cannot leak by being forgotten. A new internal file of another kind is
+  published until it is listed: add it in the same turn it is created, and check its URL for a 404.
+  Nothing personal — an address, a token, a session — belongs in a file that ships, and a `.nojekyll`
+  file would switch the list off. `testing` is the staging branch: risky work lands there and reaches
+  the site only when it is merged into `main`.
 
 ## 6. External APIs and their cost
 

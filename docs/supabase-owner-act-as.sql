@@ -7,9 +7,14 @@
 -- profile, saved vehicles, recent lookups, encrypted vault blob and decode count. Read-only.
 --
 -- THE OWNER'S ADDRESS IS A PLACEHOLDER. In the function below, replace `<owner-email>` with the
--- owner account's address before running this file. The function already in the database holds the
--- real address, so nothing needs re-running unless it is rebuilt. The address is kept out of this
--- repository's published files on purpose.
+-- owner account's address before running this file. The address is kept out of this repository on
+-- purpose, since the repository is public.
+--
+-- **DO NOT RE-RUN THIS FILE ON A WORKING DATABASE.** The function already in the database holds the
+-- real address. Running this file again would replace it with the literal `<owner-email>`, and the
+-- "Log in as" button would then refuse the owner as well. Run it only to rebuild the function from
+-- scratch, and replace the placeholder first. (Turn 53 made this explicit: the file used to end with
+-- "Idempotent. Run in Supabase", which invites exactly the run that breaks it.)
 --
 -- Every use is written to public.events (kind 'act_as' and 'act_as_end'), so it is never silent.
 --

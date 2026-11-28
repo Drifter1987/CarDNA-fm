@@ -318,7 +318,11 @@ surface: the private preview is retired. Four rules hold it together, and they a
 - **The site carries the app, nothing else.** Pages builds through Jekyll, and `_config.yml` excludes
   `README.md`, `AGENT.md`, `instructions.md`, this plan, the tracker, `docs/`, `Skills/`, the internal
   parser and the research files. What is published is the pages, `assets/`, `tools/vin-compare.html` and
-  the four `data/` files the pages load. A new internal file is published until it is added to that list.
+  the four `data/` files the pages load. **The list is defended twice**: each document is named, and the
+  document extensions are excluded outright (`*.md`, `*.sql`, `*.yml`, `*.yaml`, `*.toml`, `*.log`,
+  `*.sh`, `*.py`, at the root and in every folder), so a document written later cannot reach the site by
+  being forgotten. A new internal file of another kind is published until it is listed — add it in the
+  same turn, and check its URL for the Pages 404 (the seven checks are in `SECURITY.md`).
 - **No `.nojekyll` file.** It would switch Jekyll off and serve the whole repository again, documents
   included.
 - **No personal data in a shipped file.** An address, a token or a session belongs in the database or in a

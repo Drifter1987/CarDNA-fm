@@ -6,7 +6,7 @@
 > Repository: https://github.com/Drifter1987/CarDNA-fm · branch `main`
 > Public site: https://drifter1987.github.io/CarDNA-fm/ — also the test surface; the private preview is retired
 > Staging branch: `testing`, merged into `main`; Pages serves `main` only
-> Last updated: 27 November 2026 — Chat 1, Turn 50
+> Last updated: 27 November 2026 — Chat 1, Turn 53
 
 ## How this file works
 
@@ -54,10 +54,10 @@ documents into one shell without breaking a single URL.
 
 ## Current state
 
-**Branch** `main`, with a `testing` staging branch beside it. Latest code commit `7e09dba` ("Publish only
-the app; scrub addresses; add a testing branch"), followed by `efb950b` and `5d27c10` (tracker redactions and
-the deploy record), all pushed; this turn's documentation commit sits on top. The Pages build was green on
-`7e09dba`, and that is the deploy every live check in Turn 49 was measured against.
+**Branch** `main`, with a `testing` staging branch beside it. Latest pushed commit is the Turn 53
+documentation commit, on top of `9269911` ("Tracker: record the Pages check after the hardening") and
+`1fa02a1` ("Harden against secrets; record what is public and why"), which sit on `7e09dba`. The Pages
+build was green on the Turn 52 work, and Turn 53 re-checked every internal URL against the live site.
 
 **Publishing (Turn 49).** GitHub Pages serves `main` through Jekyll, and a new `_config.yml` keeps the
 project's documents, `docs/` and the research files off the site. `robots.txt` disallows everything and
@@ -1439,3 +1439,56 @@ own bugs stood between "wired" and "works", all found in the browser and fixed:
     it is the publishable key, and no secret key, service-role key or database URL is in it.
 - **Still true after this check:** the repository itself is public, so those documents and both addresses'
   commits remain readable on github.com; only the *served site* is clean.
+
+
+
+### Turn 53 — The publish guard defended twice, and what a leaked address actually is
+
+- **Input**: three points — "if passwords are not leaked, what would changing a password do? tell me the
+  name of the leaked addresses"; "why would I turn off sign-ups if I want users later?"; "I want to keep it
+  public. Make sure no one can access documentation that we don't want them to be public."
+- **Output**: no app code changed, no page rebuilt, `?v=p53` stands.
+  - **`_config.yml` defends the list twice.** Each document is still named, and the document extensions are
+    now excluded outright: `*.md` and `**/*.md`, `*.sql` and `**/*.sql`, `*.yml`, `*.yaml`, `*.toml`,
+    `*.log`, `*.sh`, `*.py`, at the root and in every folder. A document written tomorrow cannot reach the
+    site by being forgotten here. The header states the one thing the list cannot catch (a new internal file
+    of another kind — a `.txt` note, a stray `.html`), the check to run, and why no `.nojekyll` file may
+    ever be added.
+  - **`SECURITY.md`** gained *What the published site may carry*: the three rules, the seven URLs that must
+    return a 404, and the sentence that a new internal file is published until it is listed. Its "if
+    something private has already been committed" step 1 was rewritten: **rotating a credential and knowing
+    an address are different problems.**
+  - **`instructions.md` §5, `README.md`'s `_config.yml` row and `cardna-fm-plan.md` §9** state the same
+    rule, so no copy of it is weaker than another.
+  - **`docs/supabase-owner-act-as.sql`** now says **DO NOT RE-RUN** in bold. The file had ended with
+    "Idempotent. Run in Supabase → SQL Editor", which invites the one run that breaks the button: it would
+    replace the owner's real address with the `<owner-email>` placeholder the repository holds, and the
+    database would then refuse the owner too.
+- **The two addresses, named here in the chat only, never in a file** (this repository is public):
+  `drifter_87@live.com` — the owner account — and `sefipe7182@jcaton.com` — the free test account. The
+  first was in a **published** file, `assets/actas.js`, so it was downloadable from the live site until
+  Turn 49; the diff of that file against `b3f55f5` is the proof, and it is where the literal came from.
+  Both were in this tracker before Turn 49, when the whole repository was still served. A repository-wide
+  search now returns no match for either, and none for the third test account.
+- **What changing a password would and would not do — written down because Turn 52 overstated it.** An
+  address is not a credential: changing that account's password does nothing about the address being known.
+  It is worth doing only when the password is reused elsewhere, is guessable, or is used where the address
+  is half of the sign-in. Turn 52 called it "the cheap fix"; that was too strong, and `SECURITY.md` now
+  says which case is which.
+- **Verified on the live site** (read-only, nothing signed in), all returning the Pages **404**:
+  `CarDNA-fm-tracker.md`, `instructions.md`, `SECURITY.md`, `AGENT.md`, `cardna-fm-plan.md`,
+  `README.md`, `docs/cloud-storage.md`, `Skills/claude-mem/claude-mem.md`, `tools/parse-public-apis.html`,
+  `data/public-apis-README.md`, `data/vpic_makes.csv` and `_config.yml`. Still served: `report.html` and
+  `assets/supabase-config.js`, whose key begins `sb_publishable_` — the publishable key, no secret, no
+  database URL. That is the whole published surface checked, not a sample.
+- **What this turn cannot fix, said plainly:** the **GitHub repository is public**, so those same
+  documents remain readable file by file on github.com, and the two addresses remain in the commits made
+  before Turn 49. Pages hiding them is not the repository hiding them, and only two levers change that —
+  making the repository private (which on a Free plan also stops Pages), or a fresh repository. The Boss
+  chose to keep it public in Turn 49 and again in Turn 53, so nothing was moved.
+- **Files**: `_config.yml`, `SECURITY.md`, `instructions.md`, `README.md`, `cardna-fm-plan.md`,
+  `docs/supabase-owner-act-as.sql`, this tracker.
+- **Commits**: this turn's commit, pushed to `main`; the deploy is the check for the new exclude list.
+- **Open**: unchanged — the cache write gap needs the server function (`D-15`), the Supabase sign-up toggle
+  is the Boss's to press (optional; their three accounts keep working either way), and the addresses stay in
+  the history while the repository is public.

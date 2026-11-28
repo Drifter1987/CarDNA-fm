@@ -4,6 +4,13 @@
 # leaves every path in `exclude` out of the published site. The site is public, so this list is
 # what keeps the project's own documents, the database SQL and the research files off it.
 #
+# THE LIST IS DEFENDED TWICE. Every document is named below, so the intent is readable — and the
+# common document extensions are excluded outright (`*.md`, `*.sql`, `*.yml`, `*.yaml`, `*.toml`,
+# `*.log`, `*.sh`, `*.py`, at the root and in every folder), so a document written tomorrow cannot
+# reach the site by being forgotten here. A new internal file of another kind — a `.txt` note, a
+# stray `.html` — is still published until it is listed, so add it in the same turn it is created
+# and check its URL for a 404 (the seven checks are in SECURITY.md).
+#
 # IMPORTANT: adding a `.nojekyll` file switches Jekyll off, and this list stops working — the whole
 # repository would be served again, internal documents included. If a `.nojekyll` file is ever
 # needed, replace this list with a build step that copies only the published set.
@@ -22,8 +29,14 @@ exclude:
   - instructions.md
   - cardna-fm-plan.md
   - CarDNA-fm-tracker.md
-  # The database side: schema, policies and functions.
+  # Every markdown file, at the root and in every folder: a new document is excluded without
+  # anyone remembering it. Quoted so YAML does not read `*` as a syntax token.
+  - "*.md"
+  - "**/*.md"
+  # The database side: schema, policies and functions, wherever a new file lands.
   - docs
+  - "*.sql"
+  - "**/*.sql"
   # Agent skills kept on this device only.
   - Skills
   # Research and reference files the site does not load.
@@ -32,6 +45,19 @@ exclude:
   - data/vpic_makes_car.csv
   # An internal utility page, and the file it parses.
   - tools/parse-public-apis.html
+  # Configuration, scripts and logs: none of these is ever a page.
+  - "*.yml"
+  - "**/*.yml"
+  - "*.yaml"
+  - "**/*.yaml"
+  - "*.toml"
+  - "**/*.toml"
+  - "*.log"
+  - "**/*.log"
+  - "*.sh"
+  - "**/*.sh"
+  - "*.py"
+  - "**/*.py"
   # Build and dependency folders Jekyll excludes by default; listed so that overriding this key
   # never publishes them by accident.
   - .sass-cache
